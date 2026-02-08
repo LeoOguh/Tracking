@@ -9,11 +9,21 @@
 </head>
 <body>
 
+    <!-- CALENDÁRIO POPUP -->
+    <div class="date-picker-popup hidden" id="datePicker">
+        <div class="dp-header">
+            <button class="dp-nav" onclick="dpPrevMonth()">‹</button>
+            <span id="dpMonthLabel"></span>
+            <button class="dp-nav" onclick="dpNextMonth()">›</button>
+        </div>
+        <div class="dp-grid" id="dpGrid"></div>
+    </div>
+
     <!-- TOPBAR: DATA + WIDGET PROGRESSO + BOTÃO META -->
     <div class="habits-topbar">
         <div class="month-nav">
             <button class="nav-btn" onclick="changeMonth(-1)">‹</button>
-            <div id="monthTitle">...</div>
+            <div id="monthTitle" onclick="toggleDatePicker()" style="cursor:pointer" title="clique para escolher mês">...</div>
             <button class="nav-btn" onclick="changeMonth(1)">›</button>
         </div>
 

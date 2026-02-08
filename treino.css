@@ -855,72 +855,7 @@ body.light #treinoDateTitle { color: #1a1a1a; }
 body.light .today-btn { color: rgba(0,0,0,0.45); background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.12); }
 body.light .today-btn:hover { color: #000; background: rgba(0,0,0,0.1); }
 
-/* ─── DATE PICKER POPUP ──────────────────────────────────────────────────────── */
-.date-picker-popup {
-    position: fixed; top: 0; left: 0;
-    z-index: 9999; width: 260px;
-    background: rgba(16,22,36,0.97); backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255,0.12); border-radius: 16px;
-    padding: 14px; box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-}
-body.light .date-picker-popup {
-    background: rgba(255,255,255,0.97); border-color: rgba(0,0,0,0.1);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-}
-.dp-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 10px;
-}
-#dpMonthLabel {
-    font-size: 0.78rem; text-transform: capitalize; letter-spacing: 0.5px;
-    color: rgba(255,255,255,0.8);
-}
-body.light #dpMonthLabel { color: rgba(0,0,0,0.7); }
-.dp-nav {
-    background: none; border: none; color: rgba(255,255,255,0.5);
-    font-size: 1.1rem; cursor: pointer; padding: 2px 8px; border-radius: 8px;
-    transition: all 0.15s;
-}
-.dp-nav:hover { background: rgba(255,255,255,0.08); color: #fff; }
-body.light .dp-nav { color: rgba(0,0,0,0.4); }
-body.light .dp-nav:hover { background: rgba(0,0,0,0.06); color: #000; }
-.dp-weekdays {
-    display: grid; grid-template-columns: repeat(7,1fr);
-    margin-bottom: 4px;
-}
-.dp-weekdays span {
-    text-align: center; font-size: 0.6rem; text-transform: uppercase;
-    letter-spacing: 0.5px; color: rgba(255,255,255,0.3); padding: 2px 0;
-}
-body.light .dp-weekdays span { color: rgba(0,0,0,0.3); }
-.dp-days {
-    display: grid; grid-template-columns: repeat(7,1fr); gap: 2px;
-}
-.dp-day, .dp-empty {
-    text-align: center; font-size: 0.76rem; padding: 6px 0;
-    border-radius: 8px; cursor: pointer; color: rgba(255,255,255,0.65);
-    transition: all 0.15s; position: relative;
-}
-body.light .dp-day { color: rgba(0,0,0,0.6); }
-.dp-day:hover { background: rgba(255,255,255,0.1); color: #fff; }
-body.light .dp-day:hover { background: rgba(0,0,0,0.07); color: #000; }
-.dp-day.dp-today { color: #fff; font-weight: 600; }
-body.light .dp-day.dp-today { color: #000; }
-.dp-day.dp-today::after {
-    content: ''; position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%);
-    width: 4px; height: 4px; border-radius: 50%; background: rgba(255,255,255,0.6);
-}
-body.light .dp-day.dp-today::after { background: rgba(0,0,0,0.4); }
-.dp-day.dp-sel {
-    background: rgba(255,255,255,0.15); color: #fff; font-weight: 600;
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.25);
-}
-body.light .dp-day.dp-sel { background: rgba(0,0,0,0.1); color: #000; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.2); }
-.dp-day.dp-has-log::before {
-    content: ''; position: absolute; top: 3px; right: 4px;
-    width: 4px; height: 4px; border-radius: 50%; background: #4ade80;
-}
-.dp-empty { cursor: default; }
+/* calendário popup → movido para style.css */
 
 /* ─── TOPBAR: relative for popup positioning ────────────────────────────────── */
 .treino-date-nav { position: relative; }

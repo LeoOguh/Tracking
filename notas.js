@@ -371,3 +371,62 @@ function escapeHtml(str) {
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 renderTasks();
 renderDiary();
+
+// ─── CALENDÁRIO POPUP (notas/tarefas) ────────────────────────────────────────
+let dpDate = new Date();
+
+function toggleDatePicker() {
+    const popup = document.getElementById('datePicker');
+    if (!popup) return;
+    dpDate = new Date(taskDate);
+    const isHidden = popup.classList.contains('hidden');
+    popup.classList.add('hidden');
+    if (isHidden) {
+        const title = document.getElementById('taskDateLabel');
+        const rect  = title.getBoundingClientRect();
+        popup.style.top       = (rect.bottom + 8) + 'px';
+        popup.style.left      = (rect.left + rect.width / 2) + 'px';
+        popup.style.transform = 'translateX(-50%)';
+        requestAnimationFrame(() => {
+            const pr = popup.getBoundingClientRect();
+            if (pr.right > window.innerWidth - 8) { popup.style.left = (window.innerWidth - pr.width - 8) + 'px'; popup.style.transform = 'none'; }
+            if (pr.left < 8) { popup.style.left = '8px'; popup.style.transform = 'none'; }
+        });
+        popup.classList.remove('hidden');
+        renderDpGrid();
+    }
+}
+function closeDatePicker() { document.getElementById('datePicker')?.classList.add('hidden'); }
+function dpPrevMonth() { dpDate.setMonth(dpDate.getMonth()-1); renderDpGrid(); }
+function dpNextMonth() { dpDate.setMonth(dpDate.getMonth()+1); renderDpGrid(); }
+function renderDpGrid() {
+    const label = document.getElementById('dpMonthLabel');
+    const grid  = document.getElementById('dpGrid');
+    if (!label || !grid) return;
+    const y = dpDate.getFullYear(), m = dpDate.getMonth();
+    label.textContent = new Date(y,m,1).toLocaleDateString('pt-br',{month:'long',year:'numeric'});
+    const firstDay = new Date(y,m,1).getDay();
+    const daysInMonth = new Date(y,m+1,0).getDate();
+    const todayStr = todayKey();
+    const selStr   = dateKey(taskDate);
+    let html = '<div class="dp-weekdays"><span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span></div><div class="dp-days">';
+    for (let i=0;i<firstDay;i++) html += '<span class="dp-empty"></span>';
+    for (let d=1;d<=daysInMonth;d++) {
+        const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const isToday = ds===todayStr, isSel = ds===selStr;
+        html += `<span class="dp-day${isSel?' dp-sel':''}${isToday?' dp-today':''}" onclick="dpSelectDate('${ds}')">${d}</span>`;
+    }
+    html += '</div>';
+    grid.innerHTML = html;
+}
+function dpSelectDate(ds) {
+    taskDate = new Date(ds+'T12:00:00');
+    closeDatePicker();
+    renderTasks();
+}
+document.addEventListener('click', function(e) {
+    const picker = document.getElementById('datePicker');
+    const title  = document.getElementById('taskDateLabel');
+    if (!picker || picker.classList.contains('hidden')) return;
+    if (!picker.contains(e.target) && e.target !== title) closeDatePicker();
+});

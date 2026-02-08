@@ -9,6 +9,16 @@
 </head>
 <body>
 
+    <!-- CALENDÁRIO POPUP -->
+    <div class="date-picker-popup hidden" id="datePicker">
+        <div class="dp-header">
+            <button class="dp-nav" onclick="dpPrevMonth()">‹</button>
+            <span id="dpMonthLabel"></span>
+            <button class="dp-nav" onclick="dpNextMonth()">›</button>
+        </div>
+        <div class="dp-grid" id="dpGrid"></div>
+    </div>
+
     <!-- TOPBAR -->
     <div class="notas-topbar">
         <!-- Título + sub à esquerda -->
@@ -39,7 +49,7 @@
                 <!-- Navegação de data no estilo padrão do app -->
                 <div class="notas-date-nav">
                     <button class="nav-btn" onclick="changeTaskDate(-1)">‹</button>
-                    <span id="taskDateLabel">hoje</span>
+                    <span id="taskDateLabel" onclick="toggleDatePicker()" style="cursor:pointer" title="clique para escolher data">hoje</span>
                     <button class="nav-btn" onclick="changeTaskDate(1)">›</button>
                 </div>
             </div>

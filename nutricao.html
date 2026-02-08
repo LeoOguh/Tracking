@@ -10,6 +10,16 @@
 </head>
 <body>
 
+    <!-- CALENDÁRIO POPUP -->
+    <div class="date-picker-popup hidden" id="datePicker">
+        <div class="dp-header">
+            <button class="dp-nav" onclick="dpPrevMonth()">‹</button>
+            <span id="dpMonthLabel"></span>
+            <button class="dp-nav" onclick="dpNextMonth()">›</button>
+        </div>
+        <div class="dp-grid" id="dpGrid"></div>
+    </div>
+
     <!-- DRAWER LATERAL -->
     <aside class="side-drawer nutri-drawer">
         <div class="drawer-header">
@@ -35,7 +45,7 @@
     <div class="nutri-topbar">
         <div class="nutri-date-nav">
             <button class="nav-btn" onclick="changeNutriDate(-1)">‹</button>
-            <div id="nutriDateTitle">...</div>
+            <div id="nutriDateTitle" onclick="toggleDatePicker()" style="cursor:pointer" title="clique para escolher data">...</div>
             <button class="nav-btn" onclick="changeNutriDate(1)">›</button>
         </div>
         <div class="nutri-view-label" id="nutriViewLabel">registro diário</div>
