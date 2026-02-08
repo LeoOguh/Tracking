@@ -383,7 +383,7 @@ body.light .stats-pr-name { color: rgba(0,0,0,0.65); }
 body.light .stats-pr-val  { color: #b8860b; }
 body.light .stats-pr-date { color: rgba(0,0,0,0.3); }
 
-.hidden { display: none !important; }
+/* .hidden → definido em style.css */
 
 /* ═══════════════════════════════════════════════════════════
    PLANOS — listagem
