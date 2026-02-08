@@ -1088,6 +1088,8 @@ function deleteMedida(date) {
     if (changed) saveLog();
 })();
 
+let statsProgressChart = null; // declarado antes do init para evitar TDZ
+
 renderPlansList();
 renderRegistro();
 initMuscleAvatar();
@@ -1241,7 +1243,6 @@ function changePlateCount(id, delta) {
 }
 
 // ─── GRÁFICO PROGRESSÃO (ESTATÍSTICAS) ───────────────────────────────────────
-let statsProgressChart = null;
 
 function populateStatsProgressSel() {
     const sel = document.getElementById('statsChartExSel');
