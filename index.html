@@ -76,22 +76,17 @@
 
         <!-- SONO & HIDRATAÇÃO -->
         <div class="wellness-row">
-            <!-- Sono -->
-            <div class="glass-panel wellness-card" id="sonoCard">
+            <!-- Sono — card compacto com gráfico clicável -->
+            <div class="glass-panel wellness-card" id="sonoCardTrigger">
                 <div class="wellness-card-header">
                     <span class="wellness-icon">🌙</span>
-                    <span class="wellness-title">sono de hoje</span>
-                    <button class="wellness-log-btn" onclick="openSonoModal()">registrar</button>
+                    <span class="wellness-title">sono</span>
+                    <button class="wellness-log-btn" onclick="openSonoModal()">+ registrar hoje</button>
                 </div>
-                <div class="sono-display" id="sonoDisplay">
-                    <div class="sono-no-data" id="sonoNoData">nenhum registro ainda</div>
-                    <div class="sono-data hidden" id="sonoDataEl">
-                        <div class="sono-hours" id="sonoHours">—</div>
-                        <div class="sono-meta" id="sonoMeta">—</div>
-                        <div class="sono-quality-row" id="sonoQualityRow"></div>
-                    </div>
+                <div class="sono-summary" id="sonoSummary">
+                    <div class="sono-quick-text" id="sonoQuickText">nenhum registro esta semana</div>
                 </div>
-                <div class="sono-week-chart" id="sonoWeekChart"></div>
+                <div class="sono-week-chart" id="sonoWeekChart" style="cursor:pointer" title="Clique em um dia para editar"></div>
             </div>
             <!-- Hidratação -->
             <div class="glass-panel wellness-card" id="hidratacaoCard">
@@ -120,8 +115,13 @@
     <!-- MODAL SONO -->
     <div class="modal-overlay" id="sonoModalOverlay" onclick="closeSonoModal(event)">
         <div class="sono-modal">
-            <div class="sono-modal-title">🌙 registrar sono</div>
-            <div class="sono-modal-date" id="sonoModalDate"></div>
+            <div class="sono-modal-header">
+                <div>
+                    <div class="sono-modal-title">🌙 registrar sono</div>
+                    <div class="sono-modal-date" id="sonoModalDate"></div>
+                </div>
+                <button class="modal-close-btn" onclick="closeSonoModal()">✕</button>
+            </div>
             <div class="sono-form">
                 <div class="sono-field-row">
                     <div class="sono-field">
@@ -141,13 +141,13 @@
                     <button class="sqb" data-val="4" onclick="selectSonoQuality(4)">😊 boa</button>
                     <button class="sqb" data-val="5" onclick="selectSonoQuality(5)">😄 ótima</button>
                 </div>
-                <div class="sono-field">
+                <div class="sono-field" style="margin-top:10px">
                     <label class="sono-label">observações (opcional)</label>
                     <textarea id="sonoObs" class="f-input" style="min-height:60px;resize:vertical" placeholder="sonhos, interrupções, etc..."></textarea>
                 </div>
             </div>
             <div class="note-modal-actions">
-                <button class="btn-note-cancel" id="btnSonoDelete" onclick="deleteSono()" style="display:none">apagar registro</button>
+                <button class="btn-note-cancel" id="btnSonoDelete" onclick="deleteSonoRecord()" style="display:none;color:#ef4444">apagar</button>
                 <button class="btn-note-cancel" onclick="closeSonoModal()">fechar</button>
                 <button class="btn-note-save"   onclick="saveSono()">salvar</button>
             </div>
