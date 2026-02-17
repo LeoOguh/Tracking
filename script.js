@@ -1104,17 +1104,19 @@ scheduleNotifs();
 // SONO
 // ═══════════════════════════════════════════════════════════
 let sonoHistory   = JSON.parse(localStorage.getItem('clarity_sono'))    || {};
-// sonoHistory = { 'YYYY-MM-DD': { start:'23:00', end:'07:00', quality:4 } }
+// sonoHistory = { 'YYYY-MM-DD': { start:'23:00', end:'07:00', quality:4, obs:'' } }
 let sonoQuality   = 3;
+let sonoEditingDate = null; // data sendo editada no modal
 
 function saveSonoHistory() { localStorage.setItem('clarity_sono', JSON.stringify(sonoHistory)); }
 
 function todayKey() { return new Date().toISOString().split('T')[0]; }
 
-function openSonoModal() {
-    const today = todayKey();
-    const reg   = sonoHistory[today];
-    document.getElementById('sonoModalDate').textContent = new Date().toLocaleDateString('pt-br',{weekday:'long',day:'numeric',month:'long'});
+function openSonoModal(dateKey = null) {
+    sonoEditingDate = dateKey || todayKey();
+    const reg   = sonoHistory[sonoEditingDate];
+    const d = new Date(sonoEditingDate + 'T12:00:00');
+    document.getElementById('sonoModalDate').textContent = d.toLocaleDateString('pt-br',{weekday:'long',day:'numeric',month:'long'});
     document.getElementById('sonoStart').value = reg ? reg.start : '23:00';
     document.getElementById('sonoEnd').value   = reg ? reg.end   : '07:00';
     document.getElementById('sonoObs').value   = reg ? (reg.obs||'') : '';
@@ -1150,15 +1152,15 @@ function saveSono() {
     const end   = document.getElementById('sonoEnd').value;
     const obs   = document.getElementById('sonoObs').value.trim();
     if (!start || !end) return;
-    sonoHistory[todayKey()] = { start, end, quality: sonoQuality, obs };
+    sonoHistory[sonoEditingDate] = { start, end, quality: sonoQuality, obs };
     saveSonoHistory();
     closeSonoModal();
     renderSonoCard();
 }
 
-function deleteSono() {
-    if (!confirm('Apagar registro de sono de hoje?')) return;
-    delete sonoHistory[todayKey()];
+function deleteSonoRecord() {
+    if (!confirm('Apagar este registro de sono?')) return;
+    delete sonoHistory[sonoEditingDate];
     saveSonoHistory();
     closeSonoModal();
     renderSonoCard();
@@ -1167,19 +1169,18 @@ function deleteSono() {
 const SONO_QUALITY_LABELS = { 1:'😫 péssima', 2:'😕 ruim', 3:'😐 ok', 4:'😊 boa', 5:'😄 ótima' };
 
 function renderSonoCard() {
+    // Summary text
     const today = todayKey();
     const reg   = sonoHistory[today];
-    const noData = document.getElementById('sonoNoData');
-    const dataEl = document.getElementById('sonoDataEl');
-    if (!reg) {
-        noData.classList.remove('hidden'); dataEl.classList.add('hidden'); return;
+    const txt   = document.getElementById('sonoQuickText');
+    if (reg) {
+        const h = calcSonoHours(reg.start, reg.end);
+        txt.textContent = `Hoje: ${h}h de sono (${SONO_QUALITY_LABELS[reg.quality]})`;
+    } else {
+        txt.textContent = 'Nenhum registro hoje — clique "registrar"';
     }
-    noData.classList.add('hidden'); dataEl.classList.remove('hidden');
-    const h = calcSonoHours(reg.start, reg.end);
-    document.getElementById('sonoHours').textContent = h + 'h';
-    document.getElementById('sonoMeta').textContent  = `${reg.start} → ${reg.end}`;
-    document.getElementById('sonoQualityRow').innerHTML = `<span class="sono-quality-badge">${SONO_QUALITY_LABELS[reg.quality]||'—'}</span>`;
-    // Mini chart últimos 7 dias
+    
+    // Chart with clickable bars
     renderSonoWeekChart();
 }
 
@@ -1193,9 +1194,9 @@ function renderSonoWeekChart() {
         const reg = sonoHistory[key];
         const h   = reg ? calcSonoHours(reg.start, reg.end) : 0;
         const pct = Math.min(100, Math.round((h/10)*100));
-        const color = h >= 7 ? '#22c55e' : h >= 5 ? '#f97316' : h > 0 ? '#ef4444' : 'rgba(255,255,255,0.08)';
+        const color = h >= 7 ? '#22c55e' : h >= 5 ? '#3b82f6' : h > 0 ? '#ef4444' : 'rgba(255,255,255,0.08)';
         const dayL  = ['D','S','T','Q','Q','S','S'][d.getDay()];
-        bars += `<div class="sono-bar-wrap" title="${h > 0 ? h+'h' : 'sem registro'}">
+        bars += `<div class="sono-bar-wrap" onclick="openSonoModal('${key}')" title="${h > 0 ? h+'h — clique para editar' : 'sem registro — clique para adicionar'}" style="cursor:pointer">
             <div class="sono-bar-track"><div class="sono-bar-fill" style="height:${pct}%;background:${color}"></div></div>
             <div class="sono-bar-label">${dayL}</div>
         </div>`;
