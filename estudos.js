@@ -70,9 +70,11 @@ function changeDate(delta) { currentDate.setDate(currentDate.getDate() + delta);
 function changeCalMonth(delta) { calMonth.setMonth(calMonth.getMonth() + delta); renderReviewCalendar(); }
 function timeToMin(t) { if (!t) return 0; const [h,m] = t.split(':').map(Number); return h*60+m; }
 function minToLabel(min) {
-    if (min <= 0) return '0min';
+    if (min <= 0) return '0 min';
     const h = Math.floor(min/60), m = min%60;
-    if (h===0) return `${m}min`; if (m===0) return `${h}h`; return `${h}h ${m.toString().padStart(2,'0')}min`;
+    if (h===0) return `${m} min`;
+    if (m===0) return `${h} h`;
+    return `${h} h ${m.toString().padStart(2,'0')} min`;
 }
 function minToH(min) { return (min/60).toFixed(1); }
 function formatHHMMSS(seconds) {
@@ -912,37 +914,7 @@ let erros = JSON.parse(localStorage.getItem('study_erros')) || [];
 
 function saveErros() { localStorage.setItem('study_erros', JSON.stringify(erros)); }
 
-function openErrosModal() {
-    // Populica select de matérias
-    const mat = document.getElementById('erroMateria');
-    const mf  = document.getElementById('errosFilterMateria');
-    mat.innerHTML = '<option value="">— matéria —</option>';
-    mf.innerHTML  = '<option value="">— todas as matérias —</option>';
-    studySubjects.forEach(s => {
-        mat.innerHTML += `<option>${escapeHtml(s.name)}</option>`;
-        mf.innerHTML  += `<option>${escapeHtml(s.name)}</option>`;
-    });
-    setErrosView('list');
-    renderErrosList();
-    document.getElementById('errosModalOverlay').classList.add('open');
-}
-
-function closeErrosModal(e) {
-    if (!e || e.target === document.getElementById('errosModalOverlay'))
-        document.getElementById('errosModalOverlay').classList.remove('open');
-}
-
-function setErrosView(view) {
-    document.getElementById('errosNewForm').style.display  = view==='new'  ? 'block' : 'none';
-    document.getElementById('errosListView').style.display = view==='list' ? 'block' : 'none';
-    document.getElementById('errosBtnNew').classList.toggle('type-btn--active',  view==='new');
-    document.getElementById('errosBtnList').classList.toggle('type-btn--active', view==='list');
-    if (view==='new') {
-        document.getElementById('erroConteudo').value  = '';
-        document.getElementById('erroDescricao').value = '';
-        document.getElementById('erroResolucao').value = '';
-    }
-}
+// Modal functions removed - erros is now a view, not a modal
 
 function saveErro() {
     const materia    = document.getElementById('erroMateria').value;
@@ -952,7 +924,7 @@ function saveErro() {
     if (!conteudo && !descricao) { alert('Preencha ao menos o conteúdo ou a descrição.'); return; }
     erros.unshift({ id: Date.now(), materia, conteudo, descricao, resolucao, status:'pendente', createdAt: new Date().toISOString() });
     saveErros();
-    setErrosView('list');
+    hideErrosForm();
     renderErrosList();
 }
 
@@ -1003,3 +975,55 @@ function renderErrosList() {
 function escapeHtml(str) {
     return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+
+// ═══════════════════════════════════════════════════════════
+// CONTROLE DE VIEWS (sessões vs caderno de erros)
+// ═══════════════════════════════════════════════════════════
+let currentStudyView = 'sessoes';
+
+function setStudyView(view) {
+    currentStudyView = view;
+    document.querySelectorAll('.study-view').forEach(v => v.classList.add('hidden'));
+    document.getElementById('view' + view.charAt(0).toUpperCase() + view.slice(1)).classList.remove('hidden');
+    // Update active drawer item
+    document.querySelectorAll('.study-drawer .drawer-item').forEach(item => {
+        item.classList.remove('drawer-item--active');
+    });
+    document.getElementById('sdItem' + view.charAt(0).toUpperCase() + view.slice(1)).classList.add('drawer-item--active');
+    if (view === 'erros') {
+        populateErrosSelects();
+        renderErrosList();
+    }
+}
+
+function showErrosForm() {
+    document.getElementById('errosNewForm').classList.remove('hidden');
+}
+
+function hideErrosForm() {
+    document.getElementById('errosNewForm').classList.add('hidden');
+    document.getElementById('erroConteudo').value = '';
+    document.getElementById('erroDescricao').value = '';
+    document.getElementById('erroResolucao').value = '';
+}
+
+function populateErrosSelects() {
+    const mat = document.getElementById('erroMateria');
+    const mf = document.querySelector('#viewErros #errosFilterMateria');
+    mat.innerHTML = '<option value="">— matéria —</option>';
+    mf.innerHTML = '<option value="">— todas as matérias —</option>';
+    studySubjects.forEach(s => {
+        mat.innerHTML += `<option>${s.name}</option>`;
+        mf.innerHTML += `<option>${s.name}</option>`;
+    });
+}
+
+// Update saveErro to hide form after save
+const _origSaveErro = saveErro;
+saveErro = function() {
+    _origSaveErro();
+    hideErrosForm();
+};
+
+// Init
+setStudyView('sessoes');
