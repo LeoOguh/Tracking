@@ -12,6 +12,25 @@
 
     <button class="theme-toggle" onclick="toggleTheme()" id="themeToggleBtn">☀ claro</button>
 
+    <!-- DRAWER LATERAL -->
+    <aside class="side-drawer study-drawer">
+        <div class="drawer-header">
+            <span class="drawer-title">estudos</span>
+        </div>
+        <nav class="drawer-nav">
+            <button class="drawer-item drawer-item--active" id="sdItemSessoes" onclick="setStudyView('sessoes')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+                sessões
+            </button>
+            <button class="drawer-item" id="sdItemErros" onclick="setStudyView('erros')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                caderno de erros
+            </button>
+        </nav>
+    </aside>
+
     <div class="study-topbar">
         <!-- Navegação de data com largura fixa para botões não se moverem -->
         <div class="study-date-nav">
@@ -40,12 +59,6 @@
 
         <!-- Ações -->
         <div class="topbar-actions">
-            <button class="btn-topbar-action btn-topbar-action--text" onclick="openErrosModal()">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-                </svg>
-                caderno de erros
-            </button>
             <button class="btn-topbar-action btn-topbar-action--text" onclick="openSubjectsModal()">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
@@ -67,8 +80,10 @@
         </div>
     </div>
 
-    <div class="study-container">
+    <div class="study-container study-with-sidebar">
 
+        <!-- VIEW: SESSÕES -->
+        <div class="study-view" id="viewSessoes">
         <!-- PAINEL ÚNICO DE REVISÕES PENDENTES (hoje + atrasadas) -->
         <div class="today-reviews-panel" id="todayReviewsPanel">
             <div class="today-reviews-header">
@@ -314,6 +329,48 @@
         </div>
     </div>
 
+    </div> <!-- end viewSessoes -->
+
+    <!-- VIEW: CADERNO DE ERROS -->
+    <div class="study-view hidden" id="viewErros">
+        <div class="erros-header">
+            <div class="erros-filters">
+                <select id="errosFilterMateria" class="f-select" style="flex:1;max-width:240px" onchange="renderErrosList()">
+                    <option value="">— todas as matérias —</option>
+                </select>
+                <select id="errosFilterStatus" class="f-select" style="width:160px" onchange="renderErrosList()">
+                    <option value="">todos</option>
+                    <option value="pendente">pendentes</option>
+                    <option value="revisado">revisados</option>
+                </select>
+            </div>
+            <button class="btn-topbar-action btn-topbar-action--text" onclick="showErrosForm()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                novo erro
+            </button>
+        </div>
+
+        <!-- Form novo erro -->
+        <div class="glass-panel hidden" id="errosNewForm" style="padding:24px;margin-bottom:20px">
+            <div class="form-title" style="padding:0 0 16px 0">novo erro</div>
+            <div style="display:flex;flex-direction:column;gap:12px">
+                <select id="erroMateria" class="f-select"><option value="">— matéria —</option></select>
+                <input type="text" id="erroConteudo" class="f-input" placeholder="conteúdo / tópico (ex: Juros compostos)">
+                <textarea id="erroDescricao" class="ai-textarea" style="min-height:90px;resize:vertical" placeholder="descreva o erro ou a dificuldade encontrada…"></textarea>
+                <input type="text" id="erroResolucao" class="f-input" placeholder="resolução / como corrigir (opcional)">
+                <div style="display:flex;gap:10px;justify-content:flex-end">
+                    <button class="btn-note-cancel" onclick="hideErrosForm()">cancelar</button>
+                    <button class="btn-note-save" onclick="saveErro()">salvar erro</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de erros -->
+        <div id="errosListContent"></div>
+    </div> <!-- end viewErros -->
+
+    </div> <!-- end study-container -->
+
     <div class="review-tooltip" id="reviewTooltip"></div>
 
     <!-- ═══ POMODORO WIDGET ═══ -->
@@ -335,45 +392,6 @@
         <div class="pomo-controls">
             <button class="pomo-btn" onclick="pomodoroStart()" id="pomoBtnStart">▶ iniciar</button>
             <button class="pomo-btn pomo-btn--reset" onclick="pomodoroReset()">↺</button>
-        </div>
-    </div>
-
-    <!-- ═══ CADERNO DE ERROS — modal ═══ -->
-    <div class="modal-overlay" id="errosModalOverlay" onclick="closeErrosModal(event)">
-        <div class="edit-modal" style="max-width:680px;width:96vw">
-            <div class="modal-header-row">
-                <div class="edit-modal-title">caderno de erros</div>
-                <div class="pomo-mode-row" style="background:transparent;border:none;padding:0;gap:6px">
-                    <button class="type-btn type-btn--active" id="errosBtnList" onclick="setErrosView('list')">lista</button>
-                    <button class="type-btn" id="errosBtnNew"  onclick="setErrosView('new')">+ novo erro</button>
-                    <button class="btn-note-cancel" onclick="closeErrosModal()" style="margin-left:8px">fechar</button>
-                </div>
-            </div>
-            <!-- Form novo erro -->
-            <div id="errosNewForm" style="display:none">
-                <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
-                    <select id="erroMateria" class="f-select"><option value="">— matéria —</option></select>
-                    <input type="text" id="erroConteudo" class="f-input" placeholder="conteúdo / tópico (ex: Juros compostos)">
-                    <textarea id="erroDescricao" class="ai-textarea" style="min-height:80px" placeholder="descreva o erro ou a dificuldade encontrada…"></textarea>
-                    <input type="text" id="erroResolucao" class="f-input" placeholder="resolução / como corrigir (opcional)">
-                    <div style="display:flex;gap:8px;justify-content:flex-end">
-                        <button class="btn-note-cancel" onclick="setErrosView('list')">cancelar</button>
-                        <button class="btn-note-save" onclick="saveErro()">salvar erro</button>
-                    </div>
-                </div>
-            </div>
-            <!-- Lista de erros -->
-            <div id="errosListView">
-                <div style="display:flex;gap:8px;margin:12px 0 8px">
-                    <select id="errosFilterMateria" class="f-select" style="flex:1" onchange="renderErrosList()"><option value="">— todas as matérias —</option></select>
-                    <select id="errosFilterStatus" class="f-select" style="width:140px" onchange="renderErrosList()">
-                        <option value="">todos</option>
-                        <option value="pendente">pendentes</option>
-                        <option value="revisado">revisados</option>
-                    </select>
-                </div>
-                <div id="errosListContent"></div>
-            </div>
         </div>
     </div>
 
