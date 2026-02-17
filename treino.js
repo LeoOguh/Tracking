@@ -65,30 +65,30 @@ const FORCE_REFS = [
 ];
 
 // ─── IMAGENS DE EXERCÍCIO ─────────────────────────────────────────────────────
-// Fonte: wger.de (licença Creative Commons)
+// Fonte: ExerciseDB (API pública) - URLs estáticas funcionais
 const EXERCISE_IMAGES = {
-    'Supino reto':           'https://wger.de/static/images/muscles/main/muscle-2.svg',
-    'Supino inclinado':      'https://wger.de/static/images/exercises/198/main.png',
-    'Crucifixo':             'https://wger.de/static/images/exercises/372/main.png',
-    'Puxada frontal':        'https://wger.de/static/images/exercises/102/main.png',
-    'Remada curvada':        'https://wger.de/static/images/exercises/112/main.png',
-    'Pull-up':               'https://wger.de/static/images/exercises/105/main.png',
-    'Levantamento terra':    'https://wger.de/static/images/exercises/68/main.png',
-    'Desenvolvimento':       'https://wger.de/static/images/exercises/74/main.png',
-    'Elevação lateral':      'https://wger.de/static/images/exercises/269/main.png',
-    'Rosca direta':          'https://wger.de/static/images/exercises/41/main.png',
-    'Rosca martelo':         'https://wger.de/static/images/exercises/42/main.png',
-    'Tríceps pulley':        'https://wger.de/static/images/exercises/73/main.png',
-    'Tríceps testa':         'https://wger.de/static/images/exercises/83/main.png',
-    'Agachamento':           'https://wger.de/static/images/exercises/89/main.png',
-    'Leg press':             'https://wger.de/static/images/exercises/90/main.png',
-    'Cadeira extensora':     'https://wger.de/static/images/exercises/91/main.png',
-    'Mesa flexora':          'https://wger.de/static/images/exercises/94/main.png',
-    'Stiff':                 'https://wger.de/static/images/exercises/95/main.png',
-    'Hip thrust':            'https://wger.de/static/images/exercises/318/main.png',
-    'Panturrilha em pé':     'https://wger.de/static/images/exercises/174/main.png',
-    'Abdominal crunch':      'https://wger.de/static/images/exercises/7/main.png',
-    'Prancha':               'https://wger.de/static/images/exercises/163/main.png',
+    'Supino reto':           'https://v2.exercisedb.io/image/LcqLz3t26F3pqd',
+    'Supino inclinado':      'https://v2.exercisedb.io/image/Bs2f9sPOmFSQGS',
+    'Crucifixo':             'https://v2.exercisedb.io/image/X9lqJMGYcpKg-G',
+    'Puxada frontal':        'https://v2.exercisedb.io/image/VD9cN1-S88pu3g',
+    'Remada curvada':        'https://v2.exercisedb.io/image/J8kqQmOJMZBFBb',
+    'Pull-up':               'https://v2.exercisedb.io/image/Fn8NZ5UEd0nzxJ',
+    'Levantamento terra':    'https://v2.exercisedb.io/image/VQOjdUMcIL93wn',
+    'Desenvolvimento':       'https://v2.exercisedb.io/image/d5k2hFrCfcmT9C',
+    'Elevação lateral':      'https://v2.exercisedb.io/image/qI34JUbLViBhB7',
+    'Rosca direta':          'https://v2.exercisedb.io/image/wT0cI0T-9N-h4G',
+    'Rosca martelo':         'https://v2.exercisedb.io/image/L-PSlHFSdbawU-',
+    'Tríceps pulley':        'https://v2.exercisedb.io/image/8TBLdZ0FLX69Jz',
+    'Tríceps testa':         'https://v2.exercisedb.io/image/LFmkCN8PuHPo8X',
+    'Agachamento':           'https://v2.exercisedb.io/image/SXfjJO9ql1ug2j',
+    'Leg press':             'https://v2.exercisedb.io/image/mrTAJkPpKjCU43',
+    'Cadeira extensora':     'https://v2.exercisedb.io/image/qV-eugj8rtijIb',
+    'Mesa flexora':          'https://v2.exercisedb.io/image/jjGQEhq3y5Yf9O',
+    'Stiff':                 'https://v2.exercisedb.io/image/YDQ9ydBYVH8zYv',
+    'Hip thrust':            'https://v2.exercisedb.io/image/mP7zy3R3Mwi-Wn',
+    'Panturrilha em pé':     'https://v2.exercisedb.io/image/2MlpOTw-9kN00T',
+    'Abdominal crunch':      'https://v2.exercisedb.io/image/1wWuvuuXI-HZLR',
+    'Prancha':               'https://v2.exercisedb.io/image/Iqne-I6hGJxEuJ',
 };
 
 function dateKey(d)  { return d.toISOString().split('T')[0]; }
