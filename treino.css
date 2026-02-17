@@ -33,12 +33,12 @@ body.light .drawer-item--active { background: rgba(59,130,246,0.12); color: #256
 body.light .drawer-footer { border-color: rgba(0,0,0,0.08); }
 
 /* ═══════════════════════════════════════════════════════════
-   TOPBAR (com margem para sidebar)
+   TOPBAR (com margem para sidebar + gap)
    ═══════════════════════════════════════════════════════════ */
 .treino-topbar {
     display: flex; align-items: center; gap: 14px;
-    margin-bottom: 28px; width: calc(100% - 240px); max-width: calc(100vw - 280px);
-    margin-left: 240px; padding: 0 20px;
+    margin-bottom: 28px; width: calc(100vw - 280px);
+    margin-left: 260px; padding: 0 20px;
 }
 .treino-topbar-center {
     flex: 1; display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap;
@@ -66,8 +66,8 @@ body.light #treinoDateTitle { color: #1a1a1a; }
 }
 body.light .treino-view-label { color: rgba(0,0,0,0.35); }
 
-/* Página treino — fullscreen minus drawer */
-.treino-page { width: calc(100vw - 240px); margin-left: 240px; padding: 0 20px; }
+/* Página treino — fullscreen minus drawer com GAP */
+.treino-page { width: calc(100vw - 280px); margin-left: 260px; padding: 0 20px; }
 
 /* ═══════════════════════════════════════════════════════════
    LAYOUT GERAL — fontes maiores em todo o treino
@@ -86,27 +86,30 @@ body.light .treino-view-label { color: rgba(0,0,0,0.35); }
 .form-title   { font-size: 0.92rem; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.4); padding: 18px 24px 0; }
 body.light .form-title { color: rgba(0,0,0,0.4); }
 
-/* Registro — fullscreen grid */
-.registro-grid { width: 100%; max-width: none; display: grid; grid-template-columns: 1fr 400px; gap: 24px; align-items: start; }
+/* Registro — fullscreen grid COM ESPAÇOS */
+.registro-grid { width: 100%; max-width: none; display: grid; grid-template-columns: 1fr 400px; gap: 28px; align-items: start; }
+.registro-main  { display: flex; flex-direction: column; gap: 22px; }
+.registro-sidebar { display: flex; flex-direction: column; gap: 20px; }
+.reg-stats-row { grid-column: 1/-1; display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; margin-bottom: 8px; }
 .registro-main  { display: flex; flex-direction: column; gap: 18px; }
 .registro-sidebar { display: flex; flex-direction: column; gap: 16px; }
 .reg-stats-row { grid-column: 1/-1; display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
 
-/* ─── PLANOS: layout fullscreen ─────────────────────────── */
+/* ─── PLANOS: layout fullscreen SEM overlap ─────────────── */
 .plans-wrapper {
-    display: flex; justify-content: center; align-items: flex-start; gap: 24px;
+    display: flex; justify-content: flex-start; align-items: flex-start; gap: 24px;
     width: 100%; min-height: 70vh;
 }
-/* Lista centralizada, ocupa toda a largura */
+/* Lista ocupa 100% por padrão */
 .plans-center-panel {
     width: 100%; max-width: none; padding: 30px 36px;
     display: flex; flex-direction: column; gap: 22px;
     transition: width 0.35s cubic-bezier(0.4,0,0.2,1), padding 0.35s ease;
 }
-/* Quando editor aberto: 50/50 split */
-.plans-wrapper.plans-split { justify-content: flex-start; align-items: stretch; gap: 20px; }
+/* Quando editor aberto: 48/48 split com GAP */
+.plans-wrapper.plans-split { justify-content: flex-start; align-items: stretch; gap: 24px; }
 .plans-wrapper.plans-split .plans-center-panel {
-    width: 50%; flex-shrink: 0; padding: 28px 30px;
+    width: 48%; flex-shrink: 0; padding: 28px 30px;
 }
 
 /* Plan cards maiores */
