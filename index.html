@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hábitos - Clarity</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeToggleBtn">☀ claro</button>
+
+    <div class="month-nav">
+        <button class="nav-btn" onclick="changeMonth(-1)">‹</button>
+        <div id="monthTitle">...</div>
+        <button class="nav-btn" onclick="changeMonth(1)">›</button>
+    </div>
+
+    <div class="container">
+        <div class="glass-panel chart-container-wrapper">
+            <div id="weeksHeaderChart" class="weeks-chart-header"></div>
+            <div class="module-chart"><canvas id="habitsChart"></canvas></div>
+        </div>
+
+        <div class="module-input">
+            <button class="btn-reset" onclick="resetAllData()">Limpar Tudo</button>
+            <button class="btn-topbar-action btn-topbar-action--icon" onclick="exportData()" title="Exportar dados">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+            </button>
+            <input type="color"  id="habitColor"  class="color-picker" value="#2ecc71">
+            <input type="text"   id="habitInput"   placeholder="novo hábito" onkeydown="if(event.key==='Enter') addHabit()">
+            <input type="number" id="habitGoal"    class="goal-input" placeholder="meta/sem" min="1" max="7">
+
+            <div class="type-toggle" title="Tipo: meta ou limite">
+                <button class="type-btn type-btn--active" id="btnTypeMeta"  onclick="setHabitType('meta')">meta</button>
+                <button class="type-btn"                  id="btnTypeLimit" onclick="setHabitType('limite')">limite</button>
+            </div>
+
+            <div class="type-toggle" title="Duração">
+                <button class="type-btn type-btn--active" id="btnDurRec" onclick="setHabitDuration('recorrente')">∞</button>
+                <button class="type-btn"                  id="btnDurPer" onclick="setHabitDuration('periodo')">N dias</button>
+            </div>
+            <input type="number" id="habitPeriod" class="goal-input period-input hidden" placeholder="dias" min="1" max="365">
+
+            <div class="weekdays-toggle" id="weekdaysToggle"></div>
+            <button class="btn-add" onclick="addHabit()">+</button>
+        </div>
+
+        <div class="glass-panel module-grid">
+            <div class="habits-sidebar">
+                <div class="row-header"><span class="week-title">hábitos</span></div>
+                <div class="row-mood-sidebar">
+                    <span style="font-size:1rem; margin-right:8px; opacity:0.7;">✦</span>
+                    <span class="mood-sidebar-label">humor</span>
+                </div>
+                <div class="row-notes-sidebar">
+                    <span style="font-size:0.85rem; margin-right:8px; opacity:0.5;">✎</span>
+                    <span class="notes-sidebar-label">notas</span>
+                </div>
+                <div id="habitsList"></div>
+                <div class="row-footer"></div>
+            </div>
+            <div class="weeks-container" id="weeksWrapper"></div>
+        </div>
+
+        <div class="summary-panel">
+            <div class="summary-header" id="summaryHeader" onclick="toggleSummary()">
+                <span class="summary-header-title">resumo do mês</span>
+                <span class="summary-chevron" id="summaryChevron">▾</span>
+            </div>
+            <div class="summary-body" id="summaryBody"></div>
+        </div>
+
+        <!-- SONO & HIDRATAÇÃO -->
+        <div class="wellness-row">
+            <!-- Sono -->
+            <div class="glass-panel wellness-card" id="sonoCard">
+                <div class="wellness-card-header">
+                    <span class="wellness-icon">🌙</span>
+                    <span class="wellness-title">sono de hoje</span>
+                    <button class="wellness-log-btn" onclick="openSonoModal()">registrar</button>
+                </div>
+                <div class="sono-display" id="sonoDisplay">
+                    <div class="sono-no-data" id="sonoNoData">nenhum registro ainda</div>
+                    <div class="sono-data hidden" id="sonoDataEl">
+                        <div class="sono-hours" id="sonoHours">—</div>
+                        <div class="sono-meta" id="sonoMeta">—</div>
+                        <div class="sono-quality-row" id="sonoQualityRow"></div>
+                    </div>
+                </div>
+                <div class="sono-week-chart" id="sonoWeekChart"></div>
+            </div>
+            <!-- Hidratação -->
+            <div class="glass-panel wellness-card" id="hidratacaoCard">
+                <div class="wellness-card-header">
+                    <span class="wellness-icon">💧</span>
+                    <span class="wellness-title">hidratação</span>
+                    <span class="wellness-meta" id="hidMeta">0 / 8 copos</span>
+                </div>
+                <div class="hid-cups-grid" id="hidCupsGrid"></div>
+                <div class="hid-controls">
+                    <button class="hid-btn" onclick="addWater(-1)">−</button>
+                    <div class="hid-bar-wrap">
+                        <div class="hid-bar" id="hidBar"></div>
+                    </div>
+                    <button class="hid-btn hid-btn--add" onclick="addWater(1)">+ copo</button>
+                </div>
+                <div class="hid-goal-row">
+                    <span class="wellness-meta">meta:</span>
+                    <input type="number" id="hidGoalInput" class="hid-goal-input" min="1" max="20" value="8" onchange="setHidGoal(this.value)">
+                    <span class="wellness-meta">copos/dia</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL SONO -->
+    <div class="modal-overlay" id="sonoModalOverlay" onclick="closeSonoModal(event)">
+        <div class="sono-modal">
+            <div class="sono-modal-title">🌙 registrar sono</div>
+            <div class="sono-modal-date" id="sonoModalDate"></div>
+            <div class="sono-form">
+                <div class="sono-field-row">
+                    <div class="sono-field">
+                        <label class="sono-label">dormi às</label>
+                        <input type="time" id="sonoStart" class="f-input" value="23:00">
+                    </div>
+                    <div class="sono-field">
+                        <label class="sono-label">acordei às</label>
+                        <input type="time" id="sonoEnd" class="f-input" value="07:00">
+                    </div>
+                </div>
+                <div class="sono-quality-label">qualidade</div>
+                <div class="sono-quality-select" id="sonoQualitySelect">
+                    <button class="sqb" data-val="1" onclick="selectSonoQuality(1)">😫 péssima</button>
+                    <button class="sqb" data-val="2" onclick="selectSonoQuality(2)">😕 ruim</button>
+                    <button class="sqb" data-val="3" onclick="selectSonoQuality(3)">😐 ok</button>
+                    <button class="sqb" data-val="4" onclick="selectSonoQuality(4)">😊 boa</button>
+                    <button class="sqb" data-val="5" onclick="selectSonoQuality(5)">😄 ótima</button>
+                </div>
+                <div class="sono-field">
+                    <label class="sono-label">observações (opcional)</label>
+                    <textarea id="sonoObs" class="f-input" style="min-height:60px;resize:vertical" placeholder="sonhos, interrupções, etc..."></textarea>
+                </div>
+            </div>
+            <div class="note-modal-actions">
+                <button class="btn-note-cancel" id="btnSonoDelete" onclick="deleteSono()" style="display:none">apagar registro</button>
+                <button class="btn-note-cancel" onclick="closeSonoModal()">fechar</button>
+                <button class="btn-note-save"   onclick="saveSono()">salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL HUMOR -->
+    <div class="mood-modal-overlay" id="moodModalOverlay" onclick="closeMoodModal(event)">
+        <div class="mood-modal">
+            <div class="mood-modal-title">como foi seu dia?</div>
+            <div class="mood-modal-date" id="moodModalDate"></div>
+            <div class="mood-options">
+                <div class="mood-option" data-value="1" onclick="selectMood(1)">😞</div>
+                <div class="mood-option" data-value="2" onclick="selectMood(2)">😕</div>
+                <div class="mood-option" data-value="3" onclick="selectMood(3)">😐</div>
+                <div class="mood-option" data-value="4" onclick="selectMood(4)">🙂</div>
+                <div class="mood-option" data-value="5" onclick="selectMood(5)">😄</div>
+            </div>
+            <div class="mood-modal-footer">
+                <button class="btn-mood-clear" id="btnMoodClear" onclick="clearMood()">remover humor</button>
+                <button class="mood-modal-close" onclick="closeMoodModal()">fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL NOTAS -->
+    <div class="note-modal-overlay" id="noteModalOverlay" onclick="closeNoteModal(event)">
+        <div class="note-modal">
+            <div class="note-modal-title">nota do dia</div>
+            <div class="note-modal-date" id="noteModalDate"></div>
+            <textarea class="note-textarea" id="noteTextarea" placeholder="como foi seu dia..."></textarea>
+            <div class="note-modal-actions">
+                <button class="btn-note-cancel" onclick="closeNoteModal()">cancelar</button>
+                <button class="btn-note-save"   onclick="saveNote()">salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ESTATÍSTICAS -->
+    <div class="stats-modal-overlay" id="statsModalOverlay" onclick="closeStatsModal(event)">
+        <div class="stats-modal">
+            <div class="stats-modal-header">
+                <div>
+                    <div class="stats-modal-title" id="statsModalTitle">—</div>
+                    <div class="stats-modal-subtitle" id="statsModalSubtitle">estatísticas</div>
+                </div>
+                <button class="stats-modal-close" onclick="closeStatsModal()">✕</button>
+            </div>
+            <div class="stats-grid" id="statsGrid"></div>
+            <div class="stats-heatmap-label">atividade — últimos 12 meses</div>
+            <div class="stats-heatmap" id="statsHeatmap"></div>
+        </div>
+    </div>
+
+    <!-- MODAL EDITAR HÁBITO -->
+    <div class="edit-habit-overlay" id="editHabitOverlay" onclick="closeEditHabit(event)">
+        <div class="edit-habit-modal">
+            <div class="edit-habit-title">editar hábito</div>
+            <div class="edit-habit-fields">
+                <div class="edit-field-row">
+                    <input type="color" id="eHabitColor" class="color-picker">
+                    <input type="text"  id="eHabitName"  class="f-input-edit" placeholder="nome do hábito">
+                </div>
+                <div class="edit-field-row" style="flex-wrap:wrap; gap:10px;">
+                    <input type="number" id="eHabitGoal" class="f-input-edit f-input-edit--sm" placeholder="meta/sem" min="1" max="7">
+                    <div class="type-toggle">
+                        <button class="type-btn" id="eBtnTypeMeta"  onclick="setEditType('meta')">meta</button>
+                        <button class="type-btn" id="eBtnTypeLimit" onclick="setEditType('limite')">limite</button>
+                    </div>
+                    <div class="type-toggle">
+                        <button class="type-btn" id="eBtnDurRec" onclick="setEditDuration('recorrente')">∞</button>
+                        <button class="type-btn" id="eBtnDurPer" onclick="setEditDuration('periodo')">N dias</button>
+                    </div>
+                    <input type="number" id="eHabitPeriod" class="f-input-edit f-input-edit--sm hidden" placeholder="dias" min="1">
+                </div>
+                <div class="weekdays-toggle" id="editWeekdaysToggle"></div>
+
+                <!-- NOTIFICAÇÃO -->
+                <div class="notif-section">
+                    <div class="notif-label">🔔 lembrete</div>
+                    <div class="notif-type-row">
+                        <div class="type-toggle">
+                            <button class="type-btn" id="eNotifNone"     onclick="setEditNotif('none')">nenhum</button>
+                            <button class="type-btn" id="eNotifInterval" onclick="setEditNotif('interval')">a cada N h</button>
+                            <button class="type-btn" id="eNotifFixed"    onclick="setEditNotif('fixed')">horário fixo</button>
+                        </div>
+                    </div>
+                    <div id="eNotifIntervalRow" class="notif-detail-row hidden">
+                        <input type="number" id="eNotifIntervalH" class="f-input-edit f-input-edit--sm" min="1" max="12" placeholder="2" value="2">
+                        <span class="notif-unit">horas</span>
+                    </div>
+                    <div id="eNotifFixedRow" class="notif-detail-row hidden">
+                        <input type="time" id="eNotifTime" class="f-input-edit" value="08:00">
+                    </div>
+                </div>
+            </div>
+            <div class="edit-habit-actions">
+                <button class="btn-note-cancel" onclick="closeEditHabit()">cancelar</button>
+                <button class="btn-note-save"   onclick="saveEditHabit()">salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MENU FLUTUANTE -->
+    <nav class="float-nav">
+        <a href="index.html" class="fn-btn fn-btn--active" title="Hábitos">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+            <span>hábitos</span>
+        </a>
+        <a href="estudos.html" class="fn-btn" title="Estudos">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+            <span>estudos</span>
+        </a>
+        <a href="treino.html" class="fn-btn" title="Treino">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5h11M6.5 17.5h11M3 12h3m15 0h-3M6 9l-3 3 3 3M18 9l3 3-3 3"/></svg>
+            <span>treino</span>
+        </a>
+        <a href="notas.html" class="fn-btn" title="Notas">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            <span>notas</span>
+        </a>
+    </nav>
+
+    <script src="script.js"></script>
+</body>
+</html>

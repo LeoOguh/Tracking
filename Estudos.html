@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estudos - Clarity</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="estudos.css">
+</head>
+<body>
+
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeToggleBtn">☀ claro</button>
+
+    <div class="study-topbar">
+        <!-- Navegação de data com largura fixa para botões não se moverem -->
+        <div class="study-date-nav">
+            <button class="nav-btn" onclick="changeDate(-1)">‹</button>
+            <div id="dateTitle">...</div>
+            <button class="nav-btn" onclick="changeDate(1)">›</button>
+        </div>
+
+        <!-- Meta diária -->
+        <div class="daily-goal-box glass-panel">
+            <span class="dg-label">meta diária</span>
+            <div class="dg-input-wrap">
+                <input type="number" id="dailyGoalInput" class="dg-input" min="0.5" max="24" step="0.5" placeholder="—">
+                <span class="dg-unit">h</span>
+            </div>
+            <div class="dg-bar-wrap">
+                <div class="dg-bar-track"><div class="dg-bar-fill" id="dgBarFill"></div></div>
+                <span class="dg-pct" id="dgPct">—</span>
+            </div>
+        </div>
+
+        <!-- Badge revisões: texto montado pelo JS, span vazio aqui -->
+        <div class="review-badge-wrap" id="reviewBadgeWrap" style="display:none">
+            <div class="review-pending-badge" onclick="scrollToCalendar()" id="reviewPendingBadge"></div>
+        </div>
+
+        <!-- Ações -->
+        <div class="topbar-actions">
+            <button class="btn-topbar-action btn-topbar-action--text" onclick="openErrosModal()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                caderno de erros
+            </button>
+            <button class="btn-topbar-action btn-topbar-action--text" onclick="openSubjectsModal()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+                    <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+                </svg>
+                matérias
+            </button>
+            <button class="btn-topbar-action btn-topbar-action--text" onclick="openAIModal()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                cronograma IA
+            </button>
+            <button class="btn-topbar-action btn-topbar-action--icon" onclick="exportStudyData()" title="Exportar dados">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="study-container">
+
+        <!-- PAINEL ÚNICO DE REVISÕES PENDENTES (hoje + atrasadas) -->
+        <div class="today-reviews-panel" id="todayReviewsPanel">
+            <div class="today-reviews-header">
+                <span class="today-reviews-icon">📋</span>
+                <span class="today-reviews-title" id="todayReviewsTitle">revisões para hoje</span>
+            </div>
+            <div class="today-reviews-items" id="todayReviewsItems"></div>
+        </div>
+
+        <!-- STATS RÁPIDAS -->
+        <div class="quick-stats-row" id="quickStatsRow"></div>
+
+        <!-- GRÁFICOS -->
+        <div class="charts-row">
+            <div class="glass-panel chart-box">
+                <div class="chart-box-title">horas por dia — últimos 14 dias</div>
+                <div class="chart-box-inner"><canvas id="chartDaily"></canvas></div>
+            </div>
+            <div class="glass-panel chart-box">
+                <div class="chart-box-title">distribuição por matéria — mês atual</div>
+                <div class="chart-box-inner chart-box-inner--donut">
+                    <canvas id="chartSubject"></canvas>
+                    <div class="donut-center" id="donutCenter">—</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FORMULÁRIO DE NOVA SESSÃO -->
+        <div class="session-form glass-panel">
+            <div class="session-form-header">
+                <div class="form-title" style="margin-bottom:0">nova sessão</div>
+                <!-- Toggle entre modo cronômetro e modo manual -->
+                <div class="session-mode-toggle">
+                    <button class="sess-mode-btn sess-mode-btn--active" id="btnModeTimer"  onclick="setSessionMode('timer')">
+                        ⏱ cronômetro
+                    </button>
+                    <button class="sess-mode-btn" id="btnModeManual" onclick="setSessionMode('manual')">
+                        ✎ manual
+                    </button>
+                </div>
+            </div>
+
+            <!-- Campos comuns -->
+            <div class="form-fields form-fields--common">
+                <div class="subject-field-wrap">
+                    <select id="fSubjectSelect" class="f-select f-select--subject" onchange="onSubjectSelectChange()">
+                        <option value="">— matéria —</option>
+                        <option value="__custom__">digitar manualmente…</option>
+                    </select>
+                    <input type="text" id="fSubjectCustom" class="f-input hidden" placeholder="matéria">
+                </div>
+                <input type="text" id="fContent" class="f-input f-input--wide" placeholder="conteúdo estudado (opcional)">
+                <div class="f-review-wrap">
+                    <span class="f-review-label">revisão</span>
+                    <select id="fReviewDays" class="f-select">
+                        <option value="">sem revisão</option>
+                        <option value="1">1 dia</option>
+                        <option value="3">3 dias</option>
+                        <option value="7">7 dias</option>
+                        <option value="14">14 dias</option>
+                        <option value="21">21 dias</option>
+                        <option value="30">30 dias</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- MODO CRONÔMETRO -->
+            <div class="session-mode-panel" id="panelTimer">
+                <div class="form-fields">
+                    <button class="btn-start-timer" id="btnStartTimer" onclick="startTimer()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/>
+                        </svg>
+                        iniciar cronômetro
+                    </button>
+                    <div class="timer-display" id="timerDisplay" style="display:none">
+                        <span class="timer-counter" id="timerCounter">00:00:00</span>
+                        <button class="btn-stop-timer" id="btnStopTimer" onclick="stopTimer()">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+                            parar e salvar
+                        </button>
+                    </div>
+                </div>
+                <p class="session-mode-hint">Selecione a matéria, clique em iniciar e o tempo será calculado automaticamente ao parar.</p>
+            </div>
+
+            <!-- MODO MANUAL -->
+            <div class="session-mode-panel hidden" id="panelManual">
+                <div class="form-fields">
+                    <div class="manual-time-row">
+                        <label class="manual-time-label">início</label>
+                        <input type="time" id="fStart" class="f-input">
+                    </div>
+                    <div class="manual-time-row">
+                        <label class="manual-time-label">término</label>
+                        <input type="time" id="fEnd" class="f-input">
+                    </div>
+                    <div class="f-duration-wrap">
+                        <span class="f-duration-label">duração</span>
+                        <span class="f-duration" id="fDuration">—</span>
+                    </div>
+                </div>
+                <div class="manual-form-footer">
+                    <p class="session-mode-hint" style="flex:1">Preencha início e término. Funciona em qualquer dia navegado.</p>
+                    <button class="btn-save-manual" onclick="addSession()">salvar sessão</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TABELA DE SESSÕES -->
+        <div class="glass-panel table-panel">
+            <div class="table-header-row">
+                <span class="th th-subject">matéria</span>
+                <span class="th th-content">conteúdo</span>
+                <span class="th th-time">início</span>
+                <span class="th th-time">término</span>
+                <span class="th th-dur">duração</span>
+                <span class="th th-rev">revisão</span>
+                <span class="th th-del"></span>
+            </div>
+            <div id="sessionsList"></div>
+            <div class="table-footer" id="tableFooter"></div>
+        </div>
+
+        <!-- RESUMO MENSAL + CALENDÁRIO lado a lado -->
+        <div class="study-bottom-row">
+            <!-- RESUMO MENSAL -->
+            <div class="summary-panel study-summary-panel" style="flex:1">
+                <div class="summary-header" id="studySummaryHeader" onclick="toggleStudySummary()">
+                    <span class="summary-header-title">resumo do mês</span>
+                    <span class="summary-chevron" id="studySummaryChevron">▾</span>
+                </div>
+                <div class="study-summary-body" id="studySummaryBody"></div>
+            </div>
+
+            <!-- CALENDÁRIO DE REVISÕES (mesmo tamanho do donut) -->
+            <div class="glass-panel review-calendar-panel" id="reviewCalendarSection">
+                <div class="review-cal-header">
+                    <span class="review-cal-title">revisões</span>
+                    <div class="review-cal-nav">
+                        <button class="nav-btn-sm" onclick="changeCalMonth(-1)">‹</button>
+                        <span id="calMonthTitle">—</span>
+                        <button class="nav-btn-sm" onclick="changeCalMonth(1)">›</button>
+                    </div>
+                </div>
+                <div class="review-cal-grid" id="reviewCalGrid"></div>
+                <div class="review-legend" id="reviewLegend"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL EDITAR SESSÃO -->
+    <div class="edit-modal-overlay" id="editModalOverlay" onclick="closeEditModal(event)">
+        <div class="edit-modal">
+            <div class="edit-modal-title">editar sessão</div>
+            <div class="edit-modal-fields">
+                <input type="text" id="eSubject" class="f-input" placeholder="matéria">
+                <input type="text" id="eContent" class="f-input" placeholder="conteúdo">
+                <div class="edit-time-row">
+                    <input type="time" id="eStart" class="f-input">
+                    <input type="time" id="eEnd"   class="f-input">
+                </div>
+                <select id="eReviewDays" class="f-select">
+                    <option value="">sem revisão</option>
+                    <option value="1">1 dia</option>
+                    <option value="3">3 dias</option>
+                    <option value="7">7 dias</option>
+                    <option value="14">14 dias</option>
+                    <option value="21">21 dias</option>
+                    <option value="30">30 dias</option>
+                </select>
+            </div>
+            <div class="edit-modal-actions">
+                <button class="btn-note-cancel" onclick="closeEditModal()">cancelar</button>
+                <button class="btn-note-save"   onclick="saveEdit()">salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL MATÉRIAS -->
+    <div class="edit-modal-overlay" id="subjectsModalOverlay" onclick="closeSubjectsModal(event)">
+        <div class="edit-modal subjects-modal">
+            <div class="edit-modal-title">gerenciar matérias</div>
+            <div class="subjects-add-row">
+                <input type="text" id="sNewName" class="f-input" placeholder="nome da matéria">
+                <!-- Seletor de importância: 1–5 estrelas -->
+                <div class="star-selector" id="starSelector">
+                    <span class="star-label">importância:</span>
+                    <span class="star" data-val="1" onclick="setStars(1)">★</span>
+                    <span class="star" data-val="2" onclick="setStars(2)">★</span>
+                    <span class="star" data-val="3" onclick="setStars(3)">★</span>
+                    <span class="star" data-val="4" onclick="setStars(4)">★</span>
+                    <span class="star" data-val="5" onclick="setStars(5)">★</span>
+                </div>
+                <input type="hidden" id="sNewImportance" value="3">
+                <input type="color" id="sNewColor" class="color-picker" value="#3498db">
+                <button class="btn-add-session" onclick="addSubject()" style="width:38px;height:38px;font-size:1.2rem;border-radius:10px">+</button>
+            </div>
+            <div class="subjects-list" id="subjectsList"></div>
+            <div class="edit-modal-actions" style="margin-top:4px">
+                <button class="btn-note-save" onclick="closeSubjectsModal()">fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL IA -->
+    <div class="edit-modal-overlay" id="aiModalOverlay" onclick="closeAIModal(event)">
+        <div class="edit-modal ai-modal">
+            <div class="edit-modal-title">cronograma com ia</div>
+            <div class="ai-note">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                O cronograma é gerado via <strong>API do Claude</strong>. Se não funcionar, use o botão "abrir no Claude" para gerar manualmente.
+            </div>
+            <div class="ai-mode-toggle">
+                <button class="type-btn type-btn--active" id="aiModeSubjects" onclick="setAIMode('subjects')">minhas matérias</button>
+                <button class="type-btn" id="aiModeText" onclick="setAIMode('text')">colar edital / texto</button>
+            </div>
+            <div id="aiPanelSubjects">
+                <p class="ai-hint">O cronograma será gerado com base nas suas matérias cadastradas e seus graus de importância.</p>
+                <div class="ai-extra-row">
+                    <input type="number" id="aiHoursPerDay"  class="f-input" placeholder="horas disponíveis/dia" min="1" max="16" style="width:200px">
+                    <input type="number" id="aiDays"         class="f-input" placeholder="quantos dias" min="1" max="365" style="width:160px">
+                </div>
+            </div>
+            <div id="aiPanelText" style="display:none">
+                <p class="ai-hint">Cole o texto do edital, ementa ou lista de matérias abaixo.</p>
+                <textarea id="aiTextarea" class="ai-textarea" placeholder="cole aqui o edital ou as matérias que deseja estudar…"></textarea>
+                <div class="ai-extra-row">
+                    <input type="number" id="aiHoursPerDay2" class="f-input" placeholder="horas disponíveis/dia" min="1" max="16" style="width:200px">
+                    <input type="number" id="aiDays2"        class="f-input" placeholder="quantos dias" min="1" max="365" style="width:160px">
+                </div>
+            </div>
+            <div class="ai-loading" id="aiLoading" style="display:none">
+                <div class="ai-spinner"></div><span>gerando cronograma…</span>
+            </div>
+            <div class="ai-result" id="aiResult" style="display:none"></div>
+            <div class="edit-modal-actions">
+                <button class="btn-note-cancel" id="aiBtnOpenClaude" onclick="openInClaude()" style="display:none">abrir no Claude ↗</button>
+                <button class="btn-note-cancel" onclick="closeAIModal()">fechar</button>
+                <button class="btn-note-save"   id="aiBtnGenerate" onclick="generateSchedule()">gerar cronograma</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="review-tooltip" id="reviewTooltip"></div>
+
+    <!-- ═══ POMODORO WIDGET ═══ -->
+    <div class="pomodoro-bubble" id="pomodoroBubble" onclick="togglePomodoro()">
+        <span id="pomodoroIndicator">🍅</span>
+    </div>
+    <div class="pomodoro-panel glass-panel" id="pomodoroPanel" style="display:none">
+        <div class="pomo-header">
+            <span class="pomo-title">pomodoro</span>
+            <button class="pomo-close" onclick="togglePomodoro()">✕</button>
+        </div>
+        <div class="pomo-mode-row">
+            <button class="pomo-mode-btn pomo-mode-btn--active" id="pomoBtnWork"  onclick="setPomoMode('work')">foco</button>
+            <button class="pomo-mode-btn" id="pomoBtnShort" onclick="setPomoMode('short')">pausa curta</button>
+            <button class="pomo-mode-btn" id="pomoBtnLong"  onclick="setPomoMode('long')">pausa longa</button>
+        </div>
+        <div class="pomo-display" id="pomoDisplay">25:00</div>
+        <div class="pomo-sessions" id="pomoSessions">⬤ ⬤ ⬤ ⬤</div>
+        <div class="pomo-controls">
+            <button class="pomo-btn" onclick="pomodoroStart()" id="pomoBtnStart">▶ iniciar</button>
+            <button class="pomo-btn pomo-btn--reset" onclick="pomodoroReset()">↺</button>
+        </div>
+    </div>
+
+    <!-- ═══ CADERNO DE ERROS — modal ═══ -->
+    <div class="modal-overlay" id="errosModalOverlay" onclick="closeErrosModal(event)">
+        <div class="edit-modal" style="max-width:680px;width:96vw">
+            <div class="modal-header-row">
+                <div class="edit-modal-title">caderno de erros</div>
+                <div class="pomo-mode-row" style="background:transparent;border:none;padding:0;gap:6px">
+                    <button class="type-btn type-btn--active" id="errosBtnList" onclick="setErrosView('list')">lista</button>
+                    <button class="type-btn" id="errosBtnNew"  onclick="setErrosView('new')">+ novo erro</button>
+                    <button class="btn-note-cancel" onclick="closeErrosModal()" style="margin-left:8px">fechar</button>
+                </div>
+            </div>
+            <!-- Form novo erro -->
+            <div id="errosNewForm" style="display:none">
+                <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+                    <select id="erroMateria" class="f-select"><option value="">— matéria —</option></select>
+                    <input type="text" id="erroConteudo" class="f-input" placeholder="conteúdo / tópico (ex: Juros compostos)">
+                    <textarea id="erroDescricao" class="ai-textarea" style="min-height:80px" placeholder="descreva o erro ou a dificuldade encontrada…"></textarea>
+                    <input type="text" id="erroResolucao" class="f-input" placeholder="resolução / como corrigir (opcional)">
+                    <div style="display:flex;gap:8px;justify-content:flex-end">
+                        <button class="btn-note-cancel" onclick="setErrosView('list')">cancelar</button>
+                        <button class="btn-note-save" onclick="saveErro()">salvar erro</button>
+                    </div>
+                </div>
+            </div>
+            <!-- Lista de erros -->
+            <div id="errosListView">
+                <div style="display:flex;gap:8px;margin:12px 0 8px">
+                    <select id="errosFilterMateria" class="f-select" style="flex:1" onchange="renderErrosList()"><option value="">— todas as matérias —</option></select>
+                    <select id="errosFilterStatus" class="f-select" style="width:140px" onchange="renderErrosList()">
+                        <option value="">todos</option>
+                        <option value="pendente">pendentes</option>
+                        <option value="revisado">revisados</option>
+                    </select>
+                </div>
+                <div id="errosListContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MENU FLUTUANTE -->
+    <nav class="float-nav">
+        <a href="index.html" class="fn-btn" title="Hábitos">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+            <span>hábitos</span>
+        </a>
+        <a href="estudos.html" class="fn-btn fn-btn--active" title="Estudos">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+            <span>estudos</span>
+        </a>
+        <a href="treino.html" class="fn-btn" title="Treino">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5h11M6.5 17.5h11M3 12h3m15 0h-3M6 9l-3 3 3 3M18 9l3 3-3 3"/></svg>
+            <span>treino</span>
+        </a>
+        <a href="notas.html" class="fn-btn" title="Notas">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            <span>notas</span>
+        </a>
+    </nav>
+
+    <script src="estudos.js"></script>
+</body>
+</html>

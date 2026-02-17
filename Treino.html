@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treino - Clarity</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="treino.css">
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeToggleBtn">☀ claro</button>
+
+    <!-- MENU LATERAL (drawer) -->
+    <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+    <aside class="side-drawer" id="sideDrawer">
+        <div class="drawer-header">
+            <span class="drawer-title">treino</span>
+            <button class="drawer-close" onclick="closeDrawer()">✕</button>
+        </div>
+        <nav class="drawer-nav">
+            <button class="drawer-item drawer-item--active" id="dItemPlanos"   onclick="setView('planos')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                meus planos
+            </button>
+            <button class="drawer-item" id="dItemRegistro" onclick="setView('registro')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4z"/></svg>
+                registrar treino
+            </button>
+            <button class="drawer-item" id="dItemStats"    onclick="setView('stats')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                estatísticas
+            </button>
+            <button class="drawer-item" id="dItemMedidas"  onclick="setView('medidas')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg>
+                medidas corporais
+            </button>
+        </nav>
+        <div class="drawer-footer">
+            <button class="btn-topbar-action" onclick="exportTreino()" style="width:100%;justify-content:center;gap:8px;border-radius:12px">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                exportar dados
+            </button>
+        </div>
+    </aside>
+
+    <!-- TOPBAR -->
+    <div class="treino-topbar">
+        <button class="drawer-trigger" onclick="openDrawer()" id="drawerBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+        </button>
+        <div class="treino-topbar-center">
+            <div class="treino-date-nav">
+                <button class="nav-btn" onclick="changeDate(-1)">‹</button>
+                <div id="treinoDateTitle">...</div>
+                <button class="nav-btn" onclick="changeDate(1)">›</button>
+            </div>
+            <div class="treino-view-label" id="treinoViewLabel">planos</div>
+        </div>
+    </div>
+
+    <!-- ═══════ PLANOS ═══════ -->
+    <div id="viewPlanos" class="treino-page">
+        <div class="plans-wrapper" id="plansWrapper">
+            <!-- Estado: centralizado (só lista) -->
+            <div class="plans-center-panel glass-panel" id="plansCenterPanel">
+                <div class="plans-header">
+                    <span class="plans-title">meus planos de treino</span>
+                    <button class="btn-new-plan" onclick="openNewPlan()">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        novo plano
+                    </button>
+                </div>
+                <div id="plansList" class="plans-list-body"></div>
+            </div>
+
+            <!-- Editor (aparece à direita) -->
+            <div class="plan-editor-card glass-panel" id="planEditor" style="display:none">
+                <div class="plan-editor-header">
+                    <input type="text" id="planNameInput" class="f-input plan-name-input" placeholder="nome do plano (ex: Treino A)">
+                    <div class="plan-editor-actions">
+                        <button class="btn-del-plan" id="btnDelPlan" onclick="deletePlan()" style="display:none">apagar</button>
+                        <button class="btn-save-plan" onclick="savePlanEdit()">✓ salvar</button>
+                        <button class="plan-editor-close" onclick="closePlanEditor()" title="Fechar">✕</button>
+                    </div>
+                </div>
+                <div id="planMuscleGroups" class="plan-muscle-groups"></div>
+                <div class="plan-add-ex-form">
+                    <div class="pae-title">adicionar exercício</div>
+                    <div class="pae-with-preview">
+                        <img id="paeExPreview" class="pae-ex-preview hidden" alt="Preview do exercício">
+                        <div class="pae-form-fields">
+                            <div class="ef-row-top">
+                                <select id="paeMusc" class="f-select" style="min-width:130px" onchange="onPaeMuscleChange()">
+                                    <option value="">— músculo —</option>
+                                    <option>Peito</option><option>Costas</option><option>Ombro</option>
+                                    <option>Bíceps</option><option>Tríceps</option><option>Quadríceps</option>
+                                    <option>Posterior</option><option>Glúteo</option><option>Panturrilha</option>
+                                    <option>Abdômen</option><option>Outro</option>
+                                </select>
+                                <select id="paeEx" class="f-select" style="flex:1" onchange="updatePaePreview()"><option value="">— exercício —</option></select>
+                                <input type="text" id="paeExCustom" class="f-input hidden" placeholder="nome do exercício" style="flex:1">
+                            </div>
+                            <div class="ef-row-top" style="margin-top:6px">
+                                <div class="equip-toggle">
+                                    <button class="equip-btn equip-btn--active" id="paeBtnLivre"   onclick="setPaeEquip('livre')">🏋️ livre</button>
+                                    <button class="equip-btn"                   id="paeBtnMaquina" onclick="setPaeEquip('maquina')">⚙️ máquina</button>
+                                </div>
+                                <input type="text" id="paeObs" class="f-input" placeholder="observação" style="flex:1">
+                                <button class="btn-add-set" onclick="addExToPlan()">+ add</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════ REGISTRO ═══════ -->
+    <div id="viewRegistro" class="treino-page hidden">
+        <div class="registro-grid">
+            <!-- Coluna principal -->
+            <div class="registro-main">
+                <!-- Stats do dia -->
+                <div class="reg-stats-row" id="treinoStatsRow"></div>
+
+                <!-- Força comparada (animal do dia) -->
+                <div class="glass-panel reg-animal-panel" id="regAnimalPanel" style="display:none"></div>
+
+                <!-- Seletor de plano -->
+                <div class="glass-panel plan-day-selector">
+                    <div class="pds-label">qual treino você realizou hoje?</div>
+                    <div class="pds-plans-row" id="pdsPlansList"></div>
+                    <div class="pds-divider">ou</div>
+                    <button class="btn-cardio-toggle" id="btnCardioToggle" onclick="toggleCardioForm()">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                        cardio / outro
+                    </button>
+                </div>
+
+                <!-- Exercícios do plano -->
+                <div id="planExercisesForm" style="display:none">
+                    <div class="glass-panel pef-header-panel">
+                        <div>
+                            <span class="pef-plan-name" id="pefPlanName"></span>
+                            <span class="pef-subtitle">registre a carga de cada exercício</span>
+                        </div>
+                        <button class="btn-discard" onclick="cancelPlanSelection()">cancelar</button>
+                    </div>
+                    <div id="pefExercisesAccordion"></div>
+                    <button class="btn-save-session" onclick="saveSession()">✓ salvar sessão</button>
+                </div>
+
+                <!-- Cardio -->
+                <div class="exercise-form glass-panel hidden" id="formCardio">
+                    <div class="form-title">registrar cardio / atividade</div>
+                    <div class="ef-row-top">
+                        <input type="text" id="cfActivity" class="f-input" placeholder="atividade (corrida, natação, yoga…)" style="flex:1">
+                    </div>
+                    <div class="ef-row-add">
+                        <div class="ef-add-field">
+                            <label class="ef-add-label">duração (min)</label>
+                            <input type="number" id="cfDuration" class="f-input ef-num-input" min="0" step="1" placeholder="30">
+                        </div>
+                        <div class="ef-add-field">
+                            <label class="ef-add-label">distância (km)</label>
+                            <input type="number" id="cfDistance" class="f-input ef-num-input" min="0" step="0.1" placeholder="0">
+                        </div>
+                        <div class="ef-add-field">
+                            <label class="ef-add-label">intensidade</label>
+                            <select id="cfIntensity" class="f-select"><option value="leve">leve</option><option value="moderada" selected>moderada</option><option value="intensa">intensa</option></select>
+                        </div>
+                    </div>
+                    <div class="ef-row-top">
+                        <input type="text" id="cfObs" class="f-input" placeholder="observações" style="flex:1">
+                        <button class="btn-save-exercise" style="width:auto;padding:11px 22px" onclick="saveCardio()">✓ salvar</button>
+                    </div>
+                </div>
+
+                <!-- Lista do dia -->
+                <div class="exercises-list-panel glass-panel">
+                    <div class="form-title" id="exercisesListTitle">exercícios do dia</div>
+                    <div id="exercisesList"></div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="registro-sidebar">
+                <div class="glass-panel progress-chart-panel">
+                    <div class="pcp-header">
+                        <span class="pcp-title">progressão de carga</span>
+                        <select id="chartExerciseSel" class="f-select pcp-sel" onchange="renderProgressChart()">
+                            <option value="">selecione um exercício</option>
+                        </select>
+                    </div>
+                    <div class="pcp-chart-wrap"><canvas id="progressChart"></canvas></div>
+                    <div class="pcp-pr" id="pcpPR"></div>
+                </div>
+                <div class="glass-panel recent-history-panel">
+                    <div class="rhp-title">histórico recente</div>
+                    <div id="recentHistoryList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════ ESTATÍSTICAS ═══════ -->
+    <div id="viewStats" class="treino-page hidden treino-stats-view">
+        <div class="stats-outer-grid">
+            <div class="glass-panel stats-panel">
+                <div class="stats-panel-title">séries por músculo — últimos 7 dias</div>
+                <div id="statsMuscleList"></div>
+            </div>
+            <div class="glass-panel stats-panel">
+                <div class="stats-panel-title">frequência — últimas 4 semanas</div>
+                <div class="stats-chart-wrap"><canvas id="statsFreqChart"></canvas></div>
+            </div>
+            <!-- Calendário navegável com botões de mês -->
+            <div class="glass-panel stats-panel stats-panel--wide">
+                <div class="stats-panel-title">
+                    calendário de treinos 📅
+                    <div class="cal-nav-row">
+                        <button class="cal-nav-btn" onclick="calPrevMonth()">‹</button>
+                        <span id="calMonthLabel">—</span>
+                        <button class="cal-nav-btn" onclick="calNextMonth()">›</button>
+                    </div>
+                </div>
+                <div id="statsCalendar" class="stats-calendar-single"></div>
+            </div>
+            <div class="glass-panel stats-panel">
+                <div class="stats-panel-title">resumo — últimos 30 dias</div>
+                <div id="statsSummary" class="stats-summary-list"></div>
+            </div>
+            <div class="glass-panel stats-panel">
+                <div class="stats-panel-title">força comparada (todos os treinos) 🦁</div>
+                <div id="statsAnimals"></div>
+            </div>
+            <div class="glass-panel stats-panel stats-panel--wide">
+                <div class="stats-panel-title">recordes de carga por exercício 🏆</div>
+                <div id="statsPRList" class="stats-pr-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════ MEDIDAS ═══════ -->
+    <div id="viewMedidas" class="treino-page hidden">
+        <div class="medidas-container">
+            <div class="glass-panel medidas-form-panel">
+                <div class="stats-panel-title" style="margin-bottom:14px">registrar medidas corporais</div>
+                <div class="medidas-form-grid">
+                    <div class="mf-field"><label class="ef-add-label">data</label><input type="date" id="mDate" class="f-input"></div>
+                    <div class="mf-field"><label class="ef-add-label">peso (kg)</label><input type="number" id="mPeso" class="f-input ef-num-input" step="0.1" placeholder="—"></div>
+                    <div class="mf-field"><label class="ef-add-label">altura (cm)</label><input type="number" id="mAltura" class="f-input ef-num-input" step="0.5" placeholder="—"></div>
+                    <div class="mf-field"><label class="ef-add-label">peito (cm)</label><input type="number" id="mPeito" class="f-input ef-num-input" step="0.5" placeholder="—"></div>
+                    <div class="mf-field"><label class="ef-add-label">cintura (cm)</label><input type="number" id="mCintura" class="f-input ef-num-input" step="0.5" placeholder="—"></div>
+                    <div class="mf-field"><label class="ef-add-label">quadril (cm)</label><input type="number" id="mQuadril" class="f-input ef-num-input" step="0.5" placeholder="—"></div>
+                    <div class="mf-field"><label class="ef-add-label">bíceps (cm)</label><input type="number" id="mBiceps" class="f-input ef-num-input" step="0.5" placeholder="—"></div>
+                    <div class="mf-field"><label class="ef-add-label">coxa (cm)</label><input type="number" id="mCoxa" class="f-input ef-num-input" step="0.5" placeholder="—"></div>
+                    <div class="mf-field"><label class="ef-add-label">% gordura</label><input type="number" id="mGordura" class="f-input ef-num-input" step="0.1" placeholder="—"></div>
+                </div>
+                <button class="btn-save-exercise" onclick="saveMedida()">✓ registrar medidas</button>
+            </div>
+            <div class="glass-panel stats-panel">
+                <div class="stats-panel-title">evolução do peso</div>
+                <div class="stats-chart-wrap" style="height:200px"><canvas id="medidasPesoChart"></canvas></div>
+            </div>
+            <div class="glass-panel stats-panel">
+                <div class="stats-panel-title">primeira vs. última medição</div>
+                <div id="medidasDiff" class="stats-summary-list"></div>
+            </div>
+            <div class="glass-panel stats-panel stats-panel--wide">
+                <div class="stats-panel-title">histórico de medidas</div>
+                <div id="medidasTable" class="medidas-table"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: detalhes do dia no calendário -->
+    <div class="cal-day-overlay" id="calDayOverlay" onclick="closeCalDayModal(event)">
+        <div class="cal-day-modal">
+            <div class="cal-day-modal-header">
+                <div class="cal-day-modal-date" id="calDayDate">—</div>
+                <button class="cal-day-modal-close" onclick="closeCalDayModal()">✕</button>
+            </div>
+            <div id="calDayContent" class="cal-day-content"></div>
+        </div>
+    </div>
+
+    <!-- MENU FLUTUANTE -->
+    <nav class="float-nav">
+        <a href="index.html" class="fn-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg><span>hábitos</span></a>
+        <a href="estudos.html" class="fn-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg><span>estudos</span></a>
+        <a href="treino.html" class="fn-btn fn-btn--active"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5h11M6.5 17.5h11M3 12h3m15 0h-3M6 9l-3 3 3 3M18 9l3 3-3 3"/></svg><span>treino</span></a>
+        <a href="notas.html" class="fn-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg><span>notas</span></a>
+    </nav>
+
+    <script src="treino.js"></script>
+</body>
+</html>

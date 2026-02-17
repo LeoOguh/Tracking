@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notas - Clarity</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="notas.css">
+</head>
+<body>
+
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeToggleBtn">☀ claro</button>
+
+    <!-- TOPBAR -->
+    <div class="notas-topbar">
+        <!-- Título + sub à esquerda -->
+        <div class="notas-title-area">
+            <h1 class="notas-page-title">notas & tarefas</h1>
+            <p class="notas-page-sub" id="notasSub">carregando…</p>
+        </div>
+
+        <!-- Ações à direita -->
+        <div class="topbar-actions">
+            <!-- Botões de foco (toggle isolado) -->
+            <div class="focus-toggle">
+                <button class="focus-btn" id="focusBtnTasks" onclick="toggleView('tasks')" title="Foco em tarefas">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+                    </svg>
+                    tarefas
+                </button>
+                <button class="focus-btn" id="focusBtnDiary" onclick="toggleView('diary')" title="Foco em diário">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                    diário
+                </button>
+            </div>
+            <button class="btn-topbar-action" onclick="exportNotas()" title="Exportar">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="notas-container" id="notasContainer">
+
+        <!-- ═══════════ COLUNA ESQUERDA: TAREFAS ═══════════ -->
+        <div class="notas-col" id="colTasks">
+
+            <!-- Header da coluna com navegação de data integrada -->
+            <div class="notas-col-header">
+                <span class="notas-col-title">tarefas</span>
+                <!-- Navegação de data no estilo padrão do app -->
+                <div class="notas-date-nav">
+                    <button class="nav-btn" onclick="changeTaskDate(-1)">‹</button>
+                    <span id="taskDateLabel">hoje</span>
+                    <button class="nav-btn" onclick="changeTaskDate(1)">›</button>
+                </div>
+            </div>
+
+            <!-- Progresso das tarefas -->
+            <div class="tasks-progress-bar-wrap" id="tasksProgressWrap" style="display:none">
+                <div class="tasks-progress-bar-track">
+                    <div class="tasks-progress-bar-fill" id="tasksProgressFill"></div>
+                </div>
+                <span class="tasks-progress-label" id="tasksProgressLabel">0 / 0</span>
+            </div>
+
+            <!-- Formulário nova tarefa -->
+            <div class="task-form glass-panel">
+                <input type="text" id="taskInput" class="f-input task-input" placeholder="nova tarefa…" onkeydown="if(event.key==='Enter')addTask()">
+                <select id="taskPriority" class="f-select task-priority-sel">
+                    <option value="normal">normal</option>
+                    <option value="high">🔴 alta</option>
+                    <option value="low">🔵 baixa</option>
+                </select>
+                <button class="btn-add-task" onclick="addTask()">+</button>
+            </div>
+
+            <!-- Lista de tarefas -->
+            <div class="tasks-list" id="tasksList"></div>
+
+            <!-- Stats das tarefas -->
+            <div class="tasks-stats-row" id="tasksStatsRow"></div>
+        </div>
+
+        <!-- ═══════════ COLUNA DIREITA: DIÁRIO ═══════════ -->
+        <div class="notas-col" id="colDiary">
+
+            <!-- Header da coluna -->
+            <div class="notas-col-header">
+                <span class="notas-col-title">diário de ideias</span>
+                <button class="btn-new-entry" onclick="openNewEntry()">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    nova entrada
+                </button>
+            </div>
+
+            <!-- Busca -->
+            <div class="diary-search-wrap">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="diary-search-icon">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="text" id="diarySearch" class="diary-search-input" placeholder="buscar entradas…" oninput="renderDiary()">
+            </div>
+
+            <!-- Lista de entradas -->
+            <div class="diary-entries-list" id="diaryEntriesList"></div>
+        </div>
+
+    </div>
+
+    <!-- MODAL: EDITAR/VER ENTRADA DO DIÁRIO -->
+    <div class="edit-modal-overlay" id="diaryModalOverlay" onclick="closeDiaryModal(event)">
+        <div class="edit-modal diary-modal">
+            <div class="diary-modal-header">
+                <input type="text" id="dEntryTitle" class="diary-title-input" placeholder="título da entrada…">
+                <div class="diary-modal-meta">
+                    <select id="dEntryTag" class="f-select diary-tag-sel">
+                        <option value="">sem tag</option>
+                        <option value="ideia">💡 ideia</option>
+                        <option value="reflexao">💭 reflexão</option>
+                        <option value="plano">🗺 plano</option>
+                        <option value="aprendizado">📚 aprendizado</option>
+                        <option value="motivacao">⚡ motivação</option>
+                        <option value="outro">📌 outro</option>
+                    </select>
+                    <span class="diary-modal-date" id="dEntryDateLabel">hoje</span>
+                </div>
+            </div>
+            <textarea id="dEntryContent" class="diary-textarea" placeholder="escreva sua entrada aqui…&#10;&#10;Use este espaço para registrar ideias, reflexões, planos ou qualquer pensamento importante."></textarea>
+            <div class="edit-modal-actions">
+                <button class="btn-note-cancel diary-btn-delete" id="dBtnDelete" onclick="deleteEntry()" style="display:none">apagar entrada</button>
+                <button class="btn-note-cancel" onclick="closeDiaryModal()">cancelar</button>
+                <button class="btn-note-save" onclick="saveEntry()">salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MENU FLUTUANTE -->
+    <nav class="float-nav">
+        <a href="index.html" class="fn-btn" title="Hábitos">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+            <span>hábitos</span>
+        </a>
+        <a href="estudos.html" class="fn-btn" title="Estudos">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+            <span>estudos</span>
+        </a>
+        <a href="treino.html" class="fn-btn" title="Treino">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5h11M6.5 17.5h11M3 12h3m15 0h-3M6 9l-3 3 3 3M18 9l3 3-3 3"/></svg>
+            <span>treino</span>
+        </a>
+        <a href="notas.html" class="fn-btn fn-btn--active" title="Notas">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            <span>notas</span>
+        </a>
+    </nav>
+
+    <script src="notas.js"></script>
+</body>
+</html>

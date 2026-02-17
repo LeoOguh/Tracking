@@ -1,0 +1,277 @@
+/* ═══════════════════════════════════════════════════════════
+   TOPBAR
+   ═══════════════════════════════════════════════════════════ */
+.notas-topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    width: 100%; max-width: 98%; margin-bottom: 28px; flex-wrap: wrap; gap: 12px;
+}
+.notas-title-area { display: flex; flex-direction: column; gap: 2px; }
+.notas-page-title {
+    font-size: 1.6rem; font-weight: 300; letter-spacing: 3px;
+    text-transform: lowercase; font-variant: small-caps; color: #fff; margin: 0;
+}
+.notas-page-sub { font-size: 0.68rem; color: rgba(255,255,255,0.3); margin: 0; letter-spacing: 1px; }
+body.light .notas-page-title { color: #1a1a1a; }
+body.light .notas-page-sub   { color: rgba(0,0,0,0.3); }
+
+/* Botões de foco (toggle par, estilo idêntico ao view-tab-toggle do treino) */
+.focus-toggle {
+    display: flex; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px; padding: 4px; gap: 2px;
+}
+.focus-btn {
+    display: flex; align-items: center; gap: 6px;
+    background: transparent; border: none; color: rgba(255,255,255,0.4);
+    border-radius: 14px; padding: 6px 14px; font-size: 0.72rem; font-weight: 600;
+    font-family: inherit; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+}
+.focus-btn:hover { color: rgba(255,255,255,0.75); }
+.focus-btn.active { background: rgba(255,255,255,0.12); color: #fff; }
+body.light .focus-toggle { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.1); }
+body.light .focus-btn { color: rgba(0,0,0,0.4); }
+body.light .focus-btn:hover { color: rgba(0,0,0,0.65); }
+body.light .focus-btn.active { background: rgba(0,0,0,0.1); color: #1a1a1a; }
+
+/* ═══════════════════════════════════════════════════════════
+   LAYOUT 2 COLUNAS
+   ═══════════════════════════════════════════════════════════ */
+.notas-container {
+    width: 100%; max-width: 98%;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start;
+}
+.notas-col { display: flex; flex-direction: column; gap: 14px; }
+.notas-col.hidden { display: none; }
+.notas-container.focus-tasks { grid-template-columns: 1fr; }
+.notas-container.focus-diary { grid-template-columns: 1fr; }
+
+/* Header de coluna */
+.notas-col-header {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.notas-col-title { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.4); }
+body.light .notas-col-title { color: rgba(0,0,0,0.4); }
+body.light .notas-col-header { border-color: rgba(0,0,0,0.08); }
+
+/* ═══════════════════════════════════════════════════════════
+   NAVEGAÇÃO DE DATA — usa os nav-btn padrão de style.css,
+   mas com container próprio
+   ═══════════════════════════════════════════════════════════ */
+.notas-date-nav {
+    display: flex; align-items: center; gap: 0;
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 30px; padding: 3px 10px;
+}
+.notas-date-nav .nav-btn {
+    /* sobrescreve o nav-btn padrão para versão compacta */
+    width: 26px; height: 26px; min-width: unset; padding: 0;
+    font-size: 1rem; border-radius: 50%;
+    background: transparent; border: none;
+    color: rgba(255,255,255,0.5); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: color 0.2s;
+}
+.notas-date-nav .nav-btn:hover { color: #fff; background: rgba(255,255,255,0.06); }
+#taskDateLabel { font-size: 0.72rem; color: rgba(255,255,255,0.65); min-width: 68px; text-align: center; padding: 0 4px; }
+body.light .notas-date-nav { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.09); }
+body.light .notas-date-nav .nav-btn { color: rgba(0,0,0,0.4); }
+body.light .notas-date-nav .nav-btn:hover { color: #1a1a1a; background: rgba(0,0,0,0.06); }
+body.light #taskDateLabel { color: rgba(0,0,0,0.55); }
+
+/* ═══════════════════════════════════════════════════════════
+   BARRA DE PROGRESSO
+   ═══════════════════════════════════════════════════════════ */
+.tasks-progress-bar-wrap { display: flex; align-items: center; gap: 10px; }
+.tasks-progress-bar-track { flex: 1; height: 4px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; }
+.tasks-progress-bar-fill { height: 100%; border-radius: 4px; background: #2ecc71; transition: width 0.4s ease, background 0.3s; width: 0%; }
+.tasks-progress-label { font-size: 0.68rem; color: rgba(255,255,255,0.4); min-width: 32px; text-align: right; }
+body.light .tasks-progress-bar-track { background: rgba(0,0,0,0.08); }
+body.light .tasks-progress-label { color: rgba(0,0,0,0.4); }
+
+/* ═══════════════════════════════════════════════════════════
+   FORMULÁRIO DE TAREFA
+   ═══════════════════════════════════════════════════════════ */
+.task-form { display: flex; gap: 8px; align-items: center; padding: 10px 14px; }
+.task-input { flex: 1; }
+.task-priority-sel { width: 108px; flex-shrink: 0; }
+.btn-add-task {
+    background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.15);
+    width: 36px; height: 36px; border-radius: 10px; cursor: pointer; font-weight: 700;
+    font-size: 1.2rem; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.2s;
+}
+.btn-add-task:hover { background: rgba(255,255,255,0.2); }
+body.light .btn-add-task { background: rgba(0,0,0,0.08); color: #1a1a1a; border-color: rgba(0,0,0,0.12); }
+
+/* ═══════════════════════════════════════════════════════════
+   LISTA DE TAREFAS
+   ═══════════════════════════════════════════════════════════ */
+.tasks-list { display: flex; flex-direction: column; gap: 6px; }
+.task-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 14px; border-radius: 14px;
+    background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
+    cursor: default; transition: background 0.2s, opacity 0.3s;
+    animation: slideIn 0.2s ease;
+}
+@keyframes slideIn { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:none; } }
+.task-item:hover { background: rgba(255,255,255,0.04); }
+.task-item.done { opacity: 0.4; }
+body.light .task-item { background: rgba(255,255,255,0.55); border-color: rgba(0,0,0,0.07); }
+body.light .task-item:hover { background: rgba(255,255,255,0.75); }
+
+.task-checkbox {
+    width: 18px; height: 18px; border-radius: 6px; flex-shrink: 0; cursor: pointer;
+    border: 2px solid rgba(255,255,255,0.2); background: transparent;
+    display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+}
+.task-checkbox.checked { border-color: #2ecc71; background: #2ecc71; }
+.task-checkbox.checked::after { content: '✓'; font-size: 0.6rem; color: #000; font-weight: 900; }
+body.light .task-checkbox { border-color: rgba(0,0,0,0.2); }
+
+.task-priority-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.priority-high   { background: #e74c3c; }
+.priority-normal { background: rgba(255,255,255,0.18); }
+.priority-low    { background: #3498db; }
+body.light .priority-normal { background: rgba(0,0,0,0.14); }
+
+.task-text { flex: 1; font-size: 0.88rem; color: rgba(255,255,255,0.85); line-height: 1.4; }
+.task-item.done .task-text { text-decoration: line-through; color: rgba(255,255,255,0.28); }
+body.light .task-text { color: rgba(0,0,0,0.75); }
+.task-body { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.task-time { font-size: 0.6rem; color: rgba(255,255,255,0.25); letter-spacing: 0.5px; }
+.task-item.done .task-time { color: rgba(255,255,255,0.15); }
+body.light .task-time { color: rgba(0,0,0,0.28); }
+body.light .task-item.done .task-text { color: rgba(0,0,0,0.28); }
+
+/* Botão de apagar — sempre visível (sutil), fica mais visível no hover */
+.task-del {
+    background: none; border: none; cursor: pointer;
+    color: rgba(255,255,255,0.18); font-size: 0.82rem;
+    padding: 3px 5px; border-radius: 6px;
+    opacity: 0; transition: all 0.2s; flex-shrink: 0;
+}
+.task-item:hover .task-del { opacity: 1; }
+.task-del:hover { color: #ff7675; background: rgba(255,77,77,0.08); }
+body.light .task-del { color: rgba(0,0,0,0.18); }
+
+/* Stats tarefas */
+.tasks-stats-row { display: flex; gap: 8px; flex-wrap: wrap; padding: 8px 0; border-top: 1px solid rgba(255,255,255,0.06); }
+.task-stat-chip { font-size: 0.65rem; color: rgba(255,255,255,0.4); letter-spacing: 0.5px; background: rgba(255,255,255,0.03); border-radius: 20px; padding: 3px 9px; }
+.task-stat-chip strong { color: rgba(255,255,255,0.7); }
+body.light .tasks-stats-row { border-color: rgba(0,0,0,0.07); }
+body.light .task-stat-chip { color: rgba(0,0,0,0.4); background: rgba(0,0,0,0.04); }
+body.light .task-stat-chip strong { color: rgba(0,0,0,0.65); }
+
+.tasks-empty { padding: 28px; text-align: center; color: rgba(255,255,255,0.14); font-size: 0.82rem; letter-spacing: 0.5px; border: 1px dashed rgba(255,255,255,0.06); border-radius: 14px; }
+body.light .tasks-empty { color: rgba(0,0,0,0.18); border-color: rgba(0,0,0,0.07); }
+
+/* ═══════════════════════════════════════════════════════════
+   DIÁRIO
+   ═══════════════════════════════════════════════════════════ */
+.btn-new-entry {
+    display: flex; align-items: center; gap: 5px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.7); border-radius: 20px; padding: 5px 12px;
+    font-size: 0.72rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.2s;
+}
+.btn-new-entry:hover { background: rgba(255,255,255,0.12); color: #fff; }
+body.light .btn-new-entry { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.1); color: rgba(0,0,0,0.55); }
+body.light .btn-new-entry:hover { background: rgba(0,0,0,0.1); color: #1a1a1a; }
+
+.diary-search-wrap {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px; padding: 8px 14px;
+}
+.diary-search-icon { color: rgba(255,255,255,0.22); flex-shrink: 0; }
+.diary-search-input { flex: 1; background: none; border: none; outline: none; color: rgba(255,255,255,0.8); font-size: 0.85rem; font-family: inherit; }
+.diary-search-input::placeholder { color: rgba(255,255,255,0.2); }
+body.light .diary-search-wrap { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.09); }
+body.light .diary-search-icon { color: rgba(0,0,0,0.22); }
+body.light .diary-search-input { color: rgba(0,0,0,0.7); }
+body.light .diary-search-input::placeholder { color: rgba(0,0,0,0.2); }
+
+.diary-entries-list { display: flex; flex-direction: column; gap: 10px; }
+
+.diary-month-group { font-size: 0.58rem; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.22); padding: 4px 2px 6px; margin-top: 4px; }
+body.light .diary-month-group { color: rgba(0,0,0,0.25); }
+
+.diary-entry-card {
+    padding: 14px 16px; border-radius: 16px; position: relative;
+    background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07);
+    cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; gap: 7px;
+    animation: slideIn 0.25s ease;
+}
+.diary-entry-card:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.13); transform: translateY(-1px); }
+body.light .diary-entry-card { background: rgba(255,255,255,0.55); border-color: rgba(0,0,0,0.07); }
+body.light .diary-entry-card:hover { background: rgba(255,255,255,0.75); }
+
+.diary-entry-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.diary-entry-title { font-size: 0.92rem; font-weight: 600; color: rgba(255,255,255,0.9); line-height: 1.3; flex: 1; }
+body.light .diary-entry-title { color: rgba(0,0,0,0.8); }
+
+.diary-tag-chip { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border-radius: 20px; padding: 2px 7px; flex-shrink: 0; background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.45); }
+body.light .diary-tag-chip { background: rgba(0,0,0,0.06); color: rgba(0,0,0,0.4); }
+
+/* Botão de apagar no card — aparece no hover */
+.diary-entry-del {
+    position: absolute; top: 10px; right: 10px;
+    background: none; border: none; cursor: pointer; color: rgba(255,255,255,0.18);
+    font-size: 0.8rem; padding: 3px 5px; border-radius: 6px;
+    opacity: 0; transition: all 0.2s;
+}
+.diary-entry-card:hover .diary-entry-del { opacity: 1; }
+.diary-entry-del:hover { color: #ff7675; background: rgba(255,77,77,0.1); }
+body.light .diary-entry-del { color: rgba(0,0,0,0.18); }
+
+.diary-entry-preview { font-size: 0.78rem; color: rgba(255,255,255,0.32); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+body.light .diary-entry-preview { color: rgba(0,0,0,0.32); }
+
+.diary-entry-meta { display: flex; align-items: center; gap: 8px; }
+.diary-entry-date { font-size: 0.62rem; color: rgba(255,255,255,0.22); }
+body.light .diary-entry-date { color: rgba(0,0,0,0.28); }
+
+.diary-empty { padding: 40px; text-align: center; color: rgba(255,255,255,0.14); font-size: 0.82rem; letter-spacing: 0.5px; border: 1px dashed rgba(255,255,255,0.06); border-radius: 16px; }
+body.light .diary-empty { color: rgba(0,0,0,0.18); border-color: rgba(0,0,0,0.07); }
+
+/* ═══════════════════════════════════════════════════════════
+   MODAL DO DIÁRIO
+   ═══════════════════════════════════════════════════════════ */
+.diary-modal { min-width: 680px; max-width: 860px; min-height: 550px; width: 94vw; }
+.diary-modal-header { display: flex; flex-direction: column; gap: 8px; }
+.diary-title-input {
+    background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.1);
+    color: #fff; font-size: 1.28rem; font-weight: 600; font-family: inherit;
+    padding: 4px 0 8px; outline: none; width: 100%; transition: border-color 0.2s;
+}
+.diary-title-input:focus { border-color: rgba(255,255,255,0.28); }
+.diary-title-input::placeholder { color: rgba(255,255,255,0.18); font-weight: 400; }
+body.light .diary-title-input { color: #1a1a1a; border-color: rgba(0,0,0,0.1); }
+body.light .diary-title-input::placeholder { color: rgba(0,0,0,0.2); }
+
+.diary-modal-meta { display: flex; align-items: center; gap: 10px; }
+.diary-tag-sel { width: 155px; }
+.diary-modal-date { font-size: 0.65rem; color: rgba(255,255,255,0.28); letter-spacing: 0.5px; }
+body.light .diary-modal-date { color: rgba(0,0,0,0.32); }
+
+.diary-textarea {
+    min-height: 260px; resize: vertical;
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px; color: rgba(255,255,255,0.85); padding: 14px 16px;
+    font-size: 0.9rem; font-family: inherit; outline: none; line-height: 1.7; transition: border-color 0.2s;
+}
+.diary-textarea:focus { border-color: rgba(255,255,255,0.16); }
+.diary-textarea::placeholder { color: rgba(255,255,255,0.16); }
+body.light .diary-textarea { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.1); color: rgba(0,0,0,0.8); }
+body.light .diary-textarea::placeholder { color: rgba(0,0,0,0.18); }
+
+.diary-btn-delete { color: #ff7675 !important; border-color: rgba(255,77,77,0.18) !important; }
+.diary-btn-delete:hover { background: rgba(255,77,77,0.1) !important; }
+
+/* ═══════════════════════════════════════════════════════════
+   IDENTIDADE VISUAL — notas (azul escuro global)
+   ═══════════════════════════════════════════════════════════ */
+.notas-page-title { font-family: 'Syne', sans-serif; }
+.diary-entry-card { border-left: 3px solid #3b82f6; }
+.task-item.done .task-text { text-decoration: line-through; color: rgba(255,255,255,0.22); }
