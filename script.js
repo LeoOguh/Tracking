@@ -1401,7 +1401,12 @@ function renderTodayProgressWidget() {
 function applyCompactMode() {
     document.body.classList.toggle('compact-mode', isCompact);
     const btn = document.getElementById('tpwCompactBtn');
-    if (btn) btn.textContent = isCompact ? '⊟' : '⊞';
+    if (btn) {
+        btn.textContent = isCompact ? '⊟' : '⊞';
+        btn.title = isCompact ? 'Modo normal' : 'Modo compacto';
+    }
+    // Forçar re-render do gráfico após mudar altura das linhas
+    if (typeof renderChart === 'function') setTimeout(renderChart, 50);
 }
 
 function toggleCompactMode() {
@@ -1410,7 +1415,37 @@ function toggleCompactMode() {
     applyCompactMode();
 }
 
+// ─── TOGGLE GRÁFICO MENSAL ────────────────────────────────────────────────────
+let isChartCollapsed = localStorage.getItem('clarity_chart_collapsed') === 'true';
+
+function applyChartCollapsed() {
+    const wrapper = document.getElementById('chartWrapper');
+    const icon    = document.getElementById('chartCollapseIcon');
+    const label   = document.getElementById('chartCollapseLabel');
+    if (!wrapper) return;
+    wrapper.classList.toggle('chart-collapsed', isChartCollapsed);
+    if (label) label.textContent = isChartCollapsed ? 'expandir' : 'recolher';
+    if (icon) {
+        // Aponta pra cima quando expandido, pra baixo quando recolhido
+        icon.setAttribute('d', isChartCollapsed
+            ? 'M6 9l6 6 6-6'   // chevron-down
+            : 'M18 15l-6-6-6 6' // chevron-up
+        );
+        // Muda o elemento polyline para path
+        icon.innerHTML = isChartCollapsed
+            ? '<polyline points="6 9 12 15 18 9"/>'
+            : '<polyline points="18 15 12 9 6 15"/>';
+    }
+}
+
+function toggleChart() {
+    isChartCollapsed = !isChartCollapsed;
+    localStorage.setItem('clarity_chart_collapsed', isChartCollapsed);
+    applyChartCollapsed();
+}
+
 applyCompactMode();
+applyChartCollapsed();
 renderTodayProgressWidget();
 
 // ─── ONBOARDING ───────────────────────────────────────────────────────────────
@@ -1529,6 +1564,8 @@ function updateMetaProgress(id, delta) {
     renderMetasMensais();
 }
 
+const MM_COLORS = ['#3b82f6','#8b5cf6','#f97316','#ec4899','#06b6d4','#eab308','#10b981','#f43f5e'];
+
 function renderMetasMensais() {
     const el    = document.getElementById('metasMensaisList');
     const metas = getMetasForCurrentMonth();
@@ -1539,28 +1576,47 @@ function renderMetasMensais() {
         return;
     }
 
-    el.innerHTML = metas.map(meta => {
-        const pct      = Math.min(100, Math.round((meta.current / meta.target) * 100));
-        const done     = pct >= 100;
-        const unitStr  = meta.unit ? ` ${meta.unit}` : '';
-        const barColor = done ? '#2ecc71' : pct >= 60 ? '#3b82f6' : '#f39c12';
-        const step     = meta.unit && ['km', 'kg', 'h', 'horas'].includes(meta.unit.toLowerCase()) ? 0.5 : 1;
+    el.innerHTML = metas.map((meta, idx) => {
+        const pct     = Math.min(100, Math.round((meta.current / meta.target) * 100));
+        const done    = pct >= 100;
+        const unitStr = meta.unit ? ` ${meta.unit}` : '';
+        const color   = done ? '#2ecc71' : MM_COLORS[idx % MM_COLORS.length];
+        const step    = meta.unit && ['km','kg','h','horas','mi'].includes(meta.unit.toLowerCase()) ? 0.5 : 1;
 
-        return `<div class="meta-mensal-card ${done ? 'meta-mensal-card--done' : ''}">
-            <div class="mm-card-top">
-                <div class="mm-card-info">
-                    <span class="mm-card-title">${done ? '✓ ' : ''}${meta.title}</span>
-                    <span class="mm-card-progress">${meta.current}${unitStr} / ${meta.target}${unitStr}</span>
+        // SVG ring (r=22, viewBox 50x50, circ≈138.2)
+        const r = 22; const circ = +(2 * Math.PI * r).toFixed(1);
+        const offset = +(circ - (pct / 100) * circ).toFixed(1);
+
+        return `<div class="meta-mensal-card ${done ? 'meta-mensal-card--done' : ''}" style="--mm-color:${color}">
+            <div class="mm-card-title-row">
+                <span class="mm-card-title">${meta.title}</span>
+                <button class="mm-edit-btn" onclick="openMetaMensalForm(${meta.id})" title="editar">✎</button>
+            </div>
+
+            <div class="mm-card-body">
+                <div class="mm-ring-wrap">
+                    <svg class="mm-ring-svg" viewBox="0 0 50 50">
+                        <circle class="mm-ring-bg" cx="25" cy="25" r="${r}"/>
+                        <circle class="mm-ring-fill" cx="25" cy="25" r="${r}"
+                            stroke="${color}"
+                            stroke-dasharray="${circ}"
+                            stroke-dashoffset="${offset}"/>
+                    </svg>
+                    <div class="mm-ring-pct">${pct}%</div>
                 </div>
-                <div class="mm-card-actions">
-                    <button class="mm-adjust-btn" onclick="updateMetaProgress(${meta.id}, -${step})" title="−${step}${unitStr}">−</button>
-                    <span class="mm-pct">${pct}%</span>
-                    <button class="mm-adjust-btn mm-adjust-btn--add" onclick="updateMetaProgress(${meta.id}, ${step})" title="+${step}${unitStr}">+</button>
-                    <button class="mm-edit-btn" onclick="openMetaMensalForm(${meta.id})" title="editar">✎</button>
+                <div class="mm-card-stats">
+                    <div class="mm-stat-current">${meta.current}${unitStr}</div>
+                    <div class="mm-stat-target">de ${meta.target}${unitStr}${done ? ' ✓' : ''}</div>
                 </div>
             </div>
+
             <div class="mm-bar-track">
-                <div class="mm-bar-fill" style="width:${pct}%;background:${barColor}"></div>
+                <div class="mm-bar-fill" style="width:${pct}%;background:${color}"></div>
+            </div>
+
+            <div class="mm-controls">
+                <button class="mm-adjust-btn" onclick="updateMetaProgress(${meta.id}, -${step})">−${step}${unitStr}</button>
+                <button class="mm-adjust-btn mm-adjust-btn--add" onclick="updateMetaProgress(${meta.id}, ${step})">+${step}${unitStr}</button>
             </div>
         </div>`;
     }).join('');
