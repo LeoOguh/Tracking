@@ -855,7 +855,5 @@ body.light .rest-preset--active { background: rgba(59,130,246,0.1); border-color
 /* ─── RESET DO BODY PARA LAYOUT COM DRAWER ─────────────── */
 body {
     display: block !important;
-    align-items: unset !important;
     padding: 0 !important;
-    padding-top: 0 !important;
 }

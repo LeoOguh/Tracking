@@ -630,13 +630,17 @@ body { overflow-x: hidden; }
 .erros-header { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 16px; }
 .erros-filters { display: flex; gap: 10px; flex: 1; }
 
-/* ─── RESET DO BODY PARA LAYOUT COM DRAWER ────────────────
-   O body padrão (style.css) tem display:flex + align-items:center
-   + padding lateral que quebram o margin-left do drawer.
-   Aqui sobrescrevemos para layout full-width. */
+/* ─── LAYOUT COM DRAWER: reset body flex ──────────────────
+   Body tem display:flex + align-items:center no style.css.
+   Precisamos que filhos diretos ocupem largura total. */
 body {
     display: block !important;
-    align-items: unset !important;
     padding: 0 !important;
-    padding-top: 0 !important;
+}
+/* Topbar e container ficam fora do flex, 
+   ocupam largura total com margin para o drawer */
+.study-topbar,
+.study-container {
+    align-self: flex-start;
+    width: 100%;
 }

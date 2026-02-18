@@ -246,7 +246,5 @@ body.light .modal-close-btn { background: rgba(0,0,0,0.05); border-color: rgba(0
 /* ─── RESET DO BODY PARA LAYOUT COM DRAWER ─────────────── */
 body {
     display: block !important;
-    align-items: unset !important;
     padding: 0 !important;
-    padding-top: 0 !important;
 }

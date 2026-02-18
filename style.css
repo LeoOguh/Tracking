@@ -23,7 +23,6 @@ body {
     font-family: 'DM Sans', -apple-system, sans-serif;
     /* Vertical gradient — top to bottom */
     background: linear-gradient(to bottom, #0a1a35 0%, #000000 100%);
-    background-attachment: fixed;
     color: var(--text-main);
     margin: 0; padding: 40px 20px;
     padding-top: 72px;
@@ -117,12 +116,14 @@ body.light .btn-mood-clear:hover { color: #c0392b; border-color: rgba(192,57,43,
 
 /* ─── TOGGLE TEMA ────────────────────────────────────────── */
 .theme-toggle {
-    position: fixed; top: 16px; right: 16px;
+    /* Posição controlada pelo wrapper div no HTML */
+    position: static;
     background: var(--glass); border: 1px solid var(--glass-border);
     border-radius: 50px; padding: 6px 14px; cursor: pointer;
     font-size: 0.72rem; color: #fff; letter-spacing: 1px;
     text-transform: uppercase; backdrop-filter: blur(12px);
-    transition: all 0.3s; z-index: 9000;
+    transition: all 0.3s;
+    display: block;
 }
 .theme-toggle:hover { background: rgba(255,255,255,0.1); }
 
