@@ -127,6 +127,7 @@ body.light .btn-mood-clear:hover { color: #c0392b; border-color: rgba(192,57,43,
     transition: background 0.2s, border-color 0.2s;
     white-space: nowrap; font-family: inherit;
     flex-shrink: 0;
+    margin-left: auto;
 }
 .theme-toggle:hover {
     background: rgba(30,30,30,0.92);
