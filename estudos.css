@@ -4,6 +4,7 @@
 .study-topbar {
     display: flex; align-items: center; justify-content: center;
     gap: 12px; margin-bottom: 28px; flex-wrap: wrap;
+    margin-left: 240px; padding: 0 20px;
 }
 .study-date-nav {
     display: flex; align-items: center; gap: 0;

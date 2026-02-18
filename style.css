@@ -983,17 +983,57 @@ body.light .tpw-detail { color: rgba(0,0,0,0.7); }
 .tpw-compact-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
 body.light .tpw-compact-btn { border-color: rgba(0,0,0,0.1); color: rgba(0,0,0,0.3); }
 
-/* BOTÃO NOVA META DO MÊS no topbar */
-.btn-nova-meta-topbar {
-    display: flex; align-items: center; gap: 6px;
-    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
-    color: rgba(255,255,255,0.6); border-radius: 50px;
-    padding: 7px 16px; font-size: 0.78rem; font-weight: 600;
-    cursor: pointer; font-family: inherit; transition: all 0.2s; white-space: nowrap;
+/* ═══════════════════════════════════════════════════════════
+   METAS MENSAIS — painel integrado
+   ═══════════════════════════════════════════════════════════ */
+.metas-mensais-panel {
+    padding: 0; overflow: hidden;
 }
-.btn-nova-meta-topbar:hover { background: rgba(255,255,255,0.12); color: #fff; border-color: rgba(255,255,255,0.22); }
-body.light .btn-nova-meta-topbar { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.1); color: rgba(0,0,0,0.55); }
-body.light .btn-nova-meta-topbar:hover { background: rgba(0,0,0,0.1); color: #1a1a1a; }
+.metas-panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; cursor: pointer; user-select: none;
+    transition: background 0.2s;
+}
+.metas-panel-header:hover { background: rgba(255,255,255,0.03); }
+.metas-panel-left { display: flex; align-items: center; gap: 10px; }
+.metas-panel-icon { font-size: 1rem; }
+.metas-panel-title {
+    font-size: 0.65rem; text-transform: uppercase; letter-spacing: 2px;
+    color: rgba(255,255,255,0.5); font-weight: 700;
+}
+.metas-panel-count {
+    font-size: 0.62rem; background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.4); border-radius: 20px; padding: 2px 8px;
+}
+.metas-panel-actions { display: flex; align-items: center; gap: 12px; }
+.metas-panel-chevron {
+    font-size: 0.8rem; color: rgba(255,255,255,0.3);
+    transition: transform 0.25s; display: inline-block;
+}
+.metas-panel-chevron.open { transform: rotate(180deg); }
+.btn-nova-meta-inline {
+    display: flex; align-items: center; gap: 5px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.55); border-radius: 20px;
+    padding: 5px 12px; font-size: 0.72rem; font-weight: 600;
+    cursor: pointer; font-family: inherit; transition: all 0.2s;
+}
+.btn-nova-meta-inline:hover { background: rgba(255,255,255,0.12); color: #fff; border-color: rgba(255,255,255,0.2); }
+.metas-panel-body {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), padding 0.25s;
+    padding: 0 20px;
+}
+.metas-panel-body.open {
+    max-height: 1200px;
+    padding: 0 20px 20px 20px;
+}
+body.light .metas-panel-title { color: rgba(0,0,0,0.45); }
+body.light .metas-panel-count { background: rgba(0,0,0,0.06); color: rgba(0,0,0,0.35); }
+body.light .metas-panel-chevron { color: rgba(0,0,0,0.25); }
+body.light .btn-nova-meta-inline { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.1); color: rgba(0,0,0,0.5); }
+body.light .btn-nova-meta-inline:hover { background: rgba(0,0,0,0.09); color: #1a1a1a; }
+body.light .metas-panel-header:hover { background: rgba(0,0,0,0.02); }
 
 /* ═══════════════════════════════════════════════════════════
    MODO COMPACTO
@@ -1063,7 +1103,7 @@ body.light .ob-card strong { color: #1a1a1a; }
 /* ═══════════════════════════════════════════════════════════
    METAS MENSAIS — redesenhado
    ═══════════════════════════════════════════════════════════ */
-.metas-mensais-section { width: 100%; max-width: 98%; display: flex; flex-direction: column; gap: 14px; }
+.metas-mensais-section { width: 100%; display: flex; flex-direction: column; gap: 14px; }
 .metas-header { display: flex; align-items: center; justify-content: space-between; }
 .metas-title { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.4); font-weight: 700; }
 body.light .metas-title { color: rgba(0,0,0,0.4); }

@@ -27,7 +27,7 @@ body.light .drawer-item--active { background: rgba(34,197,94,0.1); color: #16a34
 
 /* Topbar */
 .nutri-topbar { display: flex; align-items: center; gap: 14px; margin-bottom: 28px;
-    width: calc(100vw - 260px); margin-left: 240px; padding: 0 20px; }
+    width: calc(100vw - 260px); margin-left: 240px; padding: 0 32px; }
 .nutri-date-nav { display: flex; align-items: center; padding: 10px 26px; border-radius: 50px;
     background: var(--glass); backdrop-filter: blur(15px); border: 1px solid var(--glass-border);
     justify-content: space-between; min-width: 300px; max-width: 440px; flex: 1; }
@@ -41,7 +41,7 @@ body.light #nutriDateTitle { color: #1a1a1a; }
 body.light .nutri-view-label { color: rgba(0,0,0,0.35); }
 
 /* Page */
-.nutri-page { width: calc(100vw - 260px); margin-left: 240px; padding: 0 28px 60px 28px; }
+.nutri-page { width: calc(100vw - 260px); margin-left: 240px; padding: 0 32px 60px 32px; }
 
 /* ─── BARRA DE MACROS ─────────────────────────────────── */
 .nutri-macros-bar { display: flex; align-items: center; gap: 16px; padding: 18px 24px;

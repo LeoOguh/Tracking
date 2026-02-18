@@ -1463,6 +1463,22 @@ function closeOnboarding() {
 
 showOnboardingIfNeeded();
 
+// ─── METAS MENSAIS — PAINEL COLAPSÁVEL ───────────────────────────────────────
+let metasPanelOpen = localStorage.getItem('clarity_metas_panel') !== 'false';
+
+function applyMetasPanelState() {
+    const body    = document.getElementById('metasPanelBody');
+    const chevron = document.getElementById('metasPanelChevron');
+    if (body)    body.classList.toggle('open', metasPanelOpen);
+    if (chevron) chevron.classList.toggle('open', metasPanelOpen);
+}
+
+function toggleMetasMensais() {
+    metasPanelOpen = !metasPanelOpen;
+    localStorage.setItem('clarity_metas_panel', metasPanelOpen);
+    applyMetasPanelState();
+}
+
 // ─── METAS MENSAIS ────────────────────────────────────────────────────────────
 // metasMensais = { 'YYYY-MM': [{id, title, current, target, unit}] }
 let metasMensais = JSON.parse(localStorage.getItem('clarity_metas_mensais')) || {};
@@ -1571,6 +1587,16 @@ function renderMetasMensais() {
     const metas = getMetasForCurrentMonth();
     if (!el) return;
 
+    // Atualiza badge de contagem
+    const countEl = document.getElementById('metasPanelCount');
+    if (countEl) {
+        const done = metas.filter(m => m.current >= m.target).length;
+        countEl.textContent = metas.length > 0 ? `${done}/${metas.length}` : '';
+    }
+
+    // Aplica estado do painel (aberto/fechado)
+    applyMetasPanelState();
+
     if (!metas.length) {
         el.innerHTML = `<div class="metas-empty">nenhuma meta para este mês — clique em "meta do mês" para adicionar</div>`;
         return;
@@ -1623,3 +1649,4 @@ function renderMetasMensais() {
 }
 
 renderMetasMensais();
+applyMetasPanelState();

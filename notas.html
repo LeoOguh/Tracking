@@ -45,14 +45,6 @@
                 </div>
             </div>
 
-            <!-- Progresso das tarefas -->
-            <div class="tasks-progress-bar-wrap" id="tasksProgressWrap" style="display:none">
-                <div class="tasks-progress-bar-track">
-                    <div class="tasks-progress-bar-fill" id="tasksProgressFill"></div>
-                </div>
-                <span class="tasks-progress-label" id="tasksProgressLabel">0 / 0</span>
-            </div>
-
             <!-- Formulário nova tarefa -->
             <div class="task-form glass-panel">
                 <input type="text" id="taskInput" class="f-input task-input" placeholder="nova tarefa…" onkeydown="if(event.key==='Enter')addTask()">
@@ -66,6 +58,14 @@
 
             <!-- Lista de tarefas -->
             <div class="tasks-list" id="tasksList"></div>
+
+            <!-- Progresso das tarefas -->
+            <div class="tasks-progress-bar-wrap" id="tasksProgressWrap" style="display:none">
+                <div class="tasks-progress-bar-track">
+                    <div class="tasks-progress-bar-fill" id="tasksProgressFill"></div>
+                </div>
+                <span class="tasks-progress-label" id="tasksProgressLabel">0 / 0</span>
+            </div>
 
             <!-- Stats das tarefas -->
             <div class="tasks-stats-row" id="tasksStatsRow"></div>

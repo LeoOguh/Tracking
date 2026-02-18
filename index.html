@@ -34,11 +34,6 @@
             </div>
             <button class="tpw-compact-btn" onclick="toggleCompactMode()" id="tpwCompactBtn" title="Modo compacto">⊞</button>
         </div>
-
-        <button class="btn-nova-meta-topbar" onclick="openMetaMensalForm()" title="Nova meta do mês">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            meta do mês
-        </button>
     </div>
 
     <div class="container">
@@ -103,6 +98,27 @@
                 <span class="summary-chevron" id="summaryChevron">▾</span>
             </div>
             <div class="summary-body" id="summaryBody"></div>
+        </div>
+
+        <!-- METAS MENSAIS (integradas ao container) -->
+        <div class="glass-panel metas-mensais-panel" id="metasMensaisSection">
+            <div class="metas-panel-header" onclick="toggleMetasMensais()">
+                <div class="metas-panel-left">
+                    <span class="metas-panel-icon">🎯</span>
+                    <span class="metas-panel-title">metas do mês</span>
+                    <span class="metas-panel-count" id="metasPanelCount"></span>
+                </div>
+                <div class="metas-panel-actions" onclick="event.stopPropagation()">
+                    <button class="btn-nova-meta-inline" onclick="openMetaMensalForm()" title="Nova meta">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        nova meta
+                    </button>
+                    <span class="metas-panel-chevron" id="metasPanelChevron">▾</span>
+                </div>
+            </div>
+            <div class="metas-panel-body" id="metasPanelBody">
+                <div id="metasMensaisList" class="metas-list"></div>
+            </div>
         </div>
 
         <!-- SONO & HIDRATAÇÃO -->
@@ -274,18 +290,6 @@
                 <button class="btn-note-save"   onclick="saveEditHabit()">salvar</button>
             </div>
         </div>
-    </div>
-
-    <!-- METAS MENSAIS -->
-    <div class="metas-mensais-section" id="metasMensaisSection">
-        <div class="metas-header">
-            <span class="metas-title">🎯 metas do mês</span>
-            <button class="btn-topbar-action btn-topbar-action--text" onclick="openMetaMensalForm()">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                nova meta
-            </button>
-        </div>
-        <div id="metasMensaisList" class="metas-list"></div>
     </div>
 
     <!-- MODAL NOVA META MENSAL -->
