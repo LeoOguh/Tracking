@@ -513,7 +513,7 @@ body.light .btn-complete-review { color: #27ae60; background: rgba(39,174,96,0.0
    POMODORO
    ═══════════════════════════════════════════════════════════ */
 .pomodoro-bubble {
-    position: fixed; top: 10px; right: 145px; z-index: 300;
+    position: fixed; bottom: 28px; right: 28px; z-index: 400;
     width: 48px; height: 48px; border-radius: 50%;
     background: rgba(59,130,246,0.14); border: 1px solid rgba(59,130,246,0.3);
     display: flex; align-items: center; justify-content: center;
@@ -522,7 +522,7 @@ body.light .btn-complete-review { color: #27ae60; background: rgba(39,174,96,0.0
 }
 .pomodoro-bubble:hover { background: rgba(59,130,246,0.25); transform: scale(1.08); }
 .pomodoro-panel {
-    position: fixed; top: 78px; right: 20px; z-index: 301;
+    position: fixed; bottom: 90px; right: 28px; z-index: 401;
     width: 260px; padding: 18px 20px;
     display: flex; flex-direction: column; gap: 14px;
     background: rgba(10,10,10,0.9) !important;
@@ -645,6 +645,8 @@ body.light .study-drawer .drawer-item--active { background: rgba(59,130,246,0.12
     min-width: 0; /* prevent flex overflow */
     display: flex;
     flex-direction: column;
+    padding: 0 28px;
+    box-sizing: border-box;
 }
 /* Body deve ser block para não interferir */
 body {

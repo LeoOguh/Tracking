@@ -115,6 +115,41 @@ body.light .btn-mood-clear { color: rgba(0,0,0,0.35); border-color: rgba(0,0,0,0
 body.light .btn-mood-clear:hover { color: #c0392b; border-color: rgba(192,57,43,0.3); }
 
 
+
+/* ─── TOGGLE TEMA — fixo canto superior direito ──────────── */
+.theme-toggle-wrap {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 1000;
+    /* Isolado em seu próprio stacking context limpo */
+    isolation: isolate;
+}
+.theme-toggle {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(10,10,10,0.75);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 50px; padding: 7px 16px; cursor: pointer;
+    font-size: 0.72rem; color: rgba(255,255,255,0.8); letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: background 0.2s, border-color 0.2s;
+    white-space: nowrap; font-family: inherit;
+}
+.theme-toggle:hover {
+    background: rgba(30,30,30,0.92);
+    border-color: rgba(255,255,255,0.3);
+    color: #fff;
+}
+body.light .theme-toggle-wrap .theme-toggle {
+    background: rgba(255,255,255,0.85);
+    border-color: rgba(0,0,0,0.15);
+    color: rgba(0,0,0,0.7);
+}
+body.light .theme-toggle-wrap .theme-toggle:hover {
+    background: #fff;
+    color: #000;
+}
+
 /* ─── BOTÃO TOPBAR PADRÃO (compartilhado) ────────────────── */
 /* Container de ações na topbar */
 .topbar-actions {
