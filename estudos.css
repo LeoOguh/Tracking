@@ -4,7 +4,7 @@
 .study-topbar {
     display: flex; align-items: center; justify-content: center;
     gap: 12px; margin-bottom: 28px; flex-wrap: wrap;
-    margin-left: 240px; padding: 20px 24px 0 24px; width: calc(100vw - 240px); box-sizing: border-box;
+    margin-left: 240px; width: calc(100vw - 240px); padding: 0 24px; box-sizing: border-box;
 }
 .study-date-nav {
     display: flex; align-items: center; gap: 0;
@@ -622,25 +622,17 @@ body.light .study-drawer .drawer-title { color: rgba(0,0,0,0.4); }
 body.light .study-drawer .drawer-item { color: rgba(0,0,0,0.45); }
 body.light .study-drawer .drawer-item:hover { background: rgba(0,0,0,0.05); color: rgba(0,0,0,0.7); }
 body.light .study-drawer .drawer-item--active { background: rgba(59,130,246,0.12); color: #2563eb; border-left-color: #3b82f6; }
-.study-with-sidebar { margin-left: 240px; width: calc(100vw - 240px); padding: 0 24px 80px 24px; box-sizing: border-box; }
-body { overflow-x: hidden; }
+.study-with-sidebar { margin-left: 240px; width: calc(100vw - 240px); padding: 0 24px 80px; box-sizing: border-box; }
 .study-view { display: flex; flex-direction: column; gap: 20px; }
 .study-view.hidden { display: none; }
 #viewErros { width: 100%; }
 .erros-header { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 16px; }
 .erros-filters { display: flex; gap: 10px; flex: 1; }
 
-/* ─── LAYOUT COM DRAWER: reset body flex ──────────────────
-   Body tem display:flex + align-items:center no style.css.
-   Precisamos que filhos diretos ocupem largura total. */
+/* Páginas com drawer lateral precisam de body display:block
+   para que margin-left funcione corretamente */
 body {
     display: block !important;
     padding: 0 !important;
-}
-/* Topbar e container ficam fora do flex, 
-   ocupam largura total com margin para o drawer */
-.study-topbar,
-.study-container {
-    align-self: flex-start;
-    width: 100%;
+    align-items: unset !important;
 }

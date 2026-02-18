@@ -52,10 +52,9 @@ const weekNames  = ['domingo','segunda','terça','quarta','quinta','sexta','sáb
 
 // ─── UTILITÁRIOS ──────────────────────────────────────────────────────────────
 function dateKey(d) {
-    // Usa data local para evitar bug de UTC (ex: 23h no Brasil vira próximo dia em UTC)
     const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
+    const m = String(d.getMonth()+1).padStart(2,'0');
+    const day = String(d.getDate()).padStart(2,'0');
     return `${y}-${m}-${day}`;
 }
 function todayKey() { return dateKey(new Date()); }

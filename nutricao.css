@@ -27,7 +27,7 @@ body.light .drawer-item--active { background: rgba(34,197,94,0.1); color: #16a34
 
 /* Topbar */
 .nutri-topbar { display: flex; align-items: center; gap: 14px; margin-bottom: 28px;
-    width: calc(100vw - 240px); margin-left: 240px; padding: 20px 32px 0 32px; box-sizing: border-box; }
+    width: calc(100vw - 240px); margin-left: 240px; padding: 0 32px; box-sizing: border-box; }
 .nutri-date-nav { display: flex; align-items: center; padding: 10px 26px; border-radius: 50px;
     background: var(--glass); backdrop-filter: blur(15px); border: 1px solid var(--glass-border);
     justify-content: space-between; min-width: 300px; max-width: 440px; flex: 1; }
@@ -41,7 +41,7 @@ body.light #nutriDateTitle { color: #1a1a1a; }
 body.light .nutri-view-label { color: rgba(0,0,0,0.35); }
 
 /* Page */
-.nutri-page { width: calc(100vw - 240px); margin-left: 240px; padding: 0 32px 60px 32px; box-sizing: border-box; }
+.nutri-page { width: calc(100vw - 240px); margin-left: 240px; padding: 0 32px 80px; box-sizing: border-box; }
 
 /* ─── BARRA DE MACROS ─────────────────────────────────── */
 .nutri-macros-bar { display: flex; align-items: center; gap: 16px; padding: 18px 24px;
@@ -138,13 +138,13 @@ body.light .water-quick-bar-track { background: rgba(0,0,0,0.1); }
 .agua-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
 .agua-main-card { padding: 24px 28px; display: flex; flex-direction: column; gap: 16px; grid-column: 1/-1; }
 .agua-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
-.agua-title-row { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.agua-title-row { display: flex; align-items: baseline; gap: 8px; }
 .agua-today-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.4); }
 body.light .agua-today-label { color: rgba(0,0,0,0.4); }
 .agua-count { font-size: 2.8rem; font-weight: 700; color: #3b82f6; font-family: 'Syne', sans-serif; }
 .agua-unit { font-size: 1rem; color: rgba(255,255,255,0.4); }
 body.light .agua-unit { color: rgba(0,0,0,0.4); }
-.agua-ml-total { font-size: 0.8rem; color: rgba(255,255,255,0.35); margin-left: 4px; }
+.agua-ml-total { font-size: 0.8rem; color: rgba(255,255,255,0.35); margin-left: 6px; }
 body.light .agua-ml-total { color: rgba(0,0,0,0.35); }
 .agua-goal-row { display: flex; align-items: center; gap: 10px; }
 .agua-bar-track { height: 6px; background: rgba(255,255,255,0.08); border-radius: 6px; overflow: hidden; }
@@ -243,8 +243,5 @@ body.light .modal-close-btn { background: rgba(0,0,0,0.05); border-color: rgba(0
 
 .hidden { display: none !important; }
 
-/* ─── RESET DO BODY PARA LAYOUT COM DRAWER ─────────────── */
-body {
-    display: block !important;
-    padding: 0 !important;
-}
+/* Body override para layout com drawer */
+body { display: block !important; padding: 0 !important; }

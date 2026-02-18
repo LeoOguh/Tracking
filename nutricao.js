@@ -246,9 +246,8 @@ function renderHidCard() {
     if (hidMlEl) hidMlEl.value = ml;
     document.getElementById('hidBar').style.width = pct + '%';
 
-    // Total em mL
     const mlEl = document.getElementById('aguaMlTotal');
-    if (mlEl) mlEl.textContent = totalMl >= 1000 ? `${(totalMl/1000).toFixed(1)}L` : `${totalMl}mL`;
+    if (mlEl) mlEl.textContent = totalMl > 0 ? (totalMl >= 1000 ? `${(totalMl/1000).toFixed(1)}L` : `${totalMl}mL`) : '';
 
     const grid = document.getElementById('hidCupsGrid');
     let html = '';

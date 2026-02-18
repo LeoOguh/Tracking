@@ -9,7 +9,7 @@
 </head>
 <body>
 
-    <div style="position:fixed;top:16px;right:16px;z-index:99999;pointer-events:none"><button class="theme-toggle" onclick="toggleTheme()" id="themeToggleBtn" style="pointer-events:all">☀ claro</button></div>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeToggleBtn">☀ claro</button>
 
     <!-- TOPBAR: DATA + WIDGET PROGRESSO + BOTÃO META -->
     <div class="habits-topbar">
@@ -34,6 +34,7 @@
             </div>
             <button class="tpw-compact-btn" onclick="toggleCompactMode()" id="tpwCompactBtn" title="Modo compacto">⊞</button>
         </div>
+
     </div>
 
     <div class="container">
@@ -45,10 +46,8 @@
                     <span id="chartCollapseLabel">recolher</span>
                 </div>
             </div>
-            <div class="chart-inner">
-                <div id="weeksHeaderChart" class="weeks-chart-header"></div>
-                <div class="module-chart"><canvas id="habitsChart"></canvas></div>
-            </div>
+            <div id="weeksHeaderChart" class="weeks-chart-header"></div>
+            <div class="module-chart"><canvas id="habitsChart"></canvas></div>
         </div>
 
         <div class="module-input">
@@ -102,7 +101,7 @@
             <div class="summary-body" id="summaryBody"></div>
         </div>
 
-        <!-- METAS MENSAIS (integradas ao container) -->
+        <!-- METAS MENSAIS — painel colapsável integrado -->
         <div class="glass-panel metas-mensais-panel" id="metasMensaisSection">
             <div class="metas-panel-header" onclick="toggleMetasMensais()">
                 <div class="metas-panel-left">
@@ -111,8 +110,8 @@
                     <span class="metas-panel-count" id="metasPanelCount"></span>
                 </div>
                 <div class="metas-panel-actions" onclick="event.stopPropagation()">
-                    <button class="btn-nova-meta-inline" onclick="openMetaMensalForm()" title="Nova meta">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    <button class="btn-nova-meta-inline" onclick="openMetaMensalForm()">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                         nova meta
                     </button>
                     <span class="metas-panel-chevron" id="metasPanelChevron">▾</span>
