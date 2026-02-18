@@ -117,14 +117,6 @@ body.light .btn-mood-clear:hover { color: #c0392b; border-color: rgba(192,57,43,
 
 
 /* ─── TOGGLE TEMA — fixo canto superior direito ──────────── */
-.theme-toggle-wrap {
-    position: fixed;
-    top: 16px;
-    right: 16px;
-    z-index: 1000;
-    /* Isolado em seu próprio stacking context limpo */
-    isolation: isolate;
-}
 .theme-toggle {
     display: flex; align-items: center; gap: 6px;
     background: rgba(10,10,10,0.75);
@@ -134,18 +126,19 @@ body.light .btn-mood-clear:hover { color: #c0392b; border-color: rgba(192,57,43,
     text-transform: uppercase;
     transition: background 0.2s, border-color 0.2s;
     white-space: nowrap; font-family: inherit;
+    flex-shrink: 0;
 }
 .theme-toggle:hover {
     background: rgba(30,30,30,0.92);
     border-color: rgba(255,255,255,0.3);
     color: #fff;
 }
-body.light .theme-toggle-wrap .theme-toggle {
+body.light .theme-toggle {
     background: rgba(255,255,255,0.85);
     border-color: rgba(0,0,0,0.15);
     color: rgba(0,0,0,0.7);
 }
-body.light .theme-toggle-wrap .theme-toggle:hover {
+body.light .theme-toggle:hover {
     background: #fff;
     color: #000;
 }
