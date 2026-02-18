@@ -38,7 +38,7 @@ body.light .drawer-footer { border-color: rgba(0,0,0,0.08); }
 .treino-topbar {
     display: flex; align-items: center; gap: 14px;
     margin-bottom: 28px; width: calc(100vw - 260px);
-    margin-left: 260px; padding: 0 32px; box-sizing: border-box;
+    margin-left: 260px; padding: 20px 32px 0; box-sizing: border-box;
 }
 .treino-topbar-center {
     flex: 1; display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap;
