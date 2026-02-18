@@ -13,6 +13,7 @@ let activeHabitFilter = null;
 let chartInstance     = null;
 let dragSourceIndex   = null;
 let moodModalDate     = null;
+let isCompact         = localStorage.getItem('clarity_compact') === 'true';
 let noteModalDate     = null;
 let summaryOpen       = false;
 let selectedDays      = [0,1,2,3,4,5,6];
@@ -1238,19 +1239,26 @@ function renderHidCard() {
     const goal = d.goal;
     const cups = d.cups;
     const pct  = Math.min(100, Math.round((cups/goal)*100));
-    document.getElementById('hidMeta').textContent = `${cups} / ${goal} copos`;
-    document.getElementById('hidGoalInput').value = goal;
-    // Bar
-    const bar = document.getElementById('hidBar');
-    bar.style.width = pct + '%';
-    bar.style.background = pct >= 100 ? '#22c55e' : pct >= 60 ? '#3b82f6' : '#93c5fd';
-    // Cups grid
-    const grid = document.getElementById('hidCupsGrid');
-    let html = '';
-    for (let i=0; i<goal; i++) {
-        html += `<div class="hid-cup ${i < cups ? 'hid-cup--full' : ''}" onclick="addWater(${i < cups ? -1 : 1})" title="${i < cups ? 'remover' : 'adicionar'} copo">💧</div>`;
+    // Elementos só existem na página de hábitos — sai silenciosamente se não estiverem presentes
+    const metaEl = document.getElementById('hidMeta');
+    const barEl  = document.getElementById('hidBar');
+    const goalEl = document.getElementById('hidGoalInput');
+    const gridEl = document.getElementById('hidCupsGrid');
+    if (!metaEl) return;
+    metaEl.textContent = `${cups} / ${goal} copos`;
+    if (goalEl) goalEl.value = goal;
+    if (barEl) {
+        barEl.style.width = pct + '%';
+        barEl.style.background = pct >= 100 ? '#22c55e' : pct >= 60 ? '#3b82f6' : '#93c5fd';
     }
-    grid.innerHTML = html;
+    // Cups grid
+    if (gridEl) {
+        let html = '';
+        for (let i=0; i<goal; i++) {
+            html += `<div class="hid-cup ${i < cups ? 'hid-cup--full' : ''}" onclick="addWater(${i < cups ? -1 : 1})" title="${i < cups ? 'remover' : 'adicionar'} copo">💧</div>`;
+        }
+        gridEl.innerHTML = html;
+    }
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1390,8 +1398,6 @@ function renderTodayProgressWidget() {
 }
 
 // ─── MODO COMPACTO ────────────────────────────────────────────────────────────
-let isCompact = localStorage.getItem('clarity_compact') === 'true';
-
 function applyCompactMode() {
     document.body.classList.toggle('compact-mode', isCompact);
     const btn = document.getElementById('tpwCompactBtn');
