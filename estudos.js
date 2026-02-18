@@ -1,7 +1,7 @@
 // ─── TEMA COMPARTILHADO ───────────────────────────────────────────────────────
 let isLight = localStorage.getItem('clarity_theme') === 'light';
 if (isLight) document.body.classList.add('light');
-document.getElementById('themeToggleBtn').textContent = isLight ? '☾ escuro' : '☀ claro';
+document.getElementById('themeToggleBtn')?.textContent = isLight ? '☾ escuro' : '☀ claro';
 
 // ─── ESTADO ───────────────────────────────────────────────────────────────────
 let studySessions  = JSON.parse(localStorage.getItem('study_sessions'))    || {};
@@ -50,7 +50,7 @@ function toggleTheme() {
     isLight = !isLight;
     document.body.classList.toggle('light', isLight);
     localStorage.setItem('clarity_theme', isLight ? 'light' : 'dark');
-    document.getElementById('themeToggleBtn').textContent = isLight ? '☾ escuro' : '☀ claro';
+    document.getElementById('themeToggleBtn')?.textContent = isLight ? '☾ escuro' : '☀ claro';
     renderCharts();
 }
 
