@@ -624,5 +624,6 @@ body.light .study-drawer .drawer-item--active { background: rgba(59,130,246,0.12
 .study-with-sidebar { margin-left: 240px; width: calc(100% - 240px); max-width: calc(100vw - 280px); padding: 0 20px; }
 .study-view { display: flex; flex-direction: column; gap: 20px; }
 .study-view.hidden { display: none; }
+#viewErros { width: 100%; }
 .erros-header { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 16px; }
 .erros-filters { display: flex; gap: 10px; flex: 1; }

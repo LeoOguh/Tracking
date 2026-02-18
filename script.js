@@ -637,6 +637,8 @@ function weekBarColor(pct) {
 // ─── RENDER PRINCIPAL ─────────────────────────────────────────────────────────
 function render() {
     const today = new Date(); today.setHours(0,0,0,0);
+    // Update progress widget
+    if (typeof renderTodayProgressWidget === 'function') renderTodayProgressWidget();
 
     document.getElementById('monthTitle').innerText = `${monthNames[currentMonth]} ${currentYear}`;
     const weeks       = getWeeks(currentMonth, currentYear);
@@ -1359,3 +1361,63 @@ function getMoodAvg() {
 renderSonoCard();
 renderHidCard();
 checkWeeklySummary();
+
+
+// ─── WIDGET DE PROGRESSO DO DIA ──────────────────────────────────────────────
+function renderTodayProgressWidget() {
+    const today    = new Date();
+    const todayKey = today.toISOString().split('T')[0];
+    const dayHabits = habits.filter(h => isHabitActiveOnDate(h, today));
+    if (!dayHabits.length) {
+        const el = document.getElementById('tpwDetail');
+        if (el) el.textContent = 'nenhum hábito para hoje';
+        return;
+    }
+    const done = dayHabits.filter(h => {
+        const hName = h.name || h;
+        return !!history[todayKey]?.[hName];
+    }).length;
+    const pct = Math.round((done / dayHabits.length) * 100);
+    const circumference = 113.1;
+    const offset = circumference - (pct / 100) * circumference;
+
+    const ring   = document.getElementById('tpwRing');
+    const pctEl  = document.getElementById('tpwPct');
+    const detail = document.getElementById('tpwDetail');
+    if (ring)   { ring.style.strokeDashoffset = offset; ring.style.stroke = pct >= 80 ? '#2ecc71' : pct >= 50 ? '#f39c12' : '#3b82f6'; }
+    if (pctEl)  pctEl.textContent = pct + '%';
+    if (detail) detail.textContent = `${done} de ${dayHabits.length} hábito${dayHabits.length !== 1 ? 's' : ''}`;
+}
+
+// ─── MODO COMPACTO ────────────────────────────────────────────────────────────
+let isCompact = localStorage.getItem('clarity_compact') === 'true';
+
+function applyCompactMode() {
+    document.body.classList.toggle('compact-mode', isCompact);
+    const btn = document.getElementById('tpwCompactBtn');
+    if (btn) btn.textContent = isCompact ? '⊟' : '⊞';
+}
+
+function toggleCompactMode() {
+    isCompact = !isCompact;
+    localStorage.setItem('clarity_compact', isCompact);
+    applyCompactMode();
+}
+
+applyCompactMode();
+renderTodayProgressWidget();
+
+// ─── ONBOARDING ───────────────────────────────────────────────────────────────
+function showOnboardingIfNeeded() {
+    if (localStorage.getItem('clarity_onboarded')) return;
+    const overlay = document.getElementById('onboardingOverlay');
+    if (overlay) overlay.classList.add('open');
+}
+
+function closeOnboarding() {
+    localStorage.setItem('clarity_onboarded', '1');
+    const overlay = document.getElementById('onboardingOverlay');
+    if (overlay) overlay.classList.remove('open');
+}
+
+showOnboardingIfNeeded();

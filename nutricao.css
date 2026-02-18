@@ -1,0 +1,242 @@
+/* ═══════════════════════════════════════════════════════════
+   NUTRIÇÃO — CSS
+   ═══════════════════════════════════════════════════════════ */
+
+/* Drawer */
+.nutri-drawer { position: fixed; top: 0; left: 0; width: 220px; height: 100vh;
+    background: rgba(10,22,40,0.95); border-right: 1px solid rgba(255,255,255,0.08);
+    display: flex; flex-direction: column; z-index: 400; backdrop-filter: blur(12px); }
+body.light .nutri-drawer { background: rgba(240,237,232,0.95); border-color: rgba(0,0,0,0.1); }
+
+.drawer-header { display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 18px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+body.light .drawer-header { border-color: rgba(0,0,0,0.1); }
+.drawer-title { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 2px;
+    color: rgba(255,255,255,0.4); font-weight: 700; }
+body.light .drawer-title { color: rgba(0,0,0,0.4); }
+.drawer-nav { display: flex; flex-direction: column; gap: 4px; padding: 12px 10px; flex: 1; }
+.drawer-item { display: flex; align-items: center; gap: 10px; background: transparent;
+    border: none; color: rgba(255,255,255,0.5); padding: 12px 12px; border-radius: 12px;
+    font-size: 0.9rem; font-weight: 500; cursor: pointer; font-family: inherit;
+    transition: all 0.2s; text-align: left; }
+.drawer-item:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.85); }
+.drawer-item--active { background: rgba(34,197,94,0.16); color: #4ade80; font-weight: 700; border-left: 3px solid #22c55e; }
+body.light .drawer-item { color: rgba(0,0,0,0.45); }
+body.light .drawer-item:hover { background: rgba(0,0,0,0.05); color: rgba(0,0,0,0.7); }
+body.light .drawer-item--active { background: rgba(34,197,94,0.1); color: #16a34a; border-left-color: #22c55e; }
+
+/* Topbar */
+.nutri-topbar { display: flex; align-items: center; gap: 14px; margin-bottom: 28px;
+    width: calc(100vw - 260px); margin-left: 240px; padding: 0 20px; }
+.nutri-date-nav { display: flex; align-items: center; padding: 10px 26px; border-radius: 50px;
+    background: var(--glass); backdrop-filter: blur(15px); border: 1px solid var(--glass-border);
+    justify-content: space-between; min-width: 300px; max-width: 440px; flex: 1; }
+#nutriDateTitle { font-size: 1rem; font-weight: 300; letter-spacing: 1.5px;
+    text-transform: lowercase; font-variant: small-caps; color: #fff;
+    flex: 1; text-align: center; padding: 0 10px; }
+body.light .nutri-date-nav { background: rgba(255,255,255,0.5); border-color: rgba(0,0,0,0.08); }
+body.light #nutriDateTitle { color: #1a1a1a; }
+.nutri-view-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 2px;
+    color: rgba(255,255,255,0.3); white-space: nowrap; }
+body.light .nutri-view-label { color: rgba(0,0,0,0.35); }
+
+/* Page */
+.nutri-page { width: calc(100vw - 260px); margin-left: 240px; padding: 0 28px 60px 28px; }
+
+/* ─── BARRA DE MACROS ─────────────────────────────────── */
+.nutri-macros-bar { display: flex; align-items: center; gap: 16px; padding: 18px 24px;
+    margin-bottom: 24px; flex-wrap: wrap; }
+.macro-card { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 100px; }
+.macro-val { font-size: 1.4rem; font-weight: 700; color: #fff; font-family: 'Syne', sans-serif; }
+body.light .macro-val { color: #1a1a1a; }
+.macro-lbl { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1.2px; color: rgba(255,255,255,0.4); }
+body.light .macro-lbl { color: rgba(0,0,0,0.4); }
+.macro-progress-track { height: 3px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; margin-top: 4px; }
+body.light .macro-progress-track { background: rgba(0,0,0,0.1); }
+.macro-progress-fill { height: 100%; border-radius: 3px; background: #3b82f6; transition: width 0.4s; }
+.macro-progress-fill--prot { background: #f97316; }
+.macro-progress-fill--carb { background: #eab308; }
+.macro-progress-fill--gord { background: #a855f7; }
+.btn-metas-nutri { display: flex; align-items: center; gap: 6px; padding: 8px 16px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.6); border-radius: 20px; font-size: 0.75rem; font-weight: 600;
+    cursor: pointer; font-family: inherit; transition: all 0.2s; white-space: nowrap; }
+.btn-metas-nutri:hover { background: rgba(255,255,255,0.12); color: #fff; }
+body.light .btn-metas-nutri { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.12); color: rgba(0,0,0,0.55); }
+
+/* ─── GRID PRINCIPAL ─────────────────────────────────── */
+.nutri-main-grid { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; }
+.nutri-meals-col { display: flex; flex-direction: column; gap: 16px; }
+.nutri-side-col  { display: flex; flex-direction: column; gap: 16px; }
+
+/* ─── LISTA DE REFEIÇÕES ─────────────────────────────── */
+.meals-list { display: flex; flex-direction: column; gap: 12px; }
+.meal-group { border-radius: 18px; background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.07); overflow: hidden; }
+body.light .meal-group { background: rgba(255,255,255,0.55); border-color: rgba(0,0,0,0.08); }
+.meal-group-header { display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 18px; background: rgba(255,255,255,0.03); }
+body.light .meal-group-header { background: rgba(0,0,0,0.03); }
+.meal-group-name { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1.5px;
+    font-weight: 700; color: rgba(255,255,255,0.5); }
+body.light .meal-group-name { color: rgba(0,0,0,0.45); }
+.meal-group-cals { font-size: 0.72rem; color: rgba(255,255,255,0.35); }
+body.light .meal-group-cals { color: rgba(0,0,0,0.35); }
+.meal-item { display: flex; align-items: center; gap: 12px; padding: 12px 18px;
+    border-top: 1px solid rgba(255,255,255,0.04); transition: background 0.15s; }
+body.light .meal-item { border-color: rgba(0,0,0,0.05); }
+.meal-item:hover { background: rgba(255,255,255,0.03); }
+.meal-item-name { flex: 1; font-size: 0.88rem; color: rgba(255,255,255,0.82); font-weight: 500; }
+body.light .meal-item-name { color: rgba(0,0,0,0.72); }
+.meal-item-macros { display: flex; gap: 10px; font-size: 0.68rem; color: rgba(255,255,255,0.4); }
+body.light .meal-item-macros { color: rgba(0,0,0,0.4); }
+.meal-item-cal { font-size: 0.82rem; font-weight: 700; color: rgba(255,255,255,0.7); min-width: 52px; text-align: right; }
+body.light .meal-item-cal { color: rgba(0,0,0,0.6); }
+.meal-item-del { background: none; border: none; color: rgba(255,255,255,0.15); cursor: pointer;
+    font-size: 0.82rem; padding: 2px 4px; opacity: 0; transition: all 0.2s; }
+.meal-item:hover .meal-item-del { opacity: 1; }
+.meal-item-del:hover { color: #ff7675; }
+body.light .meal-item-del { color: rgba(0,0,0,0.15); }
+
+/* ─── FORM ADICIONAR REFEIÇÃO ────────────────────────── */
+.add-meal-panel { padding: 20px 22px; display: flex; flex-direction: column; gap: 12px; }
+.add-meal-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.add-meal-title { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1.5px;
+    color: rgba(255,255,255,0.4); font-weight: 700; }
+body.light .add-meal-title { color: rgba(0,0,0,0.4); }
+.macros-input-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.macro-input-field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 80px; }
+.btn-save-meal { background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.3);
+    color: #22c55e; border-radius: 12px; padding: 12px 22px; font-size: 0.85rem;
+    font-weight: 700; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+.btn-save-meal:hover { background: rgba(34,197,94,0.22); }
+body.light .btn-save-meal { color: #16a34a; background: rgba(34,197,94,0.1); border-color: rgba(34,197,94,0.25); }
+
+/* ─── DONUT DE MACROS ────────────────────────────────── */
+.nutri-donut-panel { padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
+.nutri-panel-title { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 1.5px;
+    color: rgba(255,255,255,0.4); display: flex; align-items: center; justify-content: space-between; }
+body.light .nutri-panel-title { color: rgba(0,0,0,0.4); }
+.nutri-donut-wrap { position: relative; height: 180px; display: flex; align-items: center; justify-content: center; }
+.nutri-donut-center { position: absolute; font-size: 1.1rem; font-weight: 700;
+    color: rgba(255,255,255,0.8); text-align: center; pointer-events: none; }
+body.light .nutri-donut-center { color: rgba(0,0,0,0.7); }
+
+/* ─── HIDRATAÇÃO RÁPIDA (sidebar) ────────────────────── */
+.nutri-water-quick { padding: 18px 20px; display: flex; flex-direction: column; gap: 10px; }
+.btn-ver-mais { background: none; border: none; color: rgba(59,130,246,0.7); font-size: 0.68rem;
+    cursor: pointer; font-family: inherit; transition: color 0.2s; }
+.btn-ver-mais:hover { color: #3b82f6; }
+.water-quick-meta { font-size: 1rem; font-weight: 700; color: rgba(255,255,255,0.8); }
+body.light .water-quick-meta { color: rgba(0,0,0,0.7); }
+.water-quick-bar-track { height: 4px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; }
+body.light .water-quick-bar-track { background: rgba(0,0,0,0.1); }
+.water-quick-bar-fill { height: 100%; background: #3b82f6; border-radius: 4px; transition: width 0.4s; }
+.water-quick-cups { display: flex; flex-wrap: wrap; gap: 5px; }
+
+/* ─── HIDRATAÇÃO (aba água) ──────────────────────────── */
+.agua-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+.agua-main-card { padding: 24px 28px; display: flex; flex-direction: column; gap: 16px; grid-column: 1/-1; }
+.agua-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.agua-title-row { display: flex; align-items: baseline; gap: 8px; }
+.agua-today-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.4); }
+body.light .agua-today-label { color: rgba(0,0,0,0.4); }
+.agua-count { font-size: 2.8rem; font-weight: 700; color: #3b82f6; font-family: 'Syne', sans-serif; }
+.agua-unit { font-size: 1rem; color: rgba(255,255,255,0.4); }
+body.light .agua-unit { color: rgba(0,0,0,0.4); }
+.agua-goal-row { display: flex; align-items: center; gap: 10px; }
+.agua-bar-track { height: 6px; background: rgba(255,255,255,0.08); border-radius: 6px; overflow: hidden; }
+body.light .agua-bar-track { background: rgba(0,0,0,0.1); }
+.agua-bar-fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #60a5fa); border-radius: 6px; transition: width 0.4s; }
+.agua-cups-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.hid-cup { font-size: 1.4rem; cursor: pointer; opacity: 0.2; transition: all 0.15s; filter: grayscale(1); }
+.hid-cup--full { opacity: 1; filter: none; }
+.hid-cup:hover { transform: scale(1.2); }
+.agua-btns-row { display: flex; gap: 10px; }
+.agua-btn { flex: 1; padding: 12px; border-radius: 14px; font-size: 0.88rem; font-weight: 700;
+    cursor: pointer; font-family: inherit; transition: all 0.2s; border: 1px solid; }
+.agua-btn--add { background: rgba(59,130,246,0.12); border-color: rgba(59,130,246,0.3); color: #60a5fa; }
+.agua-btn--add:hover { background: rgba(59,130,246,0.22); }
+.agua-btn--remove { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); }
+.agua-btn--remove:hover { background: rgba(255,255,255,0.08); }
+body.light .agua-btn--add { background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.25); color: #2563eb; }
+body.light .agua-btn--remove { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.1); color: rgba(0,0,0,0.45); }
+.agua-week-card { padding: 20px 22px; display: flex; flex-direction: column; gap: 14px; }
+.agua-tips-card { padding: 20px 22px; display: flex; flex-direction: column; gap: 12px; }
+.agua-tips-list { display: flex; flex-direction: column; gap: 10px; }
+.agua-tip { font-size: 0.82rem; color: rgba(255,255,255,0.55); line-height: 1.5;
+    padding: 10px 14px; background: rgba(59,130,246,0.06); border-radius: 10px;
+    border-left: 2px solid rgba(59,130,246,0.3); }
+body.light .agua-tip { color: rgba(0,0,0,0.55); background: rgba(59,130,246,0.05); }
+
+/* Gráfico de barras de sono (reaproveitado para água) */
+.sono-bars { display: flex; gap: 8px; align-items: flex-end; height: 100px; }
+.sono-bar-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; cursor: pointer; }
+.sono-bar-track { flex: 1; width: 100%; background: rgba(255,255,255,0.06); border-radius: 6px 6px 0 0; position: relative; min-height: 80px; }
+body.light .sono-bar-track { background: rgba(0,0,0,0.07); }
+.sono-bar-fill { position: absolute; bottom: 0; left: 0; right: 0; border-radius: 6px 6px 0 0; transition: height 0.4s; }
+.sono-bar-label { font-size: 0.6rem; color: rgba(255,255,255,0.3); text-transform: uppercase; }
+body.light .sono-bar-label { color: rgba(0,0,0,0.3); }
+
+/* ─── ESTATÍSTICAS ───────────────────────────────────── */
+.nutri-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.nutri-stats-panel { padding: 20px 22px; display: flex; flex-direction: column; gap: 14px; }
+.nutri-stats-panel--wide { grid-column: 1/-1; }
+.nutri-chart-wrap { height: 200px; position: relative; }
+.stats-summary-list { display: flex; flex-direction: column; gap: 10px; }
+.stats-summary-row { display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.stats-summary-row:last-child { border-bottom: none; }
+.stats-summary-lbl { font-size: 0.72rem; color: rgba(255,255,255,0.45); }
+.stats-summary-val { font-size: 0.9rem; font-weight: 700; color: #fff; }
+body.light .stats-summary-row { border-color: rgba(0,0,0,0.07); }
+body.light .stats-summary-lbl { color: rgba(0,0,0,0.45); }
+body.light .stats-summary-val { color: #1a1a1a; }
+.top-food-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+    border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); margin-bottom: 6px; }
+body.light .top-food-item { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.07); }
+.top-food-name { flex: 1; font-size: 0.88rem; color: rgba(255,255,255,0.8); }
+body.light .top-food-name { color: rgba(0,0,0,0.7); }
+.top-food-count { font-size: 0.72rem; color: rgba(255,255,255,0.35); background: rgba(255,255,255,0.06); padding: 2px 10px; border-radius: 20px; }
+body.light .top-food-count { color: rgba(0,0,0,0.4); background: rgba(0,0,0,0.06); }
+
+/* ─── MODAL METAS ────────────────────────────────────── */
+.nutri-modal-overlay { display: none; position: fixed; inset: 0; z-index: 800;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
+    align-items: center; justify-content: center; }
+.nutri-modal-overlay.open { display: flex; }
+.nutri-modal { background: #111; border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 22px; padding: 0; min-width: 340px; max-width: 440px; width: 90vw;
+    display: flex; flex-direction: column; gap: 0; }
+body.light .nutri-modal { background: #f5f2ee; border-color: rgba(0,0,0,0.1); }
+.nutri-modal-header { display: flex; align-items: center; justify-content: space-between;
+    padding: 22px 26px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+body.light .nutri-modal-header { border-color: rgba(0,0,0,0.08); }
+.nutri-modal-title { font-size: 0.9rem; font-weight: 700; color: rgba(255,255,255,0.9); }
+body.light .nutri-modal-title { color: #1a1a1a; }
+.nutri-modal-body { display: flex; flex-direction: column; gap: 14px; padding: 22px 26px; }
+.metas-field { display: flex; flex-direction: column; gap: 6px; }
+.nutri-modal-footer { display: flex; gap: 10px; justify-content: flex-end;
+    padding: 16px 26px; border-top: 1px solid rgba(255,255,255,0.08); }
+body.light .nutri-modal-footer { border-color: rgba(0,0,0,0.08); }
+
+/* Reutiliza botões de modal dos estudos */
+.btn-note-cancel { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.6); border-radius: 10px; padding: 9px 18px;
+    font-size: 0.8rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+.btn-note-cancel:hover { background: rgba(255,255,255,0.12); color: #fff; }
+.btn-note-save { background: rgba(34,197,94,0.14); border: 1px solid rgba(34,197,94,0.3);
+    color: #22c55e; border-radius: 10px; padding: 9px 18px;
+    font-size: 0.8rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+.btn-note-save:hover { background: rgba(34,197,94,0.24); }
+body.light .btn-note-cancel { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.1); color: rgba(0,0,0,0.55); }
+body.light .btn-note-save { color: #16a34a; background: rgba(34,197,94,0.1); border-color: rgba(34,197,94,0.25); }
+
+/* Modal close btn */
+.modal-close-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.4); border-radius: 8px; padding: 5px 11px; cursor: pointer;
+    font-size: 0.85rem; transition: all 0.2s; }
+.modal-close-btn:hover { border-color: rgba(255,77,77,0.4); color: #ff7675; }
+body.light .modal-close-btn { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.1); color: rgba(0,0,0,0.4); }
+
+.hidden { display: none !important; }

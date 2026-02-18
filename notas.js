@@ -1,3 +1,32 @@
+
+// ─── MARKDOWN EDITOR HELPERS ──────────────────────────────────────────────────
+function insertMd(before, after) {
+    const ta  = document.getElementById('dEntryContent');
+    const s   = ta.selectionStart, e = ta.selectionEnd;
+    const sel = ta.value.substring(s, e);
+    ta.value  = ta.value.substring(0, s) + before + sel + after + ta.value.substring(e);
+    ta.selectionStart = s + before.length;
+    ta.selectionEnd   = s + before.length + sel.length;
+    ta.focus();
+}
+
+function toggleMdPreview() {
+    const ta      = document.getElementById('dEntryContent');
+    const preview = document.getElementById('dEntryPreview');
+    const btn     = document.getElementById('dBtnPreview');
+    const isShowing = !preview.classList.contains('hidden');
+    if (isShowing) {
+        preview.classList.add('hidden');
+        ta.classList.remove('hidden');
+        btn.textContent = '👁 prévia';
+    } else {
+        preview.innerHTML = parseMarkdown(ta.value);
+        preview.classList.remove('hidden');
+        ta.classList.add('hidden');
+        btn.textContent = '✎ editar';
+    }
+}
+
 // ─── TEMA ─────────────────────────────────────────────────────────────────────
 let isLight = localStorage.getItem('clarity_theme') === 'light';
 if (isLight) document.body.classList.add('light');
@@ -237,6 +266,30 @@ function quickDeleteEntry(id) {
 }
 
 const TAG_LABELS = { ideia:'💡 ideia', reflexao:'💭 reflexão', plano:'🗺 plano', aprendizado:'📚 aprendizado', motivacao:'⚡ motivação', outro:'📌 outro' };
+
+
+// ─── MARKDOWN SIMPLES ─────────────────────────────────────────────────────────
+function parseMarkdown(text) {
+    if (!text) return '';
+    return text
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        // Headers
+        .replace(/^### (.+)$/gm, '<h4 style="font-size:0.88rem;font-weight:700;margin:8px 0 4px;color:rgba(255,255,255,0.85)">$1</h4>')
+        .replace(/^## (.+)$/gm,  '<h3 style="font-size:1rem;font-weight:700;margin:10px 0 5px;color:rgba(255,255,255,0.9)">$1</h3>')
+        .replace(/^# (.+)$/gm,   '<h2 style="font-size:1.15rem;font-weight:700;margin:12px 0 6px;color:#fff">$1</h2>')
+        // Bold & Italic
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        // Lists
+        .replace(/^- (.+)$/gm, '<li style="margin-left:16px;margin-bottom:2px">$1</li>')
+        .replace(/(<li[^>]*>.*?<\/li>\s*)+/g, '<ul style="margin:6px 0;padding:0">$&</ul>')
+        // Numbered lists
+        .replace(/^\d+\. (.+)$/gm, '<li style="margin-left:16px;margin-bottom:2px">$1</li>')
+        // Inline code
+        .replace(/`(.+?)`/g, '<code style="background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:4px;font-family:monospace;font-size:0.85em">$1</code>')
+        // Line breaks
+        .replace(/\n/g, '<br>');
+}
 
 function renderDiary() {
     const query   = document.getElementById('diarySearch').value.trim().toLowerCase();

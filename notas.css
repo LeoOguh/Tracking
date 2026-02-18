@@ -274,3 +274,34 @@ body.light .diary-textarea::placeholder { color: rgba(0,0,0,0.18); }
 .notas-page-title { font-family: 'Syne', sans-serif; }
 .diary-entry-card { border-left: 3px solid #3b82f6; }
 .task-item.done .task-text { text-decoration: line-through; color: rgba(255,255,255,0.22); }
+
+/* ═══════════════════════════════════════════════════════════
+   MARKDOWN EDITOR
+   ═══════════════════════════════════════════════════════════ */
+.diary-editor-wrap { display: flex; flex-direction: column; gap: 0; }
+.diary-md-toolbar { display: flex; align-items: center; gap: 4px; padding: 8px 12px;
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+    border-bottom: none; border-radius: 12px 12px 0 0; }
+body.light .diary-md-toolbar { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.08); }
+.diary-md-btn { background: none; border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.5);
+    border-radius: 6px; padding: 4px 8px; font-size: 0.78rem; font-weight: 700;
+    cursor: pointer; font-family: inherit; transition: all 0.15s; }
+.diary-md-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+body.light .diary-md-btn { border-color: rgba(0,0,0,0.1); color: rgba(0,0,0,0.45); }
+body.light .diary-md-btn:hover { background: rgba(0,0,0,0.08); color: #1a1a1a; }
+.diary-md-sep { flex: 1; }
+.diary-md-toggle { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.55); border-radius: 8px; padding: 4px 12px;
+    font-size: 0.72rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+.diary-md-toggle:hover { background: rgba(255,255,255,0.12); color: #fff; }
+body.light .diary-md-toggle { border-color: rgba(0,0,0,0.1); color: rgba(0,0,0,0.5); }
+.diary-textarea { border-radius: 0 0 12px 12px !important; }
+.diary-md-preview {
+    min-height: 200px; padding: 14px 16px;
+    background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 0 0 12px 12px; color: rgba(255,255,255,0.78);
+    font-size: 0.88rem; line-height: 1.7; overflow-y: auto;
+}
+body.light .diary-md-preview { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.08); color: rgba(0,0,0,0.75); }
+.diary-md-preview strong { color: #fff; }
+body.light .diary-md-preview strong { color: #1a1a1a; }

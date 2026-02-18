@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nutrição - Clarity</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="nutricao.css">
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeToggleBtn">☀ claro</button>
+
+    <!-- DRAWER LATERAL -->
+    <aside class="side-drawer nutri-drawer">
+        <div class="drawer-header">
+            <span class="drawer-title">nutrição</span>
+        </div>
+        <nav class="drawer-nav">
+            <button class="drawer-item drawer-item--active" id="ndItemDia" onclick="setNutriView('dia')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                registro diário
+            </button>
+            <button class="drawer-item" id="ndItemAgua" onclick="setNutriView('agua')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg>
+                hidratação
+            </button>
+            <button class="drawer-item" id="ndItemStats" onclick="setNutriView('stats')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                estatísticas
+            </button>
+        </nav>
+    </aside>
+
+    <!-- TOPBAR -->
+    <div class="nutri-topbar">
+        <div class="nutri-date-nav">
+            <button class="nav-btn" onclick="changeNutriDate(-1)">‹</button>
+            <div id="nutriDateTitle">...</div>
+            <button class="nav-btn" onclick="changeNutriDate(1)">›</button>
+        </div>
+        <div class="nutri-view-label" id="nutriViewLabel">registro diário</div>
+    </div>
+
+    <!-- ═══════ REGISTRO DIÁRIO ═══════ -->
+    <div id="viewDia" class="nutri-page">
+        <!-- Resumo de macros do dia -->
+        <div class="nutri-macros-bar glass-panel" id="macrosBar">
+            <div class="macro-card macro-card--cal">
+                <span class="macro-val" id="totalCal">0</span>
+                <span class="macro-lbl">kcal</span>
+                <div class="macro-progress-track"><div class="macro-progress-fill" id="calFill"></div></div>
+            </div>
+            <div class="macro-card">
+                <span class="macro-val" id="totalProt">0g</span>
+                <span class="macro-lbl">proteína</span>
+                <div class="macro-progress-track"><div class="macro-progress-fill macro-progress-fill--prot" id="protFill"></div></div>
+            </div>
+            <div class="macro-card">
+                <span class="macro-val" id="totalCarb">0g</span>
+                <span class="macro-lbl">carboidratos</span>
+                <div class="macro-progress-track"><div class="macro-progress-fill macro-progress-fill--carb" id="carbFill"></div></div>
+            </div>
+            <div class="macro-card">
+                <span class="macro-val" id="totalGord">0g</span>
+                <span class="macro-lbl">gorduras</span>
+                <div class="macro-progress-track"><div class="macro-progress-fill macro-progress-fill--gord" id="gordFill"></div></div>
+            </div>
+            <button class="btn-metas-nutri" onclick="openMetasModal()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 0 0 4.93 19.07"/><path d="M4.93 4.93A10 10 0 0 1 19.07 19.07"/></svg>
+                metas
+            </button>
+        </div>
+
+        <div class="nutri-main-grid">
+            <!-- Coluna esquerda: refeições -->
+            <div class="nutri-meals-col">
+                <!-- Refeições do dia -->
+                <div id="mealsList" class="meals-list"></div>
+
+                <!-- Adicionar refeição -->
+                <div class="glass-panel add-meal-panel">
+                    <div class="add-meal-header">
+                        <span class="add-meal-title">adicionar refeição</span>
+                        <select id="mealType" class="f-select" style="width:180px">
+                            <option value="café da manhã">☀️ café da manhã</option>
+                            <option value="lanche da manhã">🍎 lanche da manhã</option>
+                            <option value="almoço" selected>🍽️ almoço</option>
+                            <option value="lanche da tarde">🍪 lanche da tarde</option>
+                            <option value="jantar">🌙 jantar</option>
+                            <option value="ceia">🌛 ceia</option>
+                            <option value="outro">📦 outro</option>
+                        </select>
+                    </div>
+                    <input type="text" id="mealName" class="f-input" placeholder="nome do alimento ou refeição (ex: Arroz com feijão)">
+                    <div class="macros-input-row">
+                        <div class="macro-input-field">
+                            <label class="ef-add-label">kcal</label>
+                            <input type="number" id="mealCal" class="f-input ef-num-input" min="0" step="1" placeholder="0">
+                        </div>
+                        <div class="macro-input-field">
+                            <label class="ef-add-label">proteína (g)</label>
+                            <input type="number" id="mealProt" class="f-input ef-num-input" min="0" step="0.1" placeholder="0">
+                        </div>
+                        <div class="macro-input-field">
+                            <label class="ef-add-label">carboidratos (g)</label>
+                            <input type="number" id="mealCarb" class="f-input ef-num-input" min="0" step="0.1" placeholder="0">
+                        </div>
+                        <div class="macro-input-field">
+                            <label class="ef-add-label">gorduras (g)</label>
+                            <input type="number" id="mealGord" class="f-input ef-num-input" min="0" step="0.1" placeholder="0">
+                        </div>
+                    </div>
+                    <input type="text" id="mealObs" class="f-input" placeholder="observações (opcional)">
+                    <button class="btn-save-meal" onclick="saveMeal()">+ adicionar refeição</button>
+                </div>
+            </div>
+
+            <!-- Coluna direita: hidratação rápida + donut -->
+            <div class="nutri-side-col">
+                <!-- Donut de macros -->
+                <div class="glass-panel nutri-donut-panel">
+                    <div class="nutri-panel-title">distribuição de macros</div>
+                    <div class="nutri-donut-wrap">
+                        <canvas id="macrosDonut"></canvas>
+                        <div class="nutri-donut-center" id="donutCenter">0 kcal</div>
+                    </div>
+                </div>
+                <!-- Hidratação rápida -->
+                <div class="glass-panel nutri-water-quick">
+                    <div class="nutri-panel-title">
+                        💧 hidratação hoje
+                        <button class="btn-ver-mais" onclick="setNutriView('agua')">ver mais →</button>
+                    </div>
+                    <div class="water-quick-meta" id="waterQuickMeta">0 / 8 copos</div>
+                    <div class="water-quick-bar-track"><div class="water-quick-bar-fill" id="waterQuickFill"></div></div>
+                    <div class="water-quick-cups" id="waterQuickCups"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════ HIDRATAÇÃO ═══════ -->
+    <div id="viewAgua" class="nutri-page hidden">
+        <div class="agua-grid">
+            <!-- Card principal -->
+            <div class="glass-panel agua-main-card">
+                <div class="agua-header">
+                    <div class="agua-title-row">
+                        <span class="agua-today-label">hoje</span>
+                        <span class="agua-count" id="aguaCount">0</span>
+                        <span class="agua-unit">/ <span id="aguaGoalDisplay">8</span> copos</span>
+                    </div>
+                    <div class="agua-goal-row">
+                        <label class="ef-add-label">meta diária</label>
+                        <input type="number" id="hidGoalInput" class="f-input ef-num-input" min="1" max="30" onchange="setHidGoal(this.value)" style="width:70px">
+                        <span class="ef-add-label">copos</span>
+                    </div>
+                </div>
+                <div class="agua-bar-track"><div class="agua-bar-fill" id="hidBar"></div></div>
+                <div class="agua-cups-grid" id="hidCupsGrid"></div>
+                <div class="agua-btns-row">
+                    <button class="agua-btn agua-btn--add" onclick="addWater(1)">+ 1 copo</button>
+                    <button class="agua-btn agua-btn--remove" onclick="addWater(-1)">− 1 copo</button>
+                </div>
+            </div>
+
+            <!-- Histórico semanal -->
+            <div class="glass-panel agua-week-card">
+                <div class="nutri-panel-title">últimos 7 dias</div>
+                <div class="agua-week-chart" id="sonoWeekChart"></div>
+            </div>
+
+            <!-- Dicas -->
+            <div class="glass-panel agua-tips-card">
+                <div class="nutri-panel-title">💡 dicas de hidratação</div>
+                <div class="agua-tips-list">
+                    <div class="agua-tip">Beba um copo de água ao acordar — reidrata o corpo após o sono.</div>
+                    <div class="agua-tip">Antes de cada refeição, beba um copo — auxilia a digestão e o controle do apetite.</div>
+                    <div class="agua-tip">Para exercícios, adicione 1–2 copos extras por hora de atividade.</div>
+                    <div class="agua-tip">Urina amarelo escuro? Sinal de desidratação — beba água agora.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════ ESTATÍSTICAS ═══════ -->
+    <div id="viewStats" class="nutri-page hidden">
+        <div class="nutri-stats-grid">
+            <div class="glass-panel nutri-stats-panel">
+                <div class="nutri-panel-title">calorias — últimos 14 dias</div>
+                <div class="nutri-chart-wrap"><canvas id="calChart"></canvas></div>
+            </div>
+            <div class="glass-panel nutri-stats-panel">
+                <div class="nutri-panel-title">média semanal de macros</div>
+                <div id="statsWeekAvg" class="stats-summary-list"></div>
+            </div>
+            <div class="glass-panel nutri-stats-panel nutri-stats-panel--wide">
+                <div class="nutri-panel-title">alimentos mais registrados</div>
+                <div id="statsTopFoods"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL METAS NUTRICIONAIS -->
+    <div class="nutri-modal-overlay" id="metasModalOverlay" onclick="closeMetasModal(event)">
+        <div class="nutri-modal">
+            <div class="nutri-modal-header">
+                <span class="nutri-modal-title">metas nutricionais diárias</span>
+                <button class="modal-close-btn" onclick="closeMetasModal()">✕</button>
+            </div>
+            <div class="nutri-modal-body">
+                <div class="metas-field"><label class="ef-add-label">calorias (kcal)</label><input type="number" id="metaCal" class="f-input ef-num-input" min="0" step="50" placeholder="2000"></div>
+                <div class="metas-field"><label class="ef-add-label">proteína (g)</label><input type="number" id="metaProt" class="f-input ef-num-input" min="0" step="5" placeholder="150"></div>
+                <div class="metas-field"><label class="ef-add-label">carboidratos (g)</label><input type="number" id="metaCarb" class="f-input ef-num-input" min="0" step="10" placeholder="250"></div>
+                <div class="metas-field"><label class="ef-add-label">gorduras (g)</label><input type="number" id="metaGord" class="f-input ef-num-input" min="0" step="5" placeholder="65"></div>
+            </div>
+            <div class="nutri-modal-footer">
+                <button class="btn-note-cancel" onclick="closeMetasModal()">cancelar</button>
+                <button class="btn-note-save" onclick="saveMetas()">salvar metas</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MENU FLUTUANTE -->
+    <nav class="float-nav">
+        <a href="index.html" class="fn-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg><span>hábitos</span></a>
+        <a href="nutricao.html" class="fn-btn fn-btn--active"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg><span>nutrição</span></a>
+        <a href="estudos.html" class="fn-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg><span>estudos</span></a>
+        <a href="treino.html" class="fn-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5h11M6.5 17.5h11M3 12h3m15 0h-3M6 9l-3 3 3 3M18 9l3 3-3 3"/></svg><span>treino</span></a>
+        <a href="notas.html" class="fn-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg><span>notas</span></a>
+    </nav>
+
+    <script src="nutricao.js"></script>
+</body>
+</html>

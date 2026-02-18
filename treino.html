@@ -94,14 +94,52 @@
                     <div class="pae-with-preview">
                         <img id="paeExPreview" class="pae-ex-preview hidden" alt="Preview do exercício">
                         <div class="pae-form-fields">
+                            <!-- Avatar muscular interativo -->
+                            <div class="muscle-avatar-selector">
+                                <div class="muscle-avatar-label">selecione o músculo clicando no avatar:</div>
+                                <div class="muscle-avatars-row">
+                                    <div class="avatar-wrap">
+                                        <div class="avatar-side-label">frente</div>
+                                        <svg class="body-svg" viewBox="0 0 120 280" xmlns="http://www.w3.org/2000/svg">
+                                            <path class="muscle-zone" data-muscle="Peito" d="M38,80 Q50,72 60,75 Q70,72 82,80 Q80,100 60,105 Q40,100 38,80Z"/>
+                                            <path class="muscle-zone" data-muscle="Ombro" d="M25,68 Q35,60 42,70 Q40,85 30,88 Q20,80 25,68Z"/>
+                                            <path class="muscle-zone" data-muscle="Ombro" d="M78,70 Q85,60 95,68 Q100,80 90,88 Q80,85 78,70Z"/>
+                                            <path class="muscle-zone" data-muscle="Bíceps" d="M22,90 Q30,86 36,95 Q34,114 24,116 Q16,108 22,90Z"/>
+                                            <path class="muscle-zone" data-muscle="Bíceps" d="M84,95 Q90,86 98,90 Q104,108 94,116 Q84,114 84,95Z"/>
+                                            <path class="muscle-zone" data-muscle="Abdômen" d="M44,106 Q60,110 76,106 Q78,140 60,144 Q42,140 44,106Z"/>
+                                            <path class="muscle-zone" data-muscle="Quadríceps" d="M36,168 Q46,162 54,168 Q56,200 50,210 Q38,205 34,190Z"/>
+                                            <path class="muscle-zone" data-muscle="Quadríceps" d="M66,168 Q74,162 84,168 Q86,190 82,210 Q70,205 64,200Z"/>
+                                            <path class="muscle-zone" data-muscle="Panturrilha" d="M38,215 Q48,212 52,220 Q50,248 44,252 Q36,245 38,215Z"/>
+                                            <path class="muscle-zone" data-muscle="Panturrilha" d="M68,215 Q72,212 82,215 Q84,245 76,252 Q70,248 68,220Z"/>
+                                            <ellipse cx="60" cy="40" rx="18" ry="22" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                                            <path d="M36,62 Q28,66 24,88 L20,120 Q18,130 22,135 L26,160 Q28,165 34,168 L42,170 L42,262 L46,265 L52,265 L54,262 L55,215 L65,215 L66,262 L68,265 L74,265 L78,262 L78,170 L86,168 Q92,165 94,160 L98,135 Q102,130 100,120 L96,88 Q92,66 84,62" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                                        </svg>
+                                    </div>
+                                    <div class="avatar-wrap">
+                                        <div class="avatar-side-label">costas</div>
+                                        <svg class="body-svg" viewBox="0 0 120 280" xmlns="http://www.w3.org/2000/svg">
+                                            <path class="muscle-zone" data-muscle="Costas" d="M36,62 Q60,58 84,62 Q86,90 80,110 Q70,118 60,120 Q50,118 40,110 Q34,90 36,62Z"/>
+                                            <path class="muscle-zone" data-muscle="Ombro" d="M24,65 Q34,58 40,70 Q38,86 28,88 Q18,80 24,65Z"/>
+                                            <path class="muscle-zone" data-muscle="Ombro" d="M80,70 Q86,58 96,65 Q102,80 92,88 Q82,86 80,70Z"/>
+                                            <path class="muscle-zone" data-muscle="Tríceps" d="M18,88 Q26,84 32,94 Q30,112 22,114 Q14,106 18,88Z"/>
+                                            <path class="muscle-zone" data-muscle="Tríceps" d="M88,94 Q94,84 102,88 Q106,106 98,114 Q88,112 88,94Z"/>
+                                            <path class="muscle-zone" data-muscle="Glúteo" d="M38,148 Q60,144 82,148 Q84,168 72,172 Q60,175 48,172 Q36,168 38,148Z"/>
+                                            <path class="muscle-zone" data-muscle="Posterior" d="M36,172 Q46,168 54,174 Q56,202 50,210 Q38,206 34,192Z"/>
+                                            <path class="muscle-zone" data-muscle="Posterior" d="M66,174 Q74,168 84,172 Q86,192 82,210 Q70,206 64,202Z"/>
+                                            <path class="muscle-zone" data-muscle="Panturrilha" d="M36,214 Q46,210 52,218 Q50,246 44,250 Q36,243 36,214Z"/>
+                                            <path class="muscle-zone" data-muscle="Panturrilha" d="M68,218 Q74,210 84,214 Q84,243 76,250 Q70,246 68,218Z"/>
+                                            <ellipse cx="60" cy="40" rx="18" ry="22" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                                            <path d="M36,62 Q28,66 24,88 L20,120 Q18,130 22,135 L26,160 Q28,165 34,168 L42,170 L42,262 L46,265 L52,265 L54,262 L55,215 L65,215 L66,262 L68,265 L74,265 L78,262 L78,170 L86,168 Q92,165 94,160 L98,135 Q102,130 100,120 L96,88 Q92,66 84,62" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="muscle-selected-display">
+                                    <span class="muscle-selected-label">selecionado:</span>
+                                    <span class="muscle-selected-name" id="muscleSelectedName">clique no avatar</span>
+                                </div>
+                                <input type="hidden" id="paeMusc" value="">
+                            </div>
                             <div class="ef-row-top">
-                                <select id="paeMusc" class="f-select" style="min-width:130px" onchange="onPaeMuscleChange()">
-                                    <option value="">— músculo —</option>
-                                    <option>Peito</option><option>Costas</option><option>Ombro</option>
-                                    <option>Bíceps</option><option>Tríceps</option><option>Quadríceps</option>
-                                    <option>Posterior</option><option>Glúteo</option><option>Panturrilha</option>
-                                    <option>Abdômen</option><option>Outro</option>
-                                </select>
                                 <select id="paeEx" class="f-select" style="flex:1" onchange="updatePaePreview()"><option value="">— exercício —</option></select>
                                 <input type="text" id="paeExCustom" class="f-input hidden" placeholder="nome do exercício" style="flex:1">
                             </div>
@@ -293,10 +331,62 @@
     <!-- MENU FLUTUANTE -->
     <nav class="float-nav">
         <a href="index.html" class="fn-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg><span>hábitos</span></a>
+        <a href="nutricao.html" class="fn-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg><span>nutrição</span></a>
         <a href="estudos.html" class="fn-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg><span>estudos</span></a>
         <a href="treino.html" class="fn-btn fn-btn--active"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5h11M6.5 17.5h11M3 12h3m15 0h-3M6 9l-3 3 3 3M18 9l3 3-3 3"/></svg><span>treino</span></a>
         <a href="notas.html" class="fn-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg><span>notas</span></a>
     </nav>
+
+
+    <!-- MODAL TIMER DE DESCANSO -->
+    <div class="rest-timer-overlay" id="restTimerOverlay">
+        <div class="rest-timer-modal">
+            <div class="rest-timer-header">
+                <span class="rest-timer-title">⏱ descanso</span>
+                <button class="rest-timer-skip" onclick="skipRestTimer()">pular ✕</button>
+            </div>
+            <div class="rest-timer-display" id="restTimerDisplay">60</div>
+            <div class="rest-timer-progress">
+                <div class="rest-timer-progress-fill" id="restTimerProgressFill"></div>
+            </div>
+            <div class="rest-timer-presets">
+                <button class="rest-preset-btn" onclick="setRestTimer(30)">30s</button>
+                <button class="rest-preset-btn rest-preset-btn--active" onclick="setRestTimer(60)">1min</button>
+                <button class="rest-preset-btn" onclick="setRestTimer(90)">1m30</button>
+                <button class="rest-preset-btn" onclick="setRestTimer(120)">2min</button>
+            </div>
+            <div class="rest-timer-ex-info" id="restTimerExInfo"></div>
+        </div>
+    </div>
+
+    <!-- MODAL: TIMER DE DESCANSO -->
+    <div class="rest-timer-overlay" id="restTimerOverlay">
+        <div class="rest-timer-modal">
+            <div class="rest-timer-header">
+                <span class="rest-timer-title">⏱ descanso</span>
+                <button class="rest-timer-skip" onclick="skipRestTimer()">pular</button>
+            </div>
+            <div class="rest-timer-circle">
+                <svg class="rest-timer-svg" viewBox="0 0 120 120">
+                    <circle class="rest-timer-bg" cx="60" cy="60" r="52"/>
+                    <circle class="rest-timer-progress" id="restTimerProgress" cx="60" cy="60" r="52"/>
+                </svg>
+                <div class="rest-timer-count" id="restTimerCount">60</div>
+            </div>
+            <div class="rest-timer-info" id="restTimerInfo">próxima série em breve</div>
+            <div class="rest-timer-btns">
+                <button class="rest-btn rest-btn--minus" onclick="adjustRestTimer(-15)">−15s</button>
+                <button class="rest-btn rest-btn--plus"  onclick="adjustRestTimer(+15)">+15s</button>
+            </div>
+            <div class="rest-timer-presets">
+                <button class="rest-preset" onclick="setRestDuration(30)">30s</button>
+                <button class="rest-preset rest-preset--active" onclick="setRestDuration(60)">1 min</button>
+                <button class="rest-preset" onclick="setRestDuration(90)">1:30</button>
+                <button class="rest-preset" onclick="setRestDuration(120)">2 min</button>
+                <button class="rest-preset" onclick="setRestDuration(180)">3 min</button>
+            </div>
+        </div>
+    </div>
 
     <script src="treino.js"></script>
 </body>
