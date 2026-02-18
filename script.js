@@ -57,12 +57,12 @@ function toggleTheme() {
     isLight = !isLight;
     document.body.classList.toggle('light', isLight);
     localStorage.setItem('clarity_theme', isLight ? 'light' : 'dark');
-    document.getElementById('themeToggleBtn')?.textContent = isLight ? '☾ escuro' : '☀ claro';
+    { const _tb = document.getElementById('themeToggleBtn'); if (_tb) _tb.textContent = isLight ? '☾ escuro' : '☀ claro'; }
     const weeks = getWeeks(currentMonth, currentYear);
     updateChart(weeks.flat().filter(d => d !== null));
 }
 // Atualiza botão no carregamento
-document.getElementById('themeToggleBtn')?.textContent = isLight ? '☾ escuro' : '☀ claro';
+{ const _tb = document.getElementById('themeToggleBtn'); if (_tb) _tb.textContent = isLight ? '☾ escuro' : '☀ claro'; }
 
 // ─── EXPORTAR DADOS ───────────────────────────────────────────────────────────
 function exportData() {

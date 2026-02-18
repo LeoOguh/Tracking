@@ -30,11 +30,11 @@ function toggleMdPreview() {
 // ─── TEMA ─────────────────────────────────────────────────────────────────────
 let isLight = localStorage.getItem('clarity_theme') === 'light';
 if (isLight) document.body.classList.add('light');
-document.getElementById('themeToggleBtn')?.textContent = isLight ? '☾ escuro' : '☀ claro';
+{ const _tb = document.getElementById('themeToggleBtn'); if (_tb) _tb.textContent = isLight ? '☾ escuro' : '☀ claro'; }
 function toggleTheme() {
     isLight = !isLight; document.body.classList.toggle('light', isLight);
     localStorage.setItem('clarity_theme', isLight ? 'light' : 'dark');
-    document.getElementById('themeToggleBtn')?.textContent = isLight ? '☾ escuro' : '☀ claro';
+    { const _tb = document.getElementById('themeToggleBtn'); if (_tb) _tb.textContent = isLight ? '☾ escuro' : '☀ claro'; }
 }
 
 // ─── ESTADO ───────────────────────────────────────────────────────────────────
