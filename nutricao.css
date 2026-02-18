@@ -27,7 +27,7 @@ body.light .drawer-item--active { background: rgba(34,197,94,0.1); color: #16a34
 
 /* Topbar */
 .nutri-topbar { display: flex; align-items: center; gap: 14px; margin-bottom: 28px;
-    width: calc(100vw - 240px); margin-left: 240px; padding: 0 32px; box-sizing: border-box; }
+    width: calc(100vw - 240px); margin-left: 240px; padding: 20px 32px 0 32px; box-sizing: border-box; }
 .nutri-date-nav { display: flex; align-items: center; padding: 10px 26px; border-radius: 50px;
     background: var(--glass); backdrop-filter: blur(15px); border: 1px solid var(--glass-border);
     justify-content: space-between; min-width: 300px; max-width: 440px; flex: 1; }
@@ -242,3 +242,11 @@ body.light .btn-note-save { color: #16a34a; background: rgba(34,197,94,0.1); bor
 body.light .modal-close-btn { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.1); color: rgba(0,0,0,0.4); }
 
 .hidden { display: none !important; }
+
+/* ─── RESET DO BODY PARA LAYOUT COM DRAWER ─────────────── */
+body {
+    display: block !important;
+    align-items: unset !important;
+    padding: 0 !important;
+    padding-top: 0 !important;
+}

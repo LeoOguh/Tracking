@@ -37,8 +37,8 @@ body.light .drawer-footer { border-color: rgba(0,0,0,0.08); }
    ═══════════════════════════════════════════════════════════ */
 .treino-topbar {
     display: flex; align-items: center; gap: 14px;
-    margin-bottom: 28px; width: calc(100vw - 280px);
-    margin-left: 260px; padding: 0 20px;
+    margin-bottom: 28px; width: calc(100vw - 260px); box-sizing: border-box;
+    margin-left: 260px; padding: 20px 32px 0 32px;
 }
 .treino-topbar-center {
     flex: 1; display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap;
@@ -67,7 +67,7 @@ body.light #treinoDateTitle { color: #1a1a1a; }
 body.light .treino-view-label { color: rgba(0,0,0,0.35); }
 
 /* Página treino — fullscreen minus drawer com GAP */
-.treino-page { width: calc(100vw - 280px); margin-left: 260px; padding: 0 28px 0 36px; }
+.treino-page { width: calc(100vw - 260px); margin-left: 260px; padding: 0 32px 80px 32px; box-sizing: border-box; }
 
 /* ═══════════════════════════════════════════════════════════
    LAYOUT GERAL — fontes maiores em todo o treino
@@ -322,7 +322,7 @@ body.light .rh-session-stats { color: rgba(0,0,0,0.38); }
 /* ═══════════════════════════════════════════════════════════
    VISTA: ESTATÍSTICAS
    ═══════════════════════════════════════════════════════════ */
-.treino-stats-view { width: calc(100vw - 280px); margin-left: 260px; max-width: none; }
+.treino-stats-view { width: calc(100vw - 260px); margin-left: 260px; max-width: none; box-sizing: border-box; padding: 0 32px; }
 .stats-outer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .stats-panel { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
 .stats-panel--wide { grid-column: 1 / -1; }
@@ -851,3 +851,11 @@ body.light .rest-btn--plus  { background: rgba(59,130,246,0.08); border-color: r
 .rest-preset--active { background: rgba(59,130,246,0.15); border-color: rgba(59,130,246,0.4); color: #60a5fa; }
 body.light .rest-preset { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.1); color: rgba(0,0,0,0.45); }
 body.light .rest-preset--active { background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.3); color: #2563eb; }
+
+/* ─── RESET DO BODY PARA LAYOUT COM DRAWER ─────────────── */
+body {
+    display: block !important;
+    align-items: unset !important;
+    padding: 0 !important;
+    padding-top: 0 !important;
+}
