@@ -1129,7 +1129,7 @@ function openSonoModal(dateKey = null) {
 function closeSonoModal(e) {
     if (!e || e.target === document.getElementById('sonoModalOverlay'))
         document.getElementById('sonoModalOverlay').classList.remove('open');
-}
+}}
 
 function selectSonoQuality(v) { sonoQuality = v; renderSonoQualitySelect(); }
 

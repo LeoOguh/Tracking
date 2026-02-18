@@ -67,7 +67,7 @@ body.light #treinoDateTitle { color: #1a1a1a; }
 body.light .treino-view-label { color: rgba(0,0,0,0.35); }
 
 /* Página treino — fullscreen minus drawer com GAP */
-.treino-page { width: calc(100vw - 280px); margin-left: 260px; padding: 0 20px; }
+.treino-page { width: calc(100vw - 280px); margin-left: 260px; padding: 0 28px 0 36px; }
 
 /* ═══════════════════════════════════════════════════════════
    LAYOUT GERAL — fontes maiores em todo o treino

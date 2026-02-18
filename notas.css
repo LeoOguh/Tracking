@@ -181,8 +181,7 @@ body.light .btn-new-entry:hover { background: rgba(0,0,0,0.1); color: #1a1a1a; }
 
 .diary-search-wrap {
     display: flex; align-items: center; gap: 8px;
-    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 12px; padding: 8px 14px;
+    padding: 12px 16px;
 }
 .diary-search-icon { color: rgba(255,255,255,0.22); flex-shrink: 0; }
 .diary-search-input { flex: 1; background: none; border: none; outline: none; color: rgba(255,255,255,0.8); font-size: 0.85rem; font-family: inherit; }

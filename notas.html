@@ -21,21 +21,6 @@
 
         <!-- Ações à direita -->
         <div class="topbar-actions">
-            <!-- Botões de foco (toggle isolado) -->
-            <div class="focus-toggle">
-                <button class="focus-btn" id="focusBtnTasks" onclick="toggleView('tasks')" title="Foco em tarefas">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
-                    </svg>
-                    tarefas
-                </button>
-                <button class="focus-btn" id="focusBtnDiary" onclick="toggleView('diary')" title="Foco em diário">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>
-                    </svg>
-                    diário
-                </button>
-            </div>
             <button class="btn-topbar-action" onclick="exportNotas()" title="Exportar">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
@@ -101,7 +86,7 @@
             </div>
 
             <!-- Busca -->
-            <div class="diary-search-wrap">
+            <div class="task-form glass-panel diary-search-wrap">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="diary-search-icon">
                     <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                 </svg>
