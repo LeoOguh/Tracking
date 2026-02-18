@@ -1206,18 +1206,27 @@ body.light .mm-edit-btn:hover { border-color: rgba(0,0,0,0.18); color: rgba(0,0,
 
 /* ─── GRÁFICO COLAPSÁVEL ─────────────────────────────────── */
 .chart-collapse-btn {
-    background: none; border: none; cursor: pointer;
+    background: none; border: none;
     color: rgba(255,255,255,0.3); font-size: 0.75rem; padding: 2px 6px;
     border-radius: 6px; transition: all 0.2s; font-family: inherit;
     display: flex; align-items: center; gap: 5px; letter-spacing: 0.5px;
+    pointer-events: none;
 }
-.chart-collapse-btn:hover { color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.06); }
 body.light .chart-collapse-btn { color: rgba(0,0,0,0.3); }
-body.light .chart-collapse-btn:hover { color: rgba(0,0,0,0.6); background: rgba(0,0,0,0.05); }
-.chart-container-wrapper { padding: 15px 25px 25px 25px; transition: padding 0.3s; }
-.chart-container-wrapper.chart-collapsed { padding: 12px 25px; }
+.chart-container-wrapper { padding: 0; transition: padding 0.3s; overflow: hidden; }
+.chart-container-wrapper .chart-inner { padding: 0 25px 25px 25px; }
+.chart-container-wrapper.chart-collapsed { padding: 0; }
 .chart-container-wrapper.chart-collapsed .weeks-chart-header,
 .chart-container-wrapper.chart-collapsed .module-chart { display: none; }
-.chart-header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.chart-header-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 15px 25px 10px 25px; margin-bottom: 0;
+    transition: background 0.2s; border-radius: 16px 16px 0 0;
+}
+.chart-header-row:hover { background: rgba(255,255,255,0.03); }
+body.light .chart-header-row:hover { background: rgba(0,0,0,0.02); }
+.chart-header-row:hover .chart-collapse-btn { color: rgba(255,255,255,0.6); }
+body.light .chart-header-row:hover .chart-collapse-btn { color: rgba(0,0,0,0.5); }
+.chart-inner { padding: 0 25px 25px 25px; }
 .chart-header-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.35); font-weight: 700; }
 body.light .chart-header-label { color: rgba(0,0,0,0.38); }

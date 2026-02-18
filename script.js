@@ -1419,19 +1419,15 @@ function toggleCompactMode() {
 let isChartCollapsed = localStorage.getItem('clarity_chart_collapsed') === 'true';
 
 function applyChartCollapsed() {
-    const wrapper = document.getElementById('chartWrapper');
+    const wrapper   = document.getElementById('chartWrapper');
+    const chartInner = wrapper ? wrapper.querySelector('.chart-inner') : null;
     const icon    = document.getElementById('chartCollapseIcon');
     const label   = document.getElementById('chartCollapseLabel');
     if (!wrapper) return;
     wrapper.classList.toggle('chart-collapsed', isChartCollapsed);
+    if (chartInner) chartInner.style.display = isChartCollapsed ? 'none' : '';
     if (label) label.textContent = isChartCollapsed ? 'expandir' : 'recolher';
     if (icon) {
-        // Aponta pra cima quando expandido, pra baixo quando recolhido
-        icon.setAttribute('d', isChartCollapsed
-            ? 'M6 9l6 6 6-6'   // chevron-down
-            : 'M18 15l-6-6-6 6' // chevron-up
-        );
-        // Muda o elemento polyline para path
         icon.innerHTML = isChartCollapsed
             ? '<polyline points="6 9 12 15 18 9"/>'
             : '<polyline points="18 15 12 9 6 15"/>';
