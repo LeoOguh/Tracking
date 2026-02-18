@@ -1421,3 +1421,143 @@ function closeOnboarding() {
 }
 
 showOnboardingIfNeeded();
+
+// ─── METAS MENSAIS ────────────────────────────────────────────────────────────
+// metasMensais = { 'YYYY-MM': [{id, title, current, target, unit}] }
+let metasMensais = JSON.parse(localStorage.getItem('clarity_metas_mensais')) || {};
+let editingMetaId = null;
+
+function saveMetasMensais() {
+    localStorage.setItem('clarity_metas_mensais', JSON.stringify(metasMensais));
+}
+
+function currentMonthKey() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function getMetasForCurrentMonth() {
+    const key = currentMonthKey();
+    if (!metasMensais[key]) metasMensais[key] = [];
+    return metasMensais[key];
+}
+
+function openMetaMensalForm(id) {
+    const overlay = document.getElementById('metaMensalModalOverlay');
+    const titleEl = document.getElementById('metaMensalModalTitle');
+    const delBtn  = document.getElementById('mmBtnDelete');
+    if (!overlay) return;
+
+    if (id !== undefined) {
+        // Editar meta existente
+        const metas = getMetasForCurrentMonth();
+        const meta  = metas.find(m => m.id === id);
+        if (!meta) return;
+        editingMetaId = id;
+        document.getElementById('mmTitle').value   = meta.title;
+        document.getElementById('mmCurrent').value = meta.current;
+        document.getElementById('mmTarget').value  = meta.target;
+        document.getElementById('mmUnit').value    = meta.unit || '';
+        titleEl.textContent = 'editar meta';
+        delBtn.style.display = 'inline-flex';
+    } else {
+        // Nova meta
+        editingMetaId = null;
+        document.getElementById('mmTitle').value   = '';
+        document.getElementById('mmCurrent').value = '0';
+        document.getElementById('mmTarget').value  = '1';
+        document.getElementById('mmUnit').value    = '';
+        titleEl.textContent = 'nova meta do mês';
+        delBtn.style.display = 'none';
+    }
+    overlay.classList.add('open');
+    setTimeout(() => document.getElementById('mmTitle').focus(), 50);
+}
+
+function closeMetaMensalModal(e) {
+    if (!e || e.target === document.getElementById('metaMensalModalOverlay')) {
+        document.getElementById('metaMensalModalOverlay').classList.remove('open');
+        editingMetaId = null;
+    }
+}
+
+function saveMetaMensal() {
+    const title   = document.getElementById('mmTitle').value.trim();
+    const current = parseFloat(document.getElementById('mmCurrent').value) || 0;
+    const target  = parseFloat(document.getElementById('mmTarget').value)  || 1;
+    const unit    = document.getElementById('mmUnit').value.trim();
+
+    if (!title) { document.getElementById('mmTitle').focus(); return; }
+
+    const metas = getMetasForCurrentMonth();
+
+    if (editingMetaId !== null) {
+        const idx = metas.findIndex(m => m.id === editingMetaId);
+        if (idx >= 0) metas[idx] = { ...metas[idx], title, current, target, unit };
+    } else {
+        metas.push({ id: Date.now(), title, current, target, unit });
+    }
+
+    saveMetasMensais();
+    closeMetaMensalModal();
+    renderMetasMensais();
+}
+
+function deleteMetaMensal() {
+    if (editingMetaId === null) return;
+    const key = currentMonthKey();
+    if (metasMensais[key]) {
+        metasMensais[key] = metasMensais[key].filter(m => m.id !== editingMetaId);
+    }
+    saveMetasMensais();
+    closeMetaMensalModal();
+    renderMetasMensais();
+}
+
+function updateMetaProgress(id, delta) {
+    const metas = getMetasForCurrentMonth();
+    const meta  = metas.find(m => m.id === id);
+    if (!meta) return;
+    meta.current = Math.max(0, Math.min(meta.target, parseFloat((meta.current + delta).toFixed(2))));
+    saveMetasMensais();
+    renderMetasMensais();
+}
+
+function renderMetasMensais() {
+    const el    = document.getElementById('metasMensaisList');
+    const metas = getMetasForCurrentMonth();
+    if (!el) return;
+
+    if (!metas.length) {
+        el.innerHTML = `<div class="metas-empty">nenhuma meta para este mês — clique em "meta do mês" para adicionar</div>`;
+        return;
+    }
+
+    el.innerHTML = metas.map(meta => {
+        const pct      = Math.min(100, Math.round((meta.current / meta.target) * 100));
+        const done     = pct >= 100;
+        const unitStr  = meta.unit ? ` ${meta.unit}` : '';
+        const barColor = done ? '#2ecc71' : pct >= 60 ? '#3b82f6' : '#f39c12';
+        const step     = meta.unit && ['km', 'kg', 'h', 'horas'].includes(meta.unit.toLowerCase()) ? 0.5 : 1;
+
+        return `<div class="meta-mensal-card ${done ? 'meta-mensal-card--done' : ''}">
+            <div class="mm-card-top">
+                <div class="mm-card-info">
+                    <span class="mm-card-title">${done ? '✓ ' : ''}${meta.title}</span>
+                    <span class="mm-card-progress">${meta.current}${unitStr} / ${meta.target}${unitStr}</span>
+                </div>
+                <div class="mm-card-actions">
+                    <button class="mm-adjust-btn" onclick="updateMetaProgress(${meta.id}, -${step})" title="−${step}${unitStr}">−</button>
+                    <span class="mm-pct">${pct}%</span>
+                    <button class="mm-adjust-btn mm-adjust-btn--add" onclick="updateMetaProgress(${meta.id}, ${step})" title="+${step}${unitStr}">+</button>
+                    <button class="mm-edit-btn" onclick="openMetaMensalForm(${meta.id})" title="editar">✎</button>
+                </div>
+            </div>
+            <div class="mm-bar-track">
+                <div class="mm-bar-fill" style="width:${pct}%;background:${barColor}"></div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+renderMetasMensais();

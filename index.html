@@ -11,27 +11,34 @@
 
     <button class="theme-toggle" onclick="toggleTheme()" id="themeToggleBtn">☀ claro</button>
 
-    <!-- WIDGET DE PROGRESSO DO DIA -->
-    <div class="today-progress-widget" id="todayProgressWidget">
-        <div class="tpw-ring-wrap">
-            <svg class="tpw-ring" viewBox="0 0 44 44">
-                <circle class="tpw-ring-bg" cx="22" cy="22" r="18" fill="none" stroke-width="4"/>
-                <circle class="tpw-ring-fill" id="tpwRing" cx="22" cy="22" r="18" fill="none" stroke-width="4"
-                    stroke-dasharray="113.1" stroke-dashoffset="113.1" transform="rotate(-90 22 22)"/>
-            </svg>
-            <span class="tpw-pct" id="tpwPct">0%</span>
+    <!-- TOPBAR: DATA + WIDGET PROGRESSO + BOTÃO META -->
+    <div class="habits-topbar">
+        <div class="month-nav">
+            <button class="nav-btn" onclick="changeMonth(-1)">‹</button>
+            <div id="monthTitle">...</div>
+            <button class="nav-btn" onclick="changeMonth(1)">›</button>
         </div>
-        <div class="tpw-info">
-            <div class="tpw-title">hoje</div>
-            <div class="tpw-detail" id="tpwDetail">carregando…</div>
-        </div>
-        <button class="tpw-compact-btn" onclick="toggleCompactMode()" id="tpwCompactBtn" title="Modo compacto">⊞</button>
-    </div>
 
-    <div class="month-nav">
-        <button class="nav-btn" onclick="changeMonth(-1)">‹</button>
-        <div id="monthTitle">...</div>
-        <button class="nav-btn" onclick="changeMonth(1)">›</button>
+        <div class="today-progress-widget" id="todayProgressWidget">
+            <div class="tpw-ring-wrap">
+                <svg class="tpw-ring" viewBox="0 0 44 44">
+                    <circle class="tpw-ring-bg" cx="22" cy="22" r="18" fill="none" stroke-width="4"/>
+                    <circle class="tpw-ring-fill" id="tpwRing" cx="22" cy="22" r="18" fill="none" stroke-width="4"
+                        stroke-dasharray="113.1" stroke-dashoffset="113.1" transform="rotate(-90 22 22)"/>
+                </svg>
+                <span class="tpw-pct" id="tpwPct">0%</span>
+            </div>
+            <div class="tpw-info">
+                <div class="tpw-title">hoje</div>
+                <div class="tpw-detail" id="tpwDetail">carregando…</div>
+            </div>
+            <button class="tpw-compact-btn" onclick="toggleCompactMode()" id="tpwCompactBtn" title="Modo compacto">⊞</button>
+        </div>
+
+        <button class="btn-nova-meta-topbar" onclick="openMetaMensalForm()" title="Nova meta do mês">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            meta do mês
+        </button>
     </div>
 
     <div class="container">
