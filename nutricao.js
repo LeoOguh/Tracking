@@ -206,6 +206,14 @@ function getTodayHid() {
     return hidData[k];
 }
 
+function getHidMl() { return parseInt(localStorage.getItem('hid_ml') || '250'); }
+
+function setHidMl(val) {
+    const ml = Math.max(50, Math.min(1000, parseInt(val) || 250));
+    localStorage.setItem('hid_ml', ml);
+    renderHidCard();
+}
+
 function addWater(delta) {
     const d = getTodayHid();
     d.cups = Math.max(0, d.cups + delta);
@@ -226,17 +234,26 @@ function renderHidCard() {
     const d    = getTodayHid();
     const goal = d.goal;
     const cups = d.cups;
+    const ml   = getHidMl();
     const pct  = Math.min(100, Math.round((cups / goal) * 100));
+    const totalMl = cups * ml;
 
-    document.getElementById('aguaCount').textContent      = cups;
+    document.getElementById('aguaCount').textContent       = cups;
     document.getElementById('aguaGoalDisplay').textContent = goal;
-    document.getElementById('hidGoalInput').value         = goal;
-    document.getElementById('hidBar').style.width         = pct + '%';
+    const hidGoalEl = document.getElementById('hidGoalInput');
+    if (hidGoalEl) hidGoalEl.value = goal;
+    const hidMlEl = document.getElementById('hidMlInput');
+    if (hidMlEl) hidMlEl.value = ml;
+    document.getElementById('hidBar').style.width = pct + '%';
+
+    // Total em mL
+    const mlEl = document.getElementById('aguaMlTotal');
+    if (mlEl) mlEl.textContent = totalMl >= 1000 ? `${(totalMl/1000).toFixed(1)}L` : `${totalMl}mL`;
 
     const grid = document.getElementById('hidCupsGrid');
     let html = '';
     for (let i = 0; i < goal; i++) {
-        html += `<div class="hid-cup ${i < cups ? 'hid-cup--full' : ''}" onclick="addWater(${i < cups ? -1 : 1})" title="${i < cups ? 'remover' : 'adicionar'} copo">💧</div>`;
+        html += `<div class="hid-cup ${i < cups ? 'hid-cup--full' : ''}" onclick="addWater(${i < cups ? -1 : 1})" title="${i < cups ? 'remover' : 'adicionar'} copo (${ml}mL)">💧</div>`;
     }
     grid.innerHTML = html;
 

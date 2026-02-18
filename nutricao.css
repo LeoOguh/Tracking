@@ -138,12 +138,14 @@ body.light .water-quick-bar-track { background: rgba(0,0,0,0.1); }
 .agua-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
 .agua-main-card { padding: 24px 28px; display: flex; flex-direction: column; gap: 16px; grid-column: 1/-1; }
 .agua-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
-.agua-title-row { display: flex; align-items: baseline; gap: 8px; }
+.agua-title-row { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
 .agua-today-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.4); }
 body.light .agua-today-label { color: rgba(0,0,0,0.4); }
 .agua-count { font-size: 2.8rem; font-weight: 700; color: #3b82f6; font-family: 'Syne', sans-serif; }
 .agua-unit { font-size: 1rem; color: rgba(255,255,255,0.4); }
 body.light .agua-unit { color: rgba(0,0,0,0.4); }
+.agua-ml-total { font-size: 0.8rem; color: rgba(255,255,255,0.35); margin-left: 4px; }
+body.light .agua-ml-total { color: rgba(0,0,0,0.35); }
 .agua-goal-row { display: flex; align-items: center; gap: 10px; }
 .agua-bar-track { height: 6px; background: rgba(255,255,255,0.08); border-radius: 6px; overflow: hidden; }
 body.light .agua-bar-track { background: rgba(0,0,0,0.1); }

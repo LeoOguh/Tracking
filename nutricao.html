@@ -150,11 +150,17 @@
                         <span class="agua-today-label">hoje</span>
                         <span class="agua-count" id="aguaCount">0</span>
                         <span class="agua-unit">/ <span id="aguaGoalDisplay">8</span> copos</span>
+                        <span class="agua-ml-total" id="aguaMlTotal"></span>
                     </div>
                     <div class="agua-goal-row">
                         <label class="ef-add-label">meta diária</label>
                         <input type="number" id="hidGoalInput" class="f-input ef-num-input" min="1" max="30" onchange="setHidGoal(this.value)" style="width:70px">
                         <span class="ef-add-label">copos</span>
+                    </div>
+                    <div class="agua-goal-row">
+                        <label class="ef-add-label">volume por copo</label>
+                        <input type="number" id="hidMlInput" class="f-input ef-num-input" min="50" max="1000" step="50" onchange="setHidMl(this.value)" style="width:80px">
+                        <span class="ef-add-label">mL</span>
                     </div>
                 </div>
                 <div class="agua-bar-track"><div class="agua-bar-fill" id="hidBar"></div></div>
