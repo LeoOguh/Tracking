@@ -971,7 +971,7 @@ body.light .weekly-close { background: rgba(0,0,0,0.06); border-color: rgba(0,0,
    TOPBAR DE HÁBITOS (data + widget + botão meta)
    ═══════════════════════════════════════════════════════════ */
 .habits-topbar {
-    display: flex; align-items: center; gap: 14px;
+    display: flex; align-items: flex-start; gap: 14px;
     margin-bottom: 35px; flex-wrap: wrap;
     padding-top: 20px;
 }
@@ -1233,13 +1233,3 @@ body.light .chart-header-row:hover .chart-collapse-btn { color: rgba(0,0,0,0.5);
 .chart-header-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.35); font-weight: 700; }
 body.light .chart-header-label { color: rgba(0,0,0,0.38); }
 
-/* Hábitos: linha do toggle alinhada à direita */
-.habits-toggle-row {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 12px;
-}
-/* Sobrescreve margin-left:auto nas páginas onde o toggle está em row dedicada */
-.habits-toggle-row .theme-toggle {
-    margin-left: 0;
-}
