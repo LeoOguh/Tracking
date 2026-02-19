@@ -973,7 +973,7 @@ body.light .weekly-close { background: rgba(0,0,0,0.06); border-color: rgba(0,0,
 .habits-topbar {
     display: flex; align-items: flex-start; gap: 14px;
     margin-bottom: 35px; flex-wrap: wrap;
-    padding-top: 20px;
+    padding-top: 20px; width: 100%;
 }
 
 /* month-nav agora é filho do topbar — sem margin-bottom próprio */
