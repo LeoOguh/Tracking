@@ -55,7 +55,7 @@ let medidasPesoChart  = null;
 const MUSCLE_COLORS = {
     'Peito':'#e74c3c','Costas':'#3498db','Ombro':'#9b59b6','Bíceps':'#2ecc71',
     'Tríceps':'#e67e22','Quadríceps':'#f39c12','Posterior':'#1abc9c','Glúteo':'#e91e63',
-    'Panturrilha':'#00bcd4','Abdômen':'#8bc34a','Cardio':'#ff5722','Outro':'#795548'
+    'Panturrilha':'#00bcd4','Abdômen':'#8bc34a','Antebraço':'#e67e22','Cardio':'#ff5722','Outro':'#795548'
 };
 
 const EXERCISES_BY_MUSCLE = {
@@ -63,6 +63,7 @@ const EXERCISES_BY_MUSCLE = {
     'Costas':      ['Puxada frontal','Remada curvada','Remada sentado','Pull-up','Levantamento terra','Serrote','Pullover'],
     'Ombro':       ['Desenvolvimento','Elevação lateral','Elevação frontal','Crucifixo invertido','Arnold press','Face pull'],
     'Bíceps':      ['Rosca direta','Rosca alternada','Rosca martelo','Rosca concentrada','Rosca scott','Rosca 21'],
+    'Antebraço': ['Rosca invertida','Curl barra inversa','Rosca punho','Extensão de punho','Pronação com haltere'],
     'Tríceps':     ['Tríceps pulley','Tríceps testa','Tríceps francês','Mergulho','Tríceps coice','Tríceps banco'],
     'Quadríceps':  ['Agachamento','Leg press','Cadeira extensora','Hack squat','Avanço','Afundo','Búlgaro'],
     'Posterior':   ['Mesa flexora','Cadeira flexora','Stiff','Levantamento terra romeno','Leg curl em pé'],

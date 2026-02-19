@@ -55,8 +55,8 @@ body.light .drawer-footer { border-color: rgba(0,0,0,0.08); }
    ═══════════════════════════════════════════════════════════ */
 .treino-topbar {
     display: flex; align-items: center; gap: 14px;
-    margin-bottom: 28px; width: calc(100vw - 260px);
-    margin-left: 260px; padding: 28px 32px 0; box-sizing: border-box;
+    margin-bottom: 14px; width: calc(100vw - 260px);
+    margin-left: 260px; padding: 12px 32px 0; box-sizing: border-box;
 }
 .treino-topbar-center {
     flex: 1; display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap;
@@ -85,7 +85,7 @@ body.light #treinoDateTitle { color: #1a1a1a; }
 body.light .treino-view-label { color: rgba(0,0,0,0.35); }
 
 /* Página treino — fullscreen minus drawer com GAP */
-.treino-page { width: calc(100vw - 260px); margin-left: 260px; padding: 0 32px 80px; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px; }
+.treino-page { width: calc(100vw - 260px); margin-left: 260px; padding: 0 32px 60px; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px; }
 
 /* ═══════════════════════════════════════════════════════════
    LAYOUT GERAL — fontes maiores em todo o treino
@@ -865,3 +865,27 @@ body.light
 
 /* Body override para layout com drawer */
 body { display: block !important; padding: 0 !important; }
+
+/* ─── MOBILE (sem sidebar) ───────────────────────────────── */
+@media (max-width: 768px) {
+    .side-drawer { display: none; }
+    .treino-topbar {
+        width: 100%;
+        margin-left: 0;
+        padding: 14px 20px 0;
+    }
+    .treino-page {
+        width: 100%;
+        margin-left: 0;
+        padding: 0 16px 80px;
+        gap: 14px;
+    }
+    .plans-wrapper { padding: 0; }
+    .plans-center-panel, .plan-editor-panel { width: 100%; max-width: 100%; }
+    .registro-grid { grid-template-columns: 1fr; }
+    .muscle-avatars-row { gap: 12px; }
+    .avatar-img-wrap { width: 140px; height: 206px; }
+    .pef-ex-block { padding: 12px; }
+    .medidas-container { grid-template-columns: 1fr; }
+    .ts-card { padding: 12px 14px; }
+}
