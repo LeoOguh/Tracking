@@ -55,8 +55,8 @@ body.light .drawer-footer { border-color: rgba(0,0,0,0.08); }
    ═══════════════════════════════════════════════════════════ */
 .treino-topbar {
     display: flex; align-items: center; gap: 14px;
-    margin-bottom: 14px; width: calc(100vw - 260px);
-    margin-left: 260px; padding: 12px 32px 0; box-sizing: border-box;
+    margin-bottom: 10px; width: calc(100vw - 260px);
+    margin-left: 260px; padding: 10px 32px 0; box-sizing: border-box;
 }
 .treino-topbar-center {
     flex: 1; display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap;
@@ -85,7 +85,7 @@ body.light #treinoDateTitle { color: #1a1a1a; }
 body.light .treino-view-label { color: rgba(0,0,0,0.35); }
 
 /* Página treino — fullscreen minus drawer com GAP */
-.treino-page { width: calc(100vw - 260px); margin-left: 260px; padding: 0 32px 60px; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px; }
+.treino-page { width: calc(100vw - 260px); margin-left: 260px; padding: 0 32px 60px; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px; }
 
 /* ═══════════════════════════════════════════════════════════
    LAYOUT GERAL — fontes maiores em todo o treino
@@ -783,7 +783,6 @@ body.light .cal-day-ex-sets { color: rgba(0,0,0,0.4); background: rgba(0,0,0,0.0
     stroke-width: 2;
 }
 
-/* Preview ao lado dos avatares */
 body.light body.light .muscle-selected-display { width: 100%; }
 .pae-form-fields { flex: 1; display: flex; flex-direction: column; gap: 6px; }
 
@@ -798,94 +797,29 @@ body.light .muscle-selected-label { color: rgba(0,0,0,0.4); }
 .muscle-selected-name { font-size: 0.88rem; font-weight: 700; color: rgba(255,255,255,0.8); transition: color 0.2s; }
 body.light .muscle-selected-name { color: rgba(0,0,0,0.7); }
 
-/* ═══════════════════════════════════════════════════════════
-   TIMER DE DESCANSO
-   ═══════════════════════════════════════════════════════════ */
-
-
-
-body.light 
-
-
-body.light 
-
-
-body.light 
-
-
-
-
-body.light 
-
-
-
-
-
-body.light 
-body.light 
-
-body.light 
-
-/* ═══════════════════════════════════════════════════════════
-   TIMER DE DESCANSO
-   ═══════════════════════════════════════════════════════════ */
-
-
-
-body.light 
-
-
-body.light 
-
-
-body.light 
-
-
-
-body.light 
-
-
-body.light 
-
-body.light 
-
-
-
-
-
-
-body.light 
-body.light 
-
-
-
-
-body.light 
-body.light 
-
-/* Body override para layout com drawer */
-body { display: block !important; padding: 0 !important; }
-
 /* ─── MOBILE (sem sidebar) ───────────────────────────────── */
 @media (max-width: 768px) {
-    .side-drawer { display: none; }
+    .side-drawer { display: none !important; }
     .treino-topbar {
-        width: 100%;
-        margin-left: 0;
-        padding: 14px 20px 0;
+        width: 100% !important;
+        margin-left: 0 !important;
+        padding: 10px 16px 0 !important;
     }
     .treino-page {
-        width: 100%;
-        margin-left: 0;
-        padding: 0 16px 80px;
-        gap: 14px;
+        width: 100% !important;
+        margin-left: 0 !important;
+        padding: 0 14px 80px !important;
+        gap: 12px !important;
     }
-    .plans-wrapper { padding: 0; }
-    .plans-center-panel, .plan-editor-panel { width: 100%; max-width: 100%; }
-    .registro-grid { grid-template-columns: 1fr; }
-    .muscle-avatars-row { gap: 12px; }
-    .avatar-img-wrap { width: 140px; height: 206px; }
-    .pef-ex-block { padding: 12px; }
-    .medidas-container { grid-template-columns: 1fr; }
-    .ts-card { padding: 12px 14px; }
+    .treino-stats-view {
+        width: 100% !important;
+        margin-left: 0 !important;
+    }
+    .plans-wrapper { flex-direction: column; }
+    .plans-center-panel { width: 100% !important; }
+    .plan-editor-panel { width: 100% !important; min-width: unset !important; }
+    .registro-grid { grid-template-columns: 1fr !important; }
+    .muscle-avatars-row { gap: 10px; }
+    .avatar-img-wrap { width: 130px !important; height: 191px !important; }
+    .medidas-container { grid-template-columns: 1fr !important; }
 }
