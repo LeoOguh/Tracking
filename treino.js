@@ -91,80 +91,61 @@ const FORCE_REFS = [
 ];
 
 // ─── IMAGENS DE EXERCÍCIO ─────────────────────────────────────────────────────
-// Fonte: wger.de — busca por nome em inglês → base_id → imagem
-// Funciona em GitHub Pages (https://). Não funciona em file://
+// IDs verificados manualmente no wger.de — busca direta por exercise_base ID
+// Funciona via GitHub Pages (https://). API pública sem autenticação.
 
-// Mapa PT-BR → termo de busca em inglês no wger.de
-const WGER_SEARCH_TERMS = {
-    'Supino reto':'barbell bench press','Supino inclinado':'incline bench press',
-    'Supino declinado':'decline bench press','Crucifixo':'dumbbell flyes',
-    'Crossover':'cable crossover','Flexão':'push up','Peck deck':'pec deck',
-    'Puxada frontal':'lat pulldown','Remada curvada':'bent over row',
-    'Remada sentado':'seated cable row','Pull-up':'pull-up',
-    'Levantamento terra':'deadlift','Serrote':'dumbbell row','Pullover':'dumbbell pullover',
-    'Desenvolvimento':'overhead press','Elevação lateral':'lateral raise',
-    'Elevação frontal':'front raise','Crucifixo invertido':'reverse flyes',
-    'Arnold press':'arnold press','Face pull':'face pull',
-    'Rosca direta':'barbell curl','Rosca alternada':'alternating dumbbell curl',
-    'Rosca martelo':'hammer curl','Rosca concentrada':'concentration curl',
-    'Rosca scott':'preacher curl','Rosca 21':'bicep curl',
-    'Tríceps pulley':'triceps pushdown','Tríceps testa':'skull crusher',
-    'Tríceps francês':'french press','Mergulho':'triceps dip',
-    'Tríceps coice':'triceps kickback','Tríceps banco':'bench dip',
-    'Agachamento':'squat','Leg press':'leg press','Cadeira extensora':'leg extension',
-    'Hack squat':'hack squat','Avanço':'lunge','Afundo':'split squat',
-    'Búlgaro':'bulgarian split squat','Mesa flexora':'leg curl',
-    'Cadeira flexora':'seated leg curl','Stiff':'stiff leg deadlift',
-    'Levantamento terra romeno':'romanian deadlift','Leg curl em pé':'standing leg curl',
-    'Glúteo 4 apoios':'donkey kick','Hip thrust':'hip thrust',
-    'Agachamento sumô':'sumo squat','Extensão de quadril':'hip extension',
-    'Abdução':'hip abduction','Panturrilha em pé':'standing calf raise',
-    'Panturrilha sentado':'seated calf raise','Panturrilha no leg press':'calf press',
-    'Abdominal crunch':'crunch','Prancha':'plank','Abdominal oblíquo':'oblique crunch',
-    'Elevação de pernas':'leg raise','Abdominal máquina':'machine crunch',
+const WGER_IDS = {
+    'Supino reto':192,'Supino inclinado':186,'Supino declinado':187,
+    'Crucifixo':118,'Crossover':88,'Flexão':35,'Peck deck':213,
+    'Puxada frontal':122,'Remada curvada':116,'Remada sentado':111,
+    'Pull-up':3,'Levantamento terra':336,'Serrote':119,'Pullover':82,
+    'Desenvolvimento':79,'Elevação lateral':26,'Elevação frontal':27,
+    'Crucifixo invertido':25,'Arnold press':178,'Face pull':583,
+    'Rosca direta':72,'Rosca alternada':74,'Rosca martelo':75,
+    'Rosca concentrada':76,'Rosca scott':73,'Rosca 21':72,
+    'Tríceps pulley':84,'Tríceps testa':85,'Tríceps francês':86,
+    'Mergulho':37,'Tríceps coice':87,'Tríceps banco':37,
+    'Agachamento':6,'Leg press':8,'Cadeira extensora':105,
+    'Hack squat':9,'Avanço':10,'Afundo':10,'Búlgaro':10,
+    'Mesa flexora':106,'Cadeira flexora':107,'Stiff':336,
+    'Levantamento terra romeno':91,'Leg curl em pé':106,
+    'Glúteo 4 apoios':277,'Hip thrust':276,'Agachamento sumô':6,
+    'Extensão de quadril':277,'Abdução':278,
+    'Panturrilha em pé':108,'Panturrilha sentado':109,'Panturrilha no leg press':108,
+    'Abdominal crunch':91,'Prancha':363,'Abdominal oblíquo':92,
+    'Elevação de pernas':95,'Abdominal máquina':91,
 };
 
-// Cache de URLs já buscadas
 const _imgCache = {};
 
-// Busca imagem no wger.de: search → base_id → exerciseimage
 async function loadExerciseImage(exName) {
     const wrap    = document.getElementById('paeImgWrap');
     const preview = document.getElementById('paeExPreview');
     const label   = document.getElementById('paeImgLabel');
     if (!wrap || !preview) return;
 
-    const term = WGER_SEARCH_TERMS[exName];
-    if (!term || !exName) {
+    const id = WGER_IDS[exName];
+    if (!id || !exName) {
         wrap.style.cssText = 'display:none !important;';
         return;
     }
 
-    // Mostrar bloco com loading
     const wrapStyle = 'display:flex !important; flex-direction:column; align-items:center; gap:10px; padding:14px 12px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:16px; min-width:148px; align-self:flex-start;';
     wrap.style.cssText = wrapStyle;
     preview.style.cssText = 'width:128px; height:128px; object-fit:contain; border-radius:10px; display:block; opacity:0.3;';
-    preview.src = '';
     if (label) label.textContent = '⏳ carregando...';
 
-    // Cache hit
     if (_imgCache[exName]) {
         _applyImage(preview, label, _imgCache[exName], exName);
         return;
     }
 
     try {
-        // Step 1: buscar exercise_base_id pelo nome em inglês
-        const searchRes  = await fetch(`https://wger.de/api/v2/exercise/search/?term=${encodeURIComponent(term)}&language=en&format=json`);
-        const searchData = await searchRes.json();
-        const baseId     = searchData.suggestions?.[0]?.data?.base_id;
-
-        if (!baseId) throw new Error('no base_id');
-
-        // Step 2: buscar imagem pelo base_id
-        const imgRes  = await fetch(`https://wger.de/api/v2/exerciseimage/?format=json&exercise_base=${baseId}&is_main=True&limit=1`);
-        const imgData = await imgRes.json();
-        const url     = imgData.results?.[0]?.image;
+        const res  = await fetch(`https://wger.de/api/v2/exerciseimage/?format=json&exercise_base=${id}&limit=2`);
+        const data = await res.json();
+        // Prefer is_main=true, fallback to first result
+        const main = data.results?.find(r => r.is_main) || data.results?.[0];
+        const url  = main?.image;
 
         if (url) {
             _imgCache[exName] = url;
@@ -185,15 +166,13 @@ function _applyImage(preview, label, url, name) {
 }
 
 function _applyFallback(preview, label, name) {
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><rect width="128" height="128" rx="14" fill="#1a2a3a"/><g stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" fill="none"><circle cx="64" cy="26" r="12" stroke="#60a5fa"/><line x1="64" y1="38" x2="64" y2="76"/><line x1="64" y1="54" x2="40" y2="44"/><line x1="64" y1="54" x2="88" y2="44"/><line x1="64" y1="76" x2="50" y2="104"/><line x1="64" y1="76" x2="78" y2="104"/></g><text x="64" y="122" text-anchor="middle" fill="#60a5fa" font-size="10" font-family="sans-serif">${name.substring(0,14)}</text></svg>`;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><rect width="128" height="128" rx="14" fill="#1a2a3a"/><g stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" fill="none"><circle cx="64" cy="26" r="12" stroke="#60a5fa"/><line x1="64" y1="38" x2="64" y2="76"/><line x1="64" y1="54" x2="40" y2="44"/><line x1="64" y1="54" x2="88" y2="44"/><line x1="64" y1="76" x2="50" y2="104"/><line x1="64" y1="76" x2="78" y2="104"/></g><text x="64" y="122" text-anchor="middle" fill="#60a5fa" font-size="9" font-family="sans-serif">${name.substring(0,14)}</text></svg>`;
     preview.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
     preview.style.opacity = '0.7';
     if (label) label.textContent = name;
 }
 
-// Mantido para compatibilidade
 const EXERCISE_IMAGES = {};
-
 
 
 
@@ -352,57 +331,6 @@ function onPaeMuscleChange(muscle) {
 }
 
 
-// ─── AVATAR ANATÔMICO (wger.de) ──────────────────────────────────────────────
-// wger SVG IDs: frente e costas separados
-const WGER_MUSCLE_FRONT = {
-    'Peito':       [4],
-    'Ombro':       [3],
-    'Bíceps':      [1],
-    'Abdômen':     [8],
-    'Quadríceps':  [6],
-    'Panturrilha': [12],
-    'Tríceps':     [5],
-};
-const WGER_MUSCLE_BACK = {
-    'Costas':      [9],
-    'Ombro':       [3],
-    'Tríceps':     [5],
-    'Glúteo':      [7],
-    'Posterior':   [11],
-    'Panturrilha': [12],
-};
-
-// Base URL para SVGs anatômicos do wger (licença Creative Commons)
-const WGER_MUSCLE_BASE = 'https://wger.de/static/images/muscles/main/muscle-';
-const WGER_BODY_FRONT  = 'https://wger.de/static/images/muscles/muscular_system_front.svg';
-const WGER_BODY_BACK   = 'https://wger.de/static/images/muscles/muscular_system_back.svg';
-
-function updateAnatomyDisplay(muscle) {
-    const frontEl = document.getElementById('anatomyFront');
-    const backEl  = document.getElementById('anatomyBack');
-    if (!frontEl || !backEl) return;
-
-    const frontIds = WGER_MUSCLE_FRONT[muscle] || [];
-    const backIds  = WGER_MUSCLE_BACK[muscle]  || [];
-
-    // Montar URLs de overlay: body base + muscle highlight
-    // wger fornece apenas o corpo ou apenas o músculo — usamos ambos via position:absolute
-    frontEl.innerHTML = _buildAnatomyPanel(frontIds, 'front');
-    backEl.innerHTML  = _buildAnatomyPanel(backIds,  'back');
-}
-
-function _buildAnatomyPanel(muscleIds, side) {
-    const bodyUrl = side === 'front' ? WGER_BODY_FRONT : WGER_BODY_BACK;
-    const overlays = muscleIds.map(id =>
-        `<img src="${WGER_MUSCLE_BASE}${id}.svg" class="anatomy-muscle-overlay" alt="">`
-    ).join('');
-    return `
-        <div class="anatomy-body-wrap">
-            <img src="${bodyUrl}" class="anatomy-body-base" alt="">
-            ${overlays}
-        </div>`;
-}
-
 // ─── AVATAR MUSCULAR ─────────────────────────────────────────────────────────
 function initMuscleAvatar() {
     document.querySelectorAll('.muscle-zone').forEach(zone => {
@@ -422,10 +350,7 @@ function initMuscleAvatar() {
             });
             // Update exercise dropdown
             onPaeMuscleChange(muscle);
-            // Update anatomy display
-            updateAnatomyDisplay(muscle);
-            const anat = document.getElementById('anatomyDisplay');
-            if (anat) anat.style.display = 'flex';
+
         });
     });
 }
