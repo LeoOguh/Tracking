@@ -92,7 +92,6 @@
                 <div class="plan-add-ex-form">
                     <div class="pae-title">adicionar exercício</div>
                     <div class="pae-with-preview">
-                        <img id="paeExPreview" class="pae-ex-preview hidden" alt="Preview do exercício">
                         <div class="pae-form-fields">
                             <!-- Avatar muscular interativo -->
                             <div class="muscle-avatar-selector">
@@ -138,6 +137,11 @@
                                     <span class="muscle-selected-name" id="muscleSelectedName">clique no avatar</span>
                                 </div>
                                 <input type="hidden" id="paeMusc" value="">
+                            </div>
+                            <!-- Preview da imagem do exercício selecionado -->
+                            <div class="pae-img-preview-wrap" id="paeImgWrap" style="display:none">
+                                <img id="paeExPreview" class="pae-ex-preview" alt="">
+                                <span class="pae-img-label" id="paeImgLabel"></span>
                             </div>
                             <div class="ef-row-top">
                                 <select id="paeEx" class="f-select" style="flex:1" onchange="updatePaePreview()"><option value="">— exercício —</option></select>

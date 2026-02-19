@@ -1,3 +1,21 @@
+
+/* ─── THUMBNAIL DE EXERCÍCIO ────────────────────────────────────────────────── */
+.ex-thumb {
+    width: 56px; height: 56px; object-fit: cover;
+    border-radius: 10px; flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.04);
+}
+.ex-thumb-placeholder {
+    width: 56px; height: 56px; border-radius: 10px; flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.04);
+    align-items: center; justify-content: center;
+    color: rgba(255,255,255,0.25);
+}
+body.light .ex-thumb { border-color: rgba(0,0,0,0.1); background: rgba(0,0,0,0.04); }
+body.light .ex-thumb-placeholder { border-color: rgba(0,0,0,0.1); background: rgba(0,0,0,0.03); }
+
 /* ═══════════════════════════════════════════════════════════
    DRAWER (menu lateral sempre visível)
    ═══════════════════════════════════════════════════════════ */
@@ -38,7 +56,7 @@ body.light .drawer-footer { border-color: rgba(0,0,0,0.08); }
 .treino-topbar {
     display: flex; align-items: center; gap: 14px;
     margin-bottom: 28px; width: calc(100vw - 260px);
-    margin-left: 260px; padding: 20px 32px 0; box-sizing: border-box;
+    margin-left: 260px; padding: 28px 32px 0; box-sizing: border-box;
 }
 .treino-topbar-center {
     flex: 1; display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap;
@@ -67,7 +85,7 @@ body.light #treinoDateTitle { color: #1a1a1a; }
 body.light .treino-view-label { color: rgba(0,0,0,0.35); }
 
 /* Página treino — fullscreen minus drawer com GAP */
-.treino-page { width: calc(100vw - 260px); margin-left: 260px; padding: 0 32px 80px; box-sizing: border-box; }
+.treino-page { width: calc(100vw - 260px); margin-left: 260px; padding: 0 32px 80px; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px; }
 
 /* ═══════════════════════════════════════════════════════════
    LAYOUT GERAL — fontes maiores em todo o treino
@@ -726,9 +744,27 @@ body.light .cal-day-ex-sets { color: rgba(0,0,0,0.4); background: rgba(0,0,0,0.0
 .btn-save-session:hover { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
 
 /* Preview de exercício no form */
-.pae-with-preview { display: flex; gap: 14px; align-items: flex-start; }
-.pae-ex-preview { width: 120px; height: 120px; object-fit: cover; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); flex-shrink: 0; }
-body.light .pae-ex-preview { border-color: rgba(0,0,0,0.12); background: rgba(0,0,0,0.04); }
+.pae-with-preview { display: flex; flex-direction: column; gap: 14px; }
+/* Preview aparece ao lado do avatar como row */
+.muscle-avatar-selector { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
+.muscle-avatars-row { display: flex; gap: 24px; }
+.pae-img-preview-wrap {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 8px; padding: 12px;
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px; min-width: 140px; align-self: flex-start; margin-top: 28px;
+}
+body.light .pae-img-preview-wrap { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.08); }
+.pae-ex-preview {
+    width: 120px; height: 120px; object-fit: contain;
+    border-radius: 10px; display: block;
+}
+.pae-img-label {
+    font-size: 0.68rem; color: rgba(255,255,255,0.45); text-align: center;
+    text-transform: uppercase; letter-spacing: 0.5px; max-width: 130px;
+}
+body.light .pae-img-label { color: rgba(0,0,0,0.4); }
+.muscle-selected-display { width: 100%; }
 .pae-form-fields { flex: 1; display: flex; flex-direction: column; gap: 6px; }
 
 /* ═══════════════════════════════════════════════════════════
