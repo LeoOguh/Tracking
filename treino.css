@@ -783,20 +783,6 @@ body.light .cal-day-ex-sets { color: rgba(0,0,0,0.4); background: rgba(0,0,0,0.0
     stroke-width: 2;
 }
 
-/* Preview ao lado dos avatares */
-.pae-img-preview-wrap {
-    display: flex; flex-direction: column; align-items: center;
-    gap: 10px; padding: 14px 12px;
-    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 16px; min-width: 220px; align-self: flex-start;
-}
-body.light .pae-img-preview-wrap { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.08); }
-.pae-ex-preview { width: 200px; height: 200px; object-fit: contain; border-radius: 12px; display: block; }
-.pae-img-label {
-    font-size: 0.66rem; color: rgba(255,255,255,0.5); text-align: center;
-    text-transform: uppercase; letter-spacing: 0.5px; max-width: 136px; line-height: 1.3;
-}
-body.light .pae-img-label { color: rgba(0,0,0,0.4); }
 .muscle-selected-display { width: 100%; }
 .pae-form-fields { flex: 1; display: flex; flex-direction: column; gap: 6px; }
 
