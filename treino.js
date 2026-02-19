@@ -93,9 +93,6 @@ const FORCE_REFS = [
 
 const EXERCISE_IMAGES = {}; // imagens desativadas
 
-
-
-
 function dateKey(d)  { return d.toISOString().split('T')[0]; }
 function todayKey()  { return dateKey(new Date()); }
 function saveLog()   { localStorage.setItem('clarity_workout_log',   JSON.stringify(workoutLog)); }
@@ -992,7 +989,6 @@ function deleteMedida(date) {
     bodyMeasures=bodyMeasures.filter(m=>m.date!==date);
     saveMeasures(); renderMedidas();
 }
-
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 renderPlansList();
