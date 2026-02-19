@@ -103,6 +103,140 @@
                                         <div class="avatar-img-wrap">
                                             <img src="avatar_front.png" class="avatar-img" alt="frente">
                                             <svg class="avatar-overlay" viewBox="0 0 587 864" xmlns="http://www.w3.org/2000/svg">
+                                                <polygon class="muscle-zone" data-muscle="Peito"       points="168,200 392,200 392,280 279,290 168,280"/>
+                                                <polygon class="muscle-zone" data-muscle="Ombro"       points="125,175 175,175 199,280 151,280"/>
+                                                <polygon class="muscle-zone" data-muscle="Ombro"       points="394,175 458,175 408,280 360,280"/>
+                                                <polygon class="muscle-zone" data-muscle="Bíceps"      points="125,280 199,280 199,450 108,450"/>
+                                                <polygon class="muscle-zone" data-muscle="Bíceps"      points="360,280 445,280 451,450 360,450"/>
+                                                <polygon class="muscle-zone" data-muscle="Abdômen"     points="210,280 350,280 368,490 195,490"/>
+                                                <polygon class="muscle-zone" data-muscle="Quadríceps"  points="195,490 276,490 261,660 203,660"/>
+                                                <polygon class="muscle-zone" data-muscle="Quadríceps"  points="289,490 369,490 368,660 312,660"/>
+                                                <polygon class="muscle-zone" data-muscle="Panturrilha" points="207,680 254,680 245,800 200,800"/>
+                                                <polygon class="muscle-zone" data-muscle="Panturrilha" points="319,680 367,680 368,800 329,800"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div class="avatar-wrap">
+                                        <div class="avatar-side-label">costas</div>
+                                        <div class="avatar-img-wrap">
+                                            <img src="avatar_back.png" class="avatar-img" alt="costas">
+                                            <svg class="avatar-overlay" viewBox="0 0 587 864" xmlns="http://www.w3.org/2000/svg">
+                                                <polygon class="muscle-zone" data-muscle="Costas"      points="184,185 419,185 385,440 218,440"/>
+                                                <polygon class="muscle-zone" data-muscle="Ombro"       points="130,175 195,175 217,280 169,280"/>
+                                                <polygon class="muscle-zone" data-muscle="Ombro"       points="388,175 472,175 433,280 386,280"/>
+                                                <polygon class="muscle-zone" data-muscle="Tríceps"     points="139,280 217,280 147,470 133,470"/>
+                                                <polygon class="muscle-zone" data-muscle="Tríceps"     points="386,280 433,280 467,470 452,470"/>
+                                                <polygon class="muscle-zone" data-muscle="Glúteo"      points="215,490 385,490 384,580 215,580"/>
+                                                <polygon class="muscle-zone" data-muscle="Posterior"   points="215,580 283,580 271,660 214,660"/>
+                                                <polygon class="muscle-zone" data-muscle="Posterior"   points="307,580 385,580 380,660 326,660"/>
+                                                <polygon class="muscle-zone" data-muscle="Panturrilha" points="216,680 269,680 254,800 204,800"/>
+                                                <polygon class="muscle-zone" data-muscle="Panturrilha" points="325,680 379,680 390,800 340,800"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treino - Clarity</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="treino.css">
+</head>
+<body>
+
+    <!-- MENU LATERAL (drawer) -->
+    <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+    <aside class="side-drawer" id="sideDrawer">
+        <div class="drawer-header">
+            <span class="drawer-title">treino</span>
+            <button class="drawer-close" onclick="closeDrawer()">✕</button>
+        </div>
+        <nav class="drawer-nav">
+            <button class="drawer-item drawer-item--active" id="dItemPlanos"   onclick="setView('planos')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                meus planos
+            </button>
+            <button class="drawer-item" id="dItemRegistro" onclick="setView('registro')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4z"/></svg>
+                registrar treino
+            </button>
+            <button class="drawer-item" id="dItemStats"    onclick="setView('stats')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                estatísticas
+            </button>
+            <button class="drawer-item" id="dItemMedidas"  onclick="setView('medidas')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg>
+                medidas corporais
+            </button>
+        </nav>
+        <div class="drawer-footer">
+            <button class="btn-topbar-action" onclick="exportTreino()" style="width:100%;justify-content:center;gap:8px;border-radius:12px">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                exportar dados
+            </button>
+        </div>
+    </aside>
+
+    <!-- TOPBAR -->
+    <div class="treino-topbar">
+        <button class="drawer-trigger" onclick="openDrawer()" id="drawerBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+        </button>
+        <div class="treino-topbar-center">
+            <div class="treino-date-nav">
+                <button class="nav-btn" onclick="changeDate(-1)">‹</button>
+                <div id="treinoDateTitle">...</div>
+                <button class="nav-btn" onclick="changeDate(1)">›</button>
+            </div>
+            <div class="treino-view-label" id="treinoViewLabel">planos</div>
+        </div>
+        <button class="theme-toggle" onclick="toggleTheme()" id="themeToggleBtn">☀ claro</button>
+    </div>
+
+    <!-- ═══════ PLANOS ═══════ -->
+    <div id="viewPlanos" class="treino-page">
+        <div class="plans-wrapper" id="plansWrapper">
+            <!-- Estado: centralizado (só lista) -->
+            <div class="plans-center-panel glass-panel" id="plansCenterPanel">
+                <div class="plans-header">
+                    <span class="plans-title">meus planos de treino</span>
+                    <button class="btn-new-plan" onclick="openNewPlan()">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        novo plano
+                    </button>
+                </div>
+                <div id="plansList" class="plans-list-body"></div>
+            </div>
+
+            <!-- Editor (aparece à direita) -->
+            <div class="plan-editor-card glass-panel" id="planEditor" style="display:none">
+                <div class="plan-editor-header">
+                    <input type="text" id="planNameInput" class="f-input plan-name-input" placeholder="nome do plano (ex: Treino A)">
+                    <div class="plan-editor-actions">
+                        <button class="btn-del-plan" id="btnDelPlan" onclick="deletePlan()" style="display:none">apagar</button>
+                        <button class="btn-save-plan" onclick="savePlanEdit()">✓ salvar</button>
+                        <button class="plan-editor-close" onclick="closePlanEditor()" title="Fechar">✕</button>
+                    </div>
+                </div>
+                <div id="planMuscleGroups" class="plan-muscle-groups"></div>
+                <div class="plan-add-ex-form">
+                    <div class="pae-title">adicionar exercício</div>
+                    <div class="pae-with-preview">
+                        <div class="pae-form-fields">
+                            <!-- Avatar muscular interativo -->
+                            <div class="muscle-avatar-selector">
+                                <div class="muscle-avatar-label">selecione o músculo clicando no avatar:</div>
+                                <div class="muscle-avatar-main-row">
+                                <div class="muscle-avatars-row">
+                                    <div class="avatar-wrap">
+                                        <div class="avatar-side-label">frente</div>
+                                        <div class="avatar-img-wrap">
+                                            <img src="avatar_front.png" class="avatar-img" alt="frente">
+                                            <svg class="avatar-overlay" viewBox="0 0 587 864" xmlns="http://www.w3.org/2000/svg">
                                                 <polygon class="muscle-zone" data-muscle="Peito"       points="168,200 392,200 392,310 279,325 168,310"/>
                                                 <polygon class="muscle-zone" data-muscle="Ombro"       points="134,175 195,175 181,310 134,310"/>
                                                 <polygon class="muscle-zone" data-muscle="Ombro"       points="379,175 458,175 425,310 379,310"/>
@@ -341,56 +475,6 @@
         <a href="notas.html" class="fn-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg><span>notas</span></a>
     </nav>
 
-
-    <!-- MODAL TIMER DE DESCANSO -->
-    <div class="rest-timer-overlay" id="restTimerOverlay">
-        <div class="rest-timer-modal">
-            <div class="rest-timer-header">
-                <span class="rest-timer-title">⏱ descanso</span>
-                <button class="rest-timer-skip" onclick="skipRestTimer()">pular ✕</button>
-            </div>
-            <div class="rest-timer-display" id="restTimerDisplay">60</div>
-            <div class="rest-timer-progress">
-                <div class="rest-timer-progress-fill" id="restTimerProgressFill"></div>
-            </div>
-            <div class="rest-timer-presets">
-                <button class="rest-preset-btn" onclick="setRestTimer(30)">30s</button>
-                <button class="rest-preset-btn rest-preset-btn--active" onclick="setRestTimer(60)">1min</button>
-                <button class="rest-preset-btn" onclick="setRestTimer(90)">1m30</button>
-                <button class="rest-preset-btn" onclick="setRestTimer(120)">2min</button>
-            </div>
-            <div class="rest-timer-ex-info" id="restTimerExInfo"></div>
-        </div>
-    </div>
-
-    <!-- MODAL: TIMER DE DESCANSO -->
-    <div class="rest-timer-overlay" id="restTimerOverlay">
-        <div class="rest-timer-modal">
-            <div class="rest-timer-header">
-                <span class="rest-timer-title">⏱ descanso</span>
-                <button class="rest-timer-skip" onclick="skipRestTimer()">pular</button>
-            </div>
-            <div class="rest-timer-circle">
-                <svg class="rest-timer-svg" viewBox="0 0 120 120">
-                    <circle class="rest-timer-bg" cx="60" cy="60" r="52"/>
-                    <circle class="rest-timer-progress" id="restTimerProgress" cx="60" cy="60" r="52"/>
-                </svg>
-                <div class="rest-timer-count" id="restTimerCount">60</div>
-            </div>
-            <div class="rest-timer-info" id="restTimerInfo">próxima série em breve</div>
-            <div class="rest-timer-btns">
-                <button class="rest-btn rest-btn--minus" onclick="adjustRestTimer(-15)">−15s</button>
-                <button class="rest-btn rest-btn--plus"  onclick="adjustRestTimer(+15)">+15s</button>
-            </div>
-            <div class="rest-timer-presets">
-                <button class="rest-preset" onclick="setRestDuration(30)">30s</button>
-                <button class="rest-preset rest-preset--active" onclick="setRestDuration(60)">1 min</button>
-                <button class="rest-preset" onclick="setRestDuration(90)">1:30</button>
-                <button class="rest-preset" onclick="setRestDuration(120)">2 min</button>
-                <button class="rest-preset" onclick="setRestDuration(180)">3 min</button>
-            </div>
-        </div>
-    </div>
 
     <script src="treino.js"></script>
 </body>

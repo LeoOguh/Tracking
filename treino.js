@@ -427,7 +427,6 @@ function addSetToAccordion(id, muscle, name, equip) {
     document.getElementById(`${id}_w`).focus();
     renderAccordionChips(id);
     // Disparar timer de descanso
-    if (typeof openRestTimer === 'function') openRestTimer(name);
 }
 
 function renderAccordionChips(id) {
@@ -993,103 +992,6 @@ function deleteMedida(date) {
     bodyMeasures=bodyMeasures.filter(m=>m.date!==date);
     saveMeasures(); renderMedidas();
 }
-
-// ─── TIMER DE DESCANSO ────────────────────────────────────────────────────────
-let restTimerDuration = parseInt(localStorage.getItem('rest_timer_duration') || '60');
-let restTimerRemaining = 0;
-let restTimerInterval  = null;
-let restTimerTotal     = 0;
-
-function setRestDuration(secs) {
-    restTimerDuration = secs;
-    localStorage.setItem('rest_timer_duration', secs);
-    document.querySelectorAll('.rest-preset').forEach(b => {
-        b.classList.toggle('rest-preset--active', parseInt(b.textContent) === secs ||
-            (b.textContent === '1 min' && secs === 60) ||
-            (b.textContent === '1:30' && secs === 90) ||
-            (b.textContent === '2 min' && secs === 120) ||
-            (b.textContent === '3 min' && secs === 180));
-    });
-    if (restTimerInterval) {
-        clearInterval(restTimerInterval);
-        restTimerRemaining = secs;
-        restTimerTotal     = secs;
-        tickRestTimer();
-        startRestTimerInterval();
-    }
-}
-
-function openRestTimer(exerciseName) {
-    restTimerRemaining = restTimerDuration;
-    restTimerTotal     = restTimerDuration;
-    const info = document.getElementById('restTimerInfo');
-    if (info && exerciseName) info.textContent = `após: ${exerciseName}`;
-    if (restTimerInterval) clearInterval(restTimerInterval);
-    tickRestTimer();
-    startRestTimerInterval();
-    document.getElementById('restTimerOverlay').classList.add('open');
-    // Play beep if available
-    try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        osc.connect(ctx.destination);
-        osc.frequency.value = 880;
-        osc.start();
-        osc.stop(ctx.currentTime + 0.15);
-    } catch(e) {}
-}
-
-function skipRestTimer() {
-    if (restTimerInterval) clearInterval(restTimerInterval);
-    restTimerInterval = null;
-    document.getElementById('restTimerOverlay').classList.remove('open');
-}
-
-function adjustRestTimer(delta) {
-    restTimerRemaining = Math.max(5, restTimerRemaining + delta);
-    if (restTimerRemaining > restTimerTotal) restTimerTotal = restTimerRemaining;
-    tickRestTimer();
-}
-
-function startRestTimerInterval() {
-    restTimerInterval = setInterval(() => {
-        restTimerRemaining--;
-        tickRestTimer();
-        if (restTimerRemaining <= 0) {
-            clearInterval(restTimerInterval);
-            restTimerInterval = null;
-            // End beep
-            try {
-                const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                [440, 550, 660].forEach((f, i) => {
-                    const osc = ctx.createOscillator();
-                    osc.connect(ctx.destination);
-                    osc.frequency.value = f;
-                    osc.start(ctx.currentTime + i * 0.15);
-                    osc.stop(ctx.currentTime + i * 0.15 + 0.12);
-                });
-            } catch(e) {}
-            setTimeout(skipRestTimer, 800);
-        }
-    }, 1000);
-}
-
-function tickRestTimer() {
-    const countEl = document.getElementById('restTimerCount');
-    const progEl  = document.getElementById('restTimerProgress');
-    if (!countEl) return;
-    const mins = Math.floor(restTimerRemaining / 60);
-    const secs = restTimerRemaining % 60;
-    countEl.textContent = mins > 0 ? `${mins}:${String(secs).padStart(2,'0')}` : String(restTimerRemaining);
-    // Circle progress
-    const circumference = 2 * Math.PI * 52; // r=52
-    const pct = restTimerTotal > 0 ? restTimerRemaining / restTimerTotal : 1;
-    if (progEl) {
-        progEl.style.strokeDasharray  = circumference;
-        progEl.style.strokeDashoffset = circumference * (1 - pct);
-    }
-}
-
 
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
