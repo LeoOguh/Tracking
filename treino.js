@@ -91,29 +91,40 @@ const FORCE_REFS = [
 ];
 
 // ─── IMAGENS DE EXERCÍCIO ─────────────────────────────────────────────────────
-// IDs verificados manualmente no wger.de — busca direta por exercise_base ID
-// Funciona via GitHub Pages (https://). API pública sem autenticação.
+// API: exercisedb.dev — gratuita, sem chave, GIFs para todos exercícios
+// Busca pelo nome em inglês → retorna gifUrl
 
-const WGER_IDS = {
-    'Supino reto':192,'Supino inclinado':186,'Supino declinado':187,
-    'Crucifixo':118,'Crossover':88,'Flexão':35,'Peck deck':213,
-    'Puxada frontal':122,'Remada curvada':116,'Remada sentado':111,
-    'Pull-up':3,'Levantamento terra':336,'Serrote':119,'Pullover':82,
-    'Desenvolvimento':79,'Elevação lateral':26,'Elevação frontal':27,
-    'Crucifixo invertido':25,'Arnold press':178,'Face pull':583,
-    'Rosca direta':72,'Rosca alternada':74,'Rosca martelo':75,
-    'Rosca concentrada':76,'Rosca scott':73,'Rosca 21':72,
-    'Tríceps pulley':84,'Tríceps testa':85,'Tríceps francês':86,
-    'Mergulho':37,'Tríceps coice':87,'Tríceps banco':37,
-    'Agachamento':6,'Leg press':8,'Cadeira extensora':105,
-    'Hack squat':9,'Avanço':10,'Afundo':10,'Búlgaro':10,
-    'Mesa flexora':106,'Cadeira flexora':107,'Stiff':336,
-    'Levantamento terra romeno':91,'Leg curl em pé':106,
-    'Glúteo 4 apoios':277,'Hip thrust':276,'Agachamento sumô':6,
-    'Extensão de quadril':277,'Abdução':278,
-    'Panturrilha em pé':108,'Panturrilha sentado':109,'Panturrilha no leg press':108,
-    'Abdominal crunch':91,'Prancha':363,'Abdominal oblíquo':92,
-    'Elevação de pernas':95,'Abdominal máquina':91,
+const EXERCISE_EN_NAMES = {
+    'Supino reto':'barbell bench press','Supino inclinado':'incline bench press',
+    'Supino declinado':'decline bench press','Crucifixo':'dumbbell fly',
+    'Crossover':'cable crossover','Flexão':'push-up','Peck deck':'pec deck fly',
+    'Puxada frontal':'lat pulldown','Remada curvada':'bent over row',
+    'Remada sentado':'seated cable row','Pull-up':'pull up',
+    'Levantamento terra':'deadlift','Serrote':'one arm dumbbell row',
+    'Pullover':'dumbbell pullover','Desenvolvimento':'overhead press',
+    'Elevação lateral':'lateral raise','Elevação frontal':'front raise',
+    'Crucifixo invertido':'reverse fly','Arnold press':'arnold press',
+    'Face pull':'face pull','Rosca direta':'barbell curl',
+    'Rosca alternada':'dumbbell alternate bicep curl',
+    'Rosca martelo':'hammer curl','Rosca concentrada':'concentration curl',
+    'Rosca scott':'ez bar preacher curl','Rosca 21':'barbell curl',
+    'Tríceps pulley':'triceps pushdown','Tríceps testa':'ez bar skullcrusher',
+    'Tríceps francês':'ez barbell french press','Mergulho':'dip',
+    'Tríceps coice':'dumbbell kickback','Tríceps banco':'bench dip',
+    'Agachamento':'barbell squat','Leg press':'leg press',
+    'Cadeira extensora':'leg extension','Hack squat':'hack squat',
+    'Avanço':'barbell lunge','Afundo':'split squat','Búlgaro':'bulgarian squat',
+    'Mesa flexora':'lying leg curl','Cadeira flexora':'seated leg curl',
+    'Stiff':'stiff-leg deadlift','Levantamento terra romeno':'romanian deadlift',
+    'Leg curl em pé':'standing leg curl',
+    'Glúteo 4 apoios':'donkey kickback','Hip thrust':'barbell hip thrust',
+    'Agachamento sumô':'sumo squat','Extensão de quadril':'hip extension',
+    'Abdução':'hip abduction','Panturrilha em pé':'standing calf raise',
+    'Panturrilha sentado':'seated calf raise',
+    'Panturrilha no leg press':'calf press on the leg press machine',
+    'Abdominal crunch':'crunch','Prancha':'plank',
+    'Abdominal oblíquo':'oblique crunch','Elevação de pernas':'hanging leg raise',
+    'Abdominal máquina':'cable crunch',
 };
 
 const _imgCache = {};
@@ -124,15 +135,15 @@ async function loadExerciseImage(exName) {
     const label   = document.getElementById('paeImgLabel');
     if (!wrap || !preview) return;
 
-    const id = WGER_IDS[exName];
-    if (!id || !exName) {
+    const enName = EXERCISE_EN_NAMES[exName];
+    if (!enName) {
         wrap.style.cssText = 'display:none !important;';
         return;
     }
 
-    const wrapStyle = 'display:flex !important; flex-direction:column; align-items:center; gap:10px; padding:14px 12px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:16px; min-width:148px; align-self:flex-start;';
-    wrap.style.cssText = wrapStyle;
-    preview.style.cssText = 'width:128px; height:128px; object-fit:contain; border-radius:10px; display:block; opacity:0.3;';
+    const wrapVisible = 'display:flex !important; flex-direction:column; align-items:center; gap:10px; padding:16px 14px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:16px; min-width:220px; align-self:flex-start;';
+    wrap.style.cssText = wrapVisible;
+    preview.style.cssText = 'width:200px; height:200px; object-fit:contain; border-radius:12px; display:block; opacity:0.3;';
     if (label) label.textContent = '⏳ carregando...';
 
     if (_imgCache[exName]) {
@@ -141,15 +152,44 @@ async function loadExerciseImage(exName) {
     }
 
     try {
+        const url = `https://exercisedb.dev/api/v1/exercises?name=${encodeURIComponent(enName)}&limit=1`;
+        const res  = await fetch(url);
+        const data = await res.json();
+        const exercises = data.exercises || data;
+        const gifUrl = Array.isArray(exercises) ? exercises[0]?.gifUrl : null;
+
+        if (gifUrl) {
+            _imgCache[exName] = gifUrl;
+            _applyImage(preview, label, gifUrl, exName);
+        } else {
+            // Fallback: try wger.de with known IDs
+            await _tryWger(exName, preview, label);
+        }
+    } catch(e) {
+        await _tryWger(exName, preview, label);
+    }
+}
+
+// Fallback: wger.de com IDs verificados
+const _WGER_IDS = {
+    'Supino reto':192,'Flexão':35,'Puxada frontal':122,'Remada curvada':116,
+    'Pull-up':3,'Levantamento terra':336,'Desenvolvimento':79,'Elevação lateral':26,
+    'Rosca direta':72,'Rosca martelo':75,'Tríceps pulley':84,'Agachamento':6,
+    'Leg press':8,'Cadeira extensora':105,'Avanço':10,'Prancha':363,
+    'Elevação de pernas':95,'Mesa flexora':106,'Hip thrust':276,
+    'Panturrilha em pé':108,'Abdominal crunch':91,
+};
+
+async function _tryWger(exName, preview, label) {
+    const id = _WGER_IDS[exName];
+    if (!id) { _applyFallback(preview, label, exName); return; }
+    try {
         const res  = await fetch(`https://wger.de/api/v2/exerciseimage/?format=json&exercise_base=${id}&limit=2`);
         const data = await res.json();
-        // Prefer is_main=true, fallback to first result
         const main = data.results?.find(r => r.is_main) || data.results?.[0];
-        const url  = main?.image;
-
-        if (url) {
-            _imgCache[exName] = url;
-            _applyImage(preview, label, url, exName);
+        if (main?.image) {
+            _imgCache[exName] = main.image;
+            _applyImage(preview, label, main.image, exName);
         } else {
             _applyFallback(preview, label, exName);
         }
@@ -166,7 +206,7 @@ function _applyImage(preview, label, url, name) {
 }
 
 function _applyFallback(preview, label, name) {
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><rect width="128" height="128" rx="14" fill="#1a2a3a"/><g stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" fill="none"><circle cx="64" cy="26" r="12" stroke="#60a5fa"/><line x1="64" y1="38" x2="64" y2="76"/><line x1="64" y1="54" x2="40" y2="44"/><line x1="64" y1="54" x2="88" y2="44"/><line x1="64" y1="76" x2="50" y2="104"/><line x1="64" y1="76" x2="78" y2="104"/></g><text x="64" y="122" text-anchor="middle" fill="#60a5fa" font-size="9" font-family="sans-serif">${name.substring(0,14)}</text></svg>`;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect width="200" height="200" rx="14" fill="#1a2a3a"/><g stroke="#3b82f6" stroke-width="3" stroke-linecap="round" fill="none"><circle cx="100" cy="40" r="16" stroke="#60a5fa"/><line x1="100" y1="56" x2="100" y2="116"/><line x1="100" y1="80" x2="64" y2="66"/><line x1="100" y1="80" x2="136" y2="66"/><line x1="100" y1="116" x2="78" y2="160"/><line x1="100" y1="116" x2="122" y2="160"/></g><text x="100" y="188" text-anchor="middle" fill="#60a5fa" font-size="13" font-family="sans-serif">${name.substring(0,18)}</text></svg>`;
     preview.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
     preview.style.opacity = '0.7';
     if (label) label.textContent = name;
