@@ -96,52 +96,92 @@
                             <!-- Avatar muscular interativo -->
                             <div class="muscle-avatar-selector">
                                 <div class="muscle-avatar-label">selecione o músculo clicando no avatar:</div>
+                                <div class="muscle-avatar-main-row">
                                 <div class="muscle-avatars-row">
                                     <div class="avatar-wrap">
                                         <div class="avatar-side-label">frente</div>
-                                        <svg class="body-svg" viewBox="0 0 120 280" xmlns="http://www.w3.org/2000/svg">
-                                            <path class="muscle-zone" data-muscle="Peito" d="M38,80 Q50,72 60,75 Q70,72 82,80 Q80,100 60,105 Q40,100 38,80Z"/>
-                                            <path class="muscle-zone" data-muscle="Ombro" d="M25,68 Q35,60 42,70 Q40,85 30,88 Q20,80 25,68Z"/>
-                                            <path class="muscle-zone" data-muscle="Ombro" d="M78,70 Q85,60 95,68 Q100,80 90,88 Q80,85 78,70Z"/>
-                                            <path class="muscle-zone" data-muscle="Bíceps" d="M22,90 Q30,86 36,95 Q34,114 24,116 Q16,108 22,90Z"/>
-                                            <path class="muscle-zone" data-muscle="Bíceps" d="M84,95 Q90,86 98,90 Q104,108 94,116 Q84,114 84,95Z"/>
-                                            <path class="muscle-zone" data-muscle="Abdômen" d="M44,106 Q60,110 76,106 Q78,140 60,144 Q42,140 44,106Z"/>
-                                            <path class="muscle-zone" data-muscle="Quadríceps" d="M36,168 Q46,162 54,168 Q56,200 50,210 Q38,205 34,190Z"/>
-                                            <path class="muscle-zone" data-muscle="Quadríceps" d="M66,168 Q74,162 84,168 Q86,190 82,210 Q70,205 64,200Z"/>
-                                            <path class="muscle-zone" data-muscle="Panturrilha" d="M38,215 Q48,212 52,220 Q50,248 44,252 Q36,245 38,215Z"/>
-                                            <path class="muscle-zone" data-muscle="Panturrilha" d="M68,215 Q72,212 82,215 Q84,245 76,252 Q70,248 68,220Z"/>
-                                            <ellipse cx="60" cy="40" rx="18" ry="22" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
-                                            <path d="M36,62 Q28,66 24,88 L20,120 Q18,130 22,135 L26,160 Q28,165 34,168 L42,170 L42,262 L46,265 L52,265 L54,262 L55,215 L65,215 L66,262 L68,265 L74,265 L78,262 L78,170 L86,168 Q92,165 94,160 L98,135 Q102,130 100,120 L96,88 Q92,66 84,62" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                                        <svg class="body-svg" viewBox="0 0 160 360" xmlns="http://www.w3.org/2000/svg">
+                                            <!-- Corpo base -->
+                                            <ellipse cx="80" cy="42" rx="24" ry="28" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
+                                            <path d="M48,70 Q36,76 30,108 L24,150 Q22,162 28,168 L34,200 L34,330 L42,334 L52,334 L56,330 L58,268 L72,268 L74,330 L78,334 L88,334 L96,330 L96,200 L102,168 Q108,162 106,150 L100,108 Q94,76 82,70 L80,68 L78,70 Q66,76 48,70Z" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
+                                            <!-- Braços -->
+                                            <path d="M30,108 Q20,112 16,130 L12,160 Q10,172 18,178 L26,180 L28,168 L30,108Z" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+                                            <path d="M100,108 Q110,112 114,130 L118,160 Q120,172 112,178 L104,180 L102,168 L100,108Z" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+                                            <!-- Antebraços -->
+                                            <path d="M12,160 L10,190 Q8,202 14,206 L22,208 L26,180 L18,178Z" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+                                            <path d="M118,160 L120,190 Q122,202 116,206 L108,208 L104,180 L112,178Z" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+
+                                            <!-- ZONAS CLICÁVEIS — frente -->
+                                            <!-- Peito -->
+                                            <path class="muscle-zone" data-muscle="Peito" d="M48,74 Q64,66 80,70 Q96,66 112,74 Q110,102 80,108 Q50,102 48,74Z"/>
+                                            <!-- Ombro esq -->
+                                            <path class="muscle-zone" data-muscle="Ombro" d="M30,68 Q44,58 52,72 Q50,94 36,98 Q22,90 30,68Z"/>
+                                            <!-- Ombro dir -->
+                                            <path class="muscle-zone" data-muscle="Ombro" d="M108,68 Q116,58 130,68 Q138,90 124,98 Q110,94 108,72Z"/>
+                                            <!-- Bíceps esq -->
+                                            <path class="muscle-zone" data-muscle="Bíceps" d="M16,108 Q28,102 34,116 Q32,148 18,150 Q6,140 16,108Z"/>
+                                            <!-- Bíceps dir -->
+                                            <path class="muscle-zone" data-muscle="Bíceps" d="M114,108 Q120,102 144,108 Q154,140 128,150 Q114,148 114,116Z"/>
+                                            <!-- Abdômen -->
+                                            <path class="muscle-zone" data-muscle="Abdômen" d="M54,110 Q80,116 106,110 Q108,156 80,162 Q52,156 54,110Z"/>
+                                            <!-- Quadríceps esq -->
+                                            <path class="muscle-zone" data-muscle="Quadríceps" d="M36,206 Q52,198 60,208 Q62,252 54,264 Q38,258 34,240Z"/>
+                                            <!-- Quadríceps dir -->
+                                            <path class="muscle-zone" data-muscle="Quadríceps" d="M100,206 Q108,198 124,208 Q126,240 122,264 Q106,258 98,252Z"/>
+                                            <!-- Panturrilha esq -->
+                                            <path class="muscle-zone" data-muscle="Panturrilha" d="M36,268 Q50,264 56,276 Q54,314 46,320 Q34,312 36,268Z"/>
+                                            <!-- Panturrilha dir -->
+                                            <path class="muscle-zone" data-muscle="Panturrilha" d="M98,268 Q106,264 124,268 Q126,312 114,320 Q106,314 98,276Z"/>
+                                            <!-- Tríceps esq (frente) — zona pequena no braço -->
+                                            <path class="muscle-zone" data-muscle="Tríceps" d="M10,150 Q20,148 24,160 L22,180 Q14,178 8,168Z" opacity="0.01"/>
                                         </svg>
                                     </div>
                                     <div class="avatar-wrap">
                                         <div class="avatar-side-label">costas</div>
-                                        <svg class="body-svg" viewBox="0 0 120 280" xmlns="http://www.w3.org/2000/svg">
-                                            <path class="muscle-zone" data-muscle="Costas" d="M36,62 Q60,58 84,62 Q86,90 80,110 Q70,118 60,120 Q50,118 40,110 Q34,90 36,62Z"/>
-                                            <path class="muscle-zone" data-muscle="Ombro" d="M24,65 Q34,58 40,70 Q38,86 28,88 Q18,80 24,65Z"/>
-                                            <path class="muscle-zone" data-muscle="Ombro" d="M80,70 Q86,58 96,65 Q102,80 92,88 Q82,86 80,70Z"/>
-                                            <path class="muscle-zone" data-muscle="Tríceps" d="M18,88 Q26,84 32,94 Q30,112 22,114 Q14,106 18,88Z"/>
-                                            <path class="muscle-zone" data-muscle="Tríceps" d="M88,94 Q94,84 102,88 Q106,106 98,114 Q88,112 88,94Z"/>
-                                            <path class="muscle-zone" data-muscle="Glúteo" d="M38,148 Q60,144 82,148 Q84,168 72,172 Q60,175 48,172 Q36,168 38,148Z"/>
-                                            <path class="muscle-zone" data-muscle="Posterior" d="M36,172 Q46,168 54,174 Q56,202 50,210 Q38,206 34,192Z"/>
-                                            <path class="muscle-zone" data-muscle="Posterior" d="M66,174 Q74,168 84,172 Q86,192 82,210 Q70,206 64,202Z"/>
-                                            <path class="muscle-zone" data-muscle="Panturrilha" d="M36,214 Q46,210 52,218 Q50,246 44,250 Q36,243 36,214Z"/>
-                                            <path class="muscle-zone" data-muscle="Panturrilha" d="M68,218 Q74,210 84,214 Q84,243 76,250 Q70,246 68,218Z"/>
-                                            <ellipse cx="60" cy="40" rx="18" ry="22" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
-                                            <path d="M36,62 Q28,66 24,88 L20,120 Q18,130 22,135 L26,160 Q28,165 34,168 L42,170 L42,262 L46,265 L52,265 L54,262 L55,215 L65,215 L66,262 L68,265 L74,265 L78,262 L78,170 L86,168 Q92,165 94,160 L98,135 Q102,130 100,120 L96,88 Q92,66 84,62" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                                        <svg class="body-svg" viewBox="0 0 160 360" xmlns="http://www.w3.org/2000/svg">
+                                            <!-- Corpo base costas -->
+                                            <ellipse cx="80" cy="42" rx="24" ry="28" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
+                                            <path d="M48,70 Q36,76 30,108 L24,150 Q22,162 28,168 L34,200 L34,330 L42,334 L52,334 L56,330 L58,268 L72,268 L74,330 L78,334 L88,334 L96,330 L96,200 L102,168 Q108,162 106,150 L100,108 Q94,76 82,70 L80,68 L78,70 Q66,76 48,70Z" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
+                                            <path d="M30,108 Q20,112 16,130 L12,160 Q10,172 18,178 L26,180 L28,168 L30,108Z" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+                                            <path d="M100,108 Q110,112 114,130 L118,160 Q120,172 112,178 L104,180 L102,168 L100,108Z" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+                                            <path d="M12,160 L10,190 Q8,202 14,206 L22,208 L26,180 L18,178Z" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+                                            <path d="M118,160 L120,190 Q122,202 116,206 L108,208 L104,180 L112,178Z" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+
+                                            <!-- ZONAS CLICÁVEIS — costas -->
+                                            <!-- Costas -->
+                                            <path class="muscle-zone" data-muscle="Costas" d="M48,72 Q80,64 112,72 Q114,108 106,130 Q92,142 80,144 Q68,142 54,130 Q46,108 48,72Z"/>
+                                            <!-- Ombro esq costas -->
+                                            <path class="muscle-zone" data-muscle="Ombro" d="M28,68 Q42,58 50,74 Q48,96 34,100 Q20,90 28,68Z"/>
+                                            <!-- Ombro dir costas -->
+                                            <path class="muscle-zone" data-muscle="Ombro" d="M110,74 Q118,58 132,68 Q140,90 126,100 Q112,96 110,74Z"/>
+                                            <!-- Tríceps esq -->
+                                            <path class="muscle-zone" data-muscle="Tríceps" d="M14,108 Q26,102 32,118 Q30,152 14,154 Q4,142 14,108Z"/>
+                                            <!-- Tríceps dir -->
+                                            <path class="muscle-zone" data-muscle="Tríceps" d="M118,108 Q128,102 146,108 Q156,142 146,154 Q130,152 118,118Z"/>
+                                            <!-- Glúteo -->
+                                            <path class="muscle-zone" data-muscle="Glúteo" d="M48,186 Q80,178 112,186 Q114,214 96,220 Q80,224 64,220 Q46,214 48,186Z"/>
+                                            <!-- Posterior esq -->
+                                            <path class="muscle-zone" data-muscle="Posterior" d="M36,220 Q52,214 62,224 Q64,260 56,272 Q40,266 34,248Z"/>
+                                            <!-- Posterior dir -->
+                                            <path class="muscle-zone" data-muscle="Posterior" d="M98,224 Q108,214 124,220 Q126,248 120,272 Q104,266 96,260Z"/>
+                                            <!-- Panturrilha esq costas -->
+                                            <path class="muscle-zone" data-muscle="Panturrilha" d="M38,276 Q52,270 58,282 Q56,318 46,324 Q34,316 38,276Z"/>
+                                            <!-- Panturrilha dir costas -->
+                                            <path class="muscle-zone" data-muscle="Panturrilha" d="M102,276 Q108,270 122,276 Q126,316 114,324 Q104,318 102,282Z"/>
                                         </svg>
                                     </div>
                                 </div>
+                                <!-- Preview ao lado dos avatares -->
+                                <div class="pae-img-preview-wrap" id="paeImgWrap" style="display:none">
+                                    <img id="paeExPreview" class="pae-ex-preview" alt="">
+                                    <span class="pae-img-label" id="paeImgLabel"></span>
+                                </div>
+                                </div><!-- end muscle-avatar-main-row -->
                                 <div class="muscle-selected-display">
                                     <span class="muscle-selected-label">selecionado:</span>
                                     <span class="muscle-selected-name" id="muscleSelectedName">clique no avatar</span>
                                 </div>
                                 <input type="hidden" id="paeMusc" value="">
-                            </div>
-                            <!-- Preview da imagem do exercício selecionado -->
-                            <div class="pae-img-preview-wrap" id="paeImgWrap" style="display:none">
-                                <img id="paeExPreview" class="pae-ex-preview" alt="">
-                                <span class="pae-img-label" id="paeImgLabel"></span>
                             </div>
                             <div class="ef-row-top">
                                 <select id="paeEx" class="f-select" style="flex:1" onchange="updatePaePreview()"><option value="">— exercício —</option></select>

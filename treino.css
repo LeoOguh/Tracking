@@ -746,48 +746,41 @@ body.light .cal-day-ex-sets { color: rgba(0,0,0,0.4); background: rgba(0,0,0,0.0
 /* Preview de exercício no form */
 .pae-with-preview { display: flex; flex-direction: column; gap: 14px; }
 /* Preview aparece ao lado do avatar como row */
-.muscle-avatar-selector { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
-.muscle-avatars-row { display: flex; gap: 24px; }
+/* ─── AVATAR MUSCULAR ──────────────────────────────────── */
+.muscle-avatar-selector { display: flex; flex-direction: column; gap: 12px; }
+.muscle-avatar-main-row { display: flex; gap: 20px; align-items: flex-start; }
+.muscle-avatars-row { display: flex; gap: 28px; align-items: flex-start; }
+.avatar-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.body-svg { width: 120px; height: 270px; cursor: pointer; }
+.muscle-zone {
+    fill: rgba(59,130,246,0.12);
+    stroke: rgba(59,130,246,0.3);
+    stroke-width: 1;
+    cursor: pointer;
+    transition: fill 0.15s, stroke 0.15s;
+}
+.muscle-zone:hover { fill: rgba(59,130,246,0.35); stroke: rgba(96,165,250,0.8); }
+.muscle-zone--active { fill: rgba(59,130,246,0.55) !important; stroke: #60a5fa !important; stroke-width: 1.5; }
+
+/* Preview ao lado dos avatares */
 .pae-img-preview-wrap {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 8px; padding: 12px;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 10px; padding: 14px 12px;
     background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 16px; min-width: 140px; align-self: flex-start; margin-top: 28px;
+    border-radius: 16px; min-width: 148px; align-self: flex-start;
 }
 body.light .pae-img-preview-wrap { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.08); }
-.pae-ex-preview {
-    width: 120px; height: 120px; object-fit: contain;
-    border-radius: 10px; display: block;
-}
+.pae-ex-preview { width: 128px; height: 128px; object-fit: contain; border-radius: 10px; display: block; }
 .pae-img-label {
-    font-size: 0.68rem; color: rgba(255,255,255,0.45); text-align: center;
-    text-transform: uppercase; letter-spacing: 0.5px; max-width: 130px;
+    font-size: 0.66rem; color: rgba(255,255,255,0.5); text-align: center;
+    text-transform: uppercase; letter-spacing: 0.5px; max-width: 136px; line-height: 1.3;
 }
 body.light .pae-img-label { color: rgba(0,0,0,0.4); }
 .muscle-selected-display { width: 100%; }
 .pae-form-fields { flex: 1; display: flex; flex-direction: column; gap: 6px; }
 
-/* ═══════════════════════════════════════════════════════════
-   AVATAR MUSCULAR INTERATIVO
-   ═══════════════════════════════════════════════════════════ */
-.muscle-avatar-selector { display: flex; flex-direction: column; gap: 10px; }
-.muscle-avatar-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.35); }
-body.light .muscle-avatar-label { color: rgba(0,0,0,0.4); }
-.muscle-avatars-row { display: flex; gap: 20px; align-items: flex-start; }
-.avatar-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-.avatar-side-label { font-size: 0.58rem; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.25); }
-body.light .avatar-side-label { color: rgba(0,0,0,0.3); }
-.body-svg { width: 90px; height: 210px; cursor: pointer; }
-.muscle-zone {
-    fill: rgba(255,255,255,0.08);
-    stroke: rgba(255,255,255,0.15);
-    stroke-width: 0.8;
-    transition: all 0.15s;
-    cursor: pointer;
-}
-.muscle-zone:hover { fill: rgba(59,130,246,0.3); stroke: rgba(59,130,246,0.6); }
-.muscle-zone--active { fill: rgba(59,130,246,0.45) !important; stroke: #3b82f6 !important; stroke-width: 1.2; }
-body.light .muscle-zone { fill: rgba(0,0,0,0.08); stroke: rgba(0,0,0,0.2); }
+/* Light mode muscle avatar */
+body.light .muscle-zone { fill: rgba(0,0,0,0.06); stroke: rgba(0,0,0,0.18); }
 body.light .muscle-zone:hover { fill: rgba(59,130,246,0.2); stroke: rgba(59,130,246,0.5); }
 body.light .muscle-zone--active { fill: rgba(59,130,246,0.3) !important; stroke: #2563eb !important; }
 .muscle-selected-display { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; }
