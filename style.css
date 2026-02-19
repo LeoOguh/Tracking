@@ -26,7 +26,7 @@ body {
     background-attachment: fixed;
     color: var(--text-main);
     margin: 0; padding: 40px 20px;
-    padding-top: 72px;
+    padding-top: 28px;
     display: flex; flex-direction: column; align-items: center;
     min-height: 100vh;
     transition: background 0.4s, color 0.4s;
@@ -1232,3 +1232,14 @@ body.light .chart-header-row:hover { background: rgba(0,0,0,0.02); }
 body.light .chart-header-row:hover .chart-collapse-btn { color: rgba(0,0,0,0.5); }
 .chart-header-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.35); font-weight: 700; }
 body.light .chart-header-label { color: rgba(0,0,0,0.38); }
+
+/* Hábitos: linha do toggle alinhada à direita */
+.habits-toggle-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 12px;
+}
+/* Sobrescreve margin-left:auto nas páginas onde o toggle está em row dedicada */
+.habits-toggle-row .theme-toggle {
+    margin-left: 0;
+}
