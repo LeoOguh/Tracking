@@ -357,6 +357,8 @@ function addExToPlan() {
         sel.innerHTML += '<option value="__custom__">digitar manualmente…</option>';
     }
     renderPlanEditorGroups();
+    attachPaeExListener();
+    updatePaePreview();
 }
 
 function removePlanEx(idx) {
@@ -1155,20 +1157,35 @@ function addSetToAccordion(id, muscle, name, equip) {
 renderPlansList();
 renderRegistro();
 initMuscleAvatar();
+attachPaeExListener();
 
 // ─── Preview de imagem do exercício ──────────────────────────────────────────
 function updatePaePreview() {
-    const exName  = document.getElementById('paeEx').value;
+    const exSel   = document.getElementById('paeEx');
+    const exName  = exSel ? exSel.value : '';
     const preview = document.getElementById('paeExPreview');
     const wrap    = document.getElementById('paeImgWrap');
     const label   = document.getElementById('paeImgLabel');
     const img     = EXERCISE_IMAGES[exName];
 
+    if (!wrap || !preview) return;
+
     if (img && exName) {
         preview.src = img;
+        preview.style.display = 'block';
         if (label) label.textContent = exName;
-        if (wrap)  wrap.style.display = 'flex';
+        wrap.style.cssText = 'display:flex !important; flex-direction:column; align-items:center; gap:8px; padding:12px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:16px; min-width:140px; align-self:flex-start; margin-top:28px;';
     } else {
-        if (wrap) wrap.style.display = 'none';
+        wrap.style.cssText = 'display:none !important;';
+        preview.src = '';
+    }
+}
+
+// Garantir que o listener está sempre ativo (re-chamado após rebuild do select)
+function attachPaeExListener() {
+    const sel = document.getElementById('paeEx');
+    if (sel) {
+        sel.removeEventListener('change', updatePaePreview);
+        sel.addEventListener('change', updatePaePreview);
     }
 }
