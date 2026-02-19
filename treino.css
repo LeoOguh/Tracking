@@ -751,16 +751,37 @@ body.light .cal-day-ex-sets { color: rgba(0,0,0,0.4); background: rgba(0,0,0,0.0
 .muscle-avatar-main-row { display: flex; gap: 20px; align-items: flex-start; }
 .muscle-avatars-row { display: flex; gap: 28px; align-items: flex-start; }
 .avatar-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-.body-svg { width: 120px; height: 270px; cursor: pointer; }
+.avatar-img-wrap {
+    position: relative;
+    width: 130px;
+    height: 191px; /* maintains 587:864 ratio */
+}
+.avatar-img {
+    width: 100%; height: 100%;
+    object-fit: contain; display: block;
+    border-radius: 8px;
+}
+.avatar-overlay {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    cursor: pointer;
+}
 .muscle-zone {
-    fill: rgba(59,130,246,0.12);
-    stroke: rgba(59,130,246,0.3);
-    stroke-width: 1;
+    fill: rgba(59,130,246,0.0);
+    stroke: rgba(59,130,246,0.0);
+    stroke-width: 2;
     cursor: pointer;
     transition: fill 0.15s, stroke 0.15s;
 }
-.muscle-zone:hover { fill: rgba(59,130,246,0.35); stroke: rgba(96,165,250,0.8); }
-.muscle-zone--active { fill: rgba(59,130,246,0.55) !important; stroke: #60a5fa !important; stroke-width: 1.5; }
+.muscle-zone:hover {
+    fill: rgba(59,130,246,0.3);
+    stroke: rgba(96,165,250,0.7);
+}
+.muscle-zone--active {
+    fill: rgba(59,130,246,0.45) !important;
+    stroke: #60a5fa !important;
+    stroke-width: 2;
+}
 
 /* Preview ao lado dos avatares */
 .pae-img-preview-wrap {
