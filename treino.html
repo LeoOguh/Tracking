@@ -211,9 +211,9 @@
                 <!-- Stats do dia -->
                 <div class="reg-stats-row" id="treinoStatsRow"></div>
 
-                <!-- Seletor de plano + Animal lado a lado -->
-                <div class="reg-selector-row">
-                <div class="glass-panel plan-day-selector">
+                <!-- Seletor de plano -->
+                <div id="regSelectorWrap">
+                <div class="glass-panel plan-day-selector" id="planDaySelector">
                     <div class="pds-label">qual treino você realizou hoje?</div>
                     <div class="pds-plans-row" id="pdsPlansList"></div>
                     <div class="pds-divider">ou</div>
@@ -222,8 +222,7 @@
                         cardio / outro
                     </button>
                 </div><!-- end plan-day-selector -->
-                <div class="glass-panel reg-animal-panel" id="regAnimalPanel" style="display:none"></div>
-                </div><!-- end reg-selector-row -->
+                </div>
 
                 <!-- Exercícios do plano -->
                 <div id="planExercisesForm" style="display:none">
@@ -267,8 +266,11 @@
                 <!-- Lista do dia -->
                 <div class="exercises-list-panel glass-panel">
                     <div class="exercises-list-header">
-                        <div class="form-title" id="exercisesListTitle">exercícios do dia</div>
-                        <button class="btn-del-session hidden" id="btnDelSession" onclick="deleteSession()">🗑 apagar treino</button>
+                        <div class="eel-title-center" id="exercisesListTitle">exercícios do dia</div>
+                        <div class="eel-header-actions">
+                            <button class="btn-edit-session hidden" id="btnEditSession" onclick="editSession()">✏️ editar</button>
+                            <button class="btn-del-session hidden" id="btnDelSession" onclick="deleteSession()">🗑 apagar treino</button>
+                        </div>
                     </div>
                     <div id="exercisesList"></div>
                 </div>
@@ -290,6 +292,7 @@
                     <div class="rhp-title">histórico recente</div>
                     <div id="recentHistoryList"></div>
                 </div>
+                <div class="glass-panel reg-animal-panel" id="regAnimalPanel" style="display:none"></div>
             </div>
         </div>
     </div>

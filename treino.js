@@ -636,7 +636,11 @@ function renderExercisesList() {
     const title= document.getElementById('exercisesListTitle');
     title.textContent = key===todayKey() ? 'exercícios de hoje' : `exercícios — ${new Date(key+'T00:00:00').toLocaleDateString('pt-br',{day:'2-digit',month:'2-digit'})}`;
     const delBtn = document.getElementById('btnDelSession');
+    const editBtn = document.getElementById('btnEditSession');
+    const selectorWrap = document.getElementById('regSelectorWrap');
     if (delBtn) delBtn.classList.toggle('hidden', !exes.length);
+    if (editBtn) editBtn.classList.toggle('hidden', !exes.length);
+    if (selectorWrap) selectorWrap.style.display = exes.length ? 'none' : '';
     if (!exes.length) { el.innerHTML=`<div class="empty-exercises">nenhum exercício registrado neste dia</div>`; return; }
 
     // Group by muscle
@@ -687,8 +691,9 @@ function renderExercisesList() {
         }).join('');
 
         return `<div class="eel-muscle-group" draggable="true" data-muscle-idx="${gi}"
-                     ondragstart="eelDragStart(event,${gi})" ondragover="eelDragOver(event)" ondrop="eelDrop(event,${gi})" ondragend="eelDragEnd(event)">
-            <div class="eel-muscle-header" style="border-left:4px solid ${color};background:${color}11">
+                     ondragstart="eelDragStart(event,${gi})" ondragover="eelDragOver(event)" ondrop="eelDrop(event,${gi})" ondragend="eelDragEnd(event)"
+                     style="background:${color}10;border-color:${color}30">
+            <div class="eel-muscle-header" style="border-left:4px solid ${color};background:${color}15">
                 <span class="eel-muscle-name" style="color:${color}">${muscle}</span>
                 <span class="eel-muscle-count">${groups[muscle].length} exerc.</span>
                 <span class="eel-drag-handle">⠿</span>
@@ -719,6 +724,12 @@ function eelDrop(e, targetIdx) {
     saveLog();
     renderExercisesList();
     eelDragIdx = null;
+}
+
+// ─── EDIT SESSION (show selector again) ──────────────────────────────────────
+function editSession() {
+    const selectorWrap = document.getElementById('regSelectorWrap');
+    if (selectorWrap) selectorWrap.style.display = '';
 }
 
 // ─── GRÁFICO PROGRESSÃO ───────────────────────────────────────────────────────
