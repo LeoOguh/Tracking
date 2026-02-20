@@ -1064,7 +1064,7 @@ body.light .ee-name { color: rgba(0,0,0,0.8); }
 .acc-input-area {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
 }
 .acc-mode-toggle {
     display: flex;
@@ -1077,17 +1077,18 @@ body.light .ee-name { color: rgba(0,0,0,0.8); }
 .acc-fields-row {
     display: flex;
     align-items: flex-end;
-    gap: 6px;
+    gap: 8px;
     flex-wrap: nowrap;
 }
 .acc-field {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 4px;
     min-width: 0;
+    flex: 0 0 90px;
 }
-.acc-field-sm  { flex: 0 0 60px; }
-.acc-field-grow { flex: 1; min-width: 60px; }
+.acc-field-sm  { flex: 0 0 65px; }
+.acc-field-grow { flex: 1; min-width: 70px; }
 .acc-num { width: 100% !important; }
 .acc-btn-add {
     flex-shrink: 0;
