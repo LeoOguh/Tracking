@@ -94,6 +94,13 @@ const FORCE_REFS = [
 
 const EXERCISE_IMAGES = {}; // imagens desativadas
 
+// ─── NOME COMPLETO DO EXERCÍCIO (inclui obs se houver) ───────────────────────
+function exFullName(name, obs) {
+    const o = (obs||'').trim();
+    return o ? `${name} (${o})` : name;
+}
+
+
 function dateKey(d) {
     const y = d.getFullYear();
     const m = String(d.getMonth()+1).padStart(2,'0');
@@ -371,14 +378,13 @@ function selectPlan(id) {
         const color = MUSCLE_COLORS[muscle] || '#7f8c8d';
         return `<div class="pef-muscle-group">
             <div class="pef-muscle-group-header" style="border-left:4px solid ${color}"><span class="pef-muscle-title-big" style="color:${color}">${muscle}</span></div>
-            ${exes.map(ex => {
-                const hint = getProgressionSuggestion(ex.name);
+            <div class="pef-exes-grid">${exes.map(ex => {
+                const hint = getProgressionSuggestion(exFullName(ex.name, ex.obs));
                 const id   = `pef_${ex._planIdx}`;
                 return `<div class="pef-ex-block glass-panel">
                     <div class="pef-ex-header">
                         <span class="pef-ex-equip">${ex.equip==='maquina'?'⚙️':'🏋️'}</span>
-                        <span class="pef-ex-name">${ex.name}</span>
-                        ${(ex.obs&&ex.obs.trim())?`<span class="pef-ex-obs-inline">📝 ${ex.obs}</span>`:''}
+                        <span class="pef-ex-name">${exFullName(ex.name, ex.obs)}</span>
                     </div>
                     ${hint?`<div class="progression-hint" style="margin:0 0 8px"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>${hint}</div>`:''}
                     <div class="ef-row-add" id="${id}_row">
@@ -392,13 +398,8 @@ function selectPlan(id) {
                                 <input type="number" id="${id}_w" class="f-input ef-num-input" min="0" step="0.5" placeholder="0">
                             </div>
                             <div id="${id}_pl_wrap" class="hidden">
-                                <label class="ef-add-label">placas / lado</label>
-                                <div class="plates-count-row">
-                                    <button class="pl-count-btn" onclick="changePlateCount('${id}',-1)">−</button>
-                                    <span class="pl-count-val" id="${id}_plcount">0</span>
-                                    <button class="pl-count-btn" onclick="changePlateCount('${id}',1)">+</button>
-                                    <span class="pl-count-unit">placas</span>
-                                </div>
+                                <label class="ef-add-label">placas</label>
+                                <input type="number" id="${id}_pw" class="f-input ef-num-input" min="0" step="1" placeholder="0">
                             </div>
                                                 </div>
                         <div class="ef-add-field ef-add-field--sm">
@@ -409,11 +410,11 @@ function selectPlan(id) {
                             <label class="ef-add-label">obs.</label>
                             <input type="text" id="${id}_n" class="f-input" placeholder="opcional">
                         </div>
-                        <button class="btn-add-set" onclick="addSetToAccordion('${id}','${muscle}','${ex.name.replace(/'/g,"\\'")}','${ex.equip||"livre"}')">+ adicionar</button>
+                        <button class="btn-add-set" onclick="addSetToAccordion('${id}','${muscle}','${exFullName(ex.name,ex.obs).replace(/'/g,"\\'")}','${ex.equip||"livre"}')">+ adicionar</button>
                     </div>
                     <div class="pef-chips-wrap" id="${id}_chips"></div>
                 </div>`;
-            }).join('')}
+            }).join('')}</div>
         </div>`;
     }).join('');
     document.getElementById('planExercisesForm').style.display = 'block';
@@ -436,9 +437,9 @@ function addSetToAccordion(id, muscle, name, equip) {
     let weight, isPlates = false;
     if (inPlatesMode) {
         isPlates = true;
-        weight = plateCountMap[id] || 0; // store plate count as "weight" with special flag
+        weight = parseFloat(document.getElementById(id+'_pw')?.value) || 0;
     } else {
-        weight = parseFloat(document.getElementById(`${id}_w`).value) || 0;
+        weight = parseFloat(document.getElementById(id+'_w').value) || 0;
     }
     const count  = parseInt(document.getElementById(`${id}_s`).value)   || 1;
     const note   = document.getElementById(`${id}_n`).value.trim();
@@ -447,10 +448,15 @@ function addSetToAccordion(id, muscle, name, equip) {
     if (existing) existing.count += count;
     else accordionSets[id].sets.push({weight,count,note,plates:isPlates||false});
     // Reset campos mas mantém foco em carga
-    document.getElementById(`${id}_w`).value = '';
+    if (inPlatesMode) {
+        const pwEl = document.getElementById(id+'_pw');
+        if (pwEl) { pwEl.value = ''; pwEl.focus(); }
+    } else {
+        document.getElementById(`${id}_w`).value = '';
+        document.getElementById(`${id}_w`).focus();
+    }
     document.getElementById(`${id}_s`).value = '1';
     document.getElementById(`${id}_n`).value = '';
-    document.getElementById(`${id}_w`).focus();
     renderAccordionChips(id);
     // Disparar timer de descanso
 }
@@ -621,7 +627,13 @@ function renderExercisesList() {
     const delBtn = document.getElementById('btnDelSession');
     if (delBtn) delBtn.classList.toggle('hidden', !exes.length);
     if (!exes.length) { el.innerHTML=`<div class="empty-exercises">nenhum exercício registrado neste dia</div>`; return; }
-    el.innerHTML = exes.map(ex => {
+    // Sort by muscle group so same muscles are together
+    const sortedExes = [...exes].sort((a,b) => {
+        const ma = a.muscle||'', mb = b.muscle||'';
+        if (ma !== mb) return ma.localeCompare(mb);
+        return (a.name||'').localeCompare(b.name||'');
+    });
+    el.innerHTML = sortedExes.map(ex => {
         const color = MUSCLE_COLORS[ex.muscle]||'#7f8c8d';
         if (ex.type==='cardio') {
             const parts = [ex.duration&&`${ex.duration} min`, ex.distance&&`${ex.distance} km`, ex.intensity].filter(Boolean);
@@ -852,7 +864,7 @@ function openCalDayModal(key) {
                     <span class="cal-day-ex-name">${ex.name}${exMaxLift?' · '+exMaxLift+'kg':''}</span>
                     <span class="cal-day-ex-sets">${total} série${total!==1?'s':''}</span>
                 </div>`;
-            }).join('')}
+            }).join('')}</div>
         </div>`;
     document.getElementById('calDayOverlay').classList.add('open');
 }

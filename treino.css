@@ -978,9 +978,10 @@ body.light *::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.2); }
 /* ─── CALCULADORA DE PLACAS ─────────────────────────────────────────────────── */
 .weight-mode-toggle {
     display: flex; border-radius: 8px; overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.1); margin-bottom: 6px;
-    width: fit-content;
+    border: 1px solid rgba(255,255,255,0.1); margin-bottom: 4px;
+    width: 100%;
 }
+.wm-btn { flex: 1; }
 .wm-btn {
     font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1px;
     padding: 4px 12px; background: transparent; border: none;
@@ -1031,25 +1032,22 @@ body { overflow-x: hidden; }
    ══════════════════════════════════════════════════════════════ */
 
 /* Top row: stats (compact) + animal side-by-side */
-.reg-top-row {
-    display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap;
+/* Selector row: plan selector + animal side by side */
+.reg-selector-row {
+    display: flex; gap: 14px; align-items: stretch; flex-wrap: wrap;
 }
-.reg-top-row .reg-stats-row {
-    grid-column: unset;
-    display: flex; flex-direction: column; gap: 8px;
-    flex: 0 0 auto; min-width: 140px;
+.reg-selector-row .plan-day-selector {
+    flex: 1; min-width: 200px;
 }
-.reg-top-row .ts-card {
-    padding: 12px 16px; gap: 3px; border-radius: 14px;
-}
-.reg-top-row .ts-label { font-size: 0.58rem; }
-.reg-top-row .ts-value { font-size: 1.4rem; }
-.reg-top-row .ts-sub   { font-size: 0.6rem; }
-
-/* Animal panel next to stats */
-.reg-top-row .reg-animal-panel {
-    flex: 1; min-width: 0; padding: 14px 16px; align-self: stretch;
+.reg-selector-row .reg-animal-panel {
+    flex: 1; min-width: 220px; padding: 14px 18px;
     display: flex; align-items: center;
+}
+
+/* Stats row stays as 3-column grid */
+.reg-stats-row {
+    grid-column: 1/-1;
+    display: grid; grid-template-columns: repeat(3,1fr); gap: 16px;
 }
 .reg-animal-inner { gap: 10px; flex-wrap: wrap; }
 .animal-emoji-big { font-size: 2.4rem; line-height: 1; }
@@ -1080,9 +1078,9 @@ body.light .pef-muscle-group-header { background: rgba(0,0,0,0.03); }
 .pef-muscle-group { margin: 10px 0; }
 
 /* 2-column exercise grid in accordion */
-#pefExercisesAccordion .pef-muscle-group > :not(.pef-muscle-group-header) {
+.pef-exes-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 10px;
 }
 .pef-ex-block {
@@ -1096,25 +1094,7 @@ body.light .pef-muscle-group-header { background: rgba(0,0,0,0.03); }
 .ef-add-field { min-width: 70px; }
 
 /* ─── PLATES COUNTER ─────────────────────────────────────────────────────── */
-.plates-count-row {
-    display: flex; align-items: center; gap: 8px; margin-top: 4px;
-}
-.pl-count-btn {
-    width: 28px; height: 28px; border-radius: 8px;
-    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
-    color: rgba(255,255,255,0.7); font-size: 1rem; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.15s; flex-shrink: 0;
-}
-.pl-count-btn:hover { background: rgba(255,255,255,0.16); color: #fff; }
-.pl-count-val {
-    font-size: 1.2rem; font-weight: 700; min-width: 24px; text-align: center;
-    color: rgba(255,255,255,0.9);
-}
-.pl-count-unit { font-size: 0.65rem; color: rgba(255,255,255,0.3); }
-body.light .pl-count-btn { background: rgba(0,0,0,0.06); border-color: rgba(0,0,0,0.1); color: rgba(0,0,0,0.6); }
-body.light .pl-count-val { color: rgba(0,0,0,0.85); }
-body.light .pl-count-unit { color: rgba(0,0,0,0.3); }
+/* plates counter replaced with simple input */
 
 /* ─── EXERCISE ENTRIES (lista do dia) — redesigned ──────────────────────── */
 .exercise-entry {

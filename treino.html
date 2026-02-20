@@ -184,13 +184,11 @@
         <div class="registro-grid">
             <!-- Coluna principal -->
             <div class="registro-main">
-                <!-- Stats do dia + Animal lado a lado -->
-                <div class="reg-top-row">
-                    <div class="reg-stats-row" id="treinoStatsRow"></div>
-                    <div class="glass-panel reg-animal-panel" id="regAnimalPanel" style="display:none"></div>
-                </div>
+                <!-- Stats do dia -->
+                <div class="reg-stats-row" id="treinoStatsRow"></div>
 
-                <!-- Seletor de plano -->
+                <!-- Seletor de plano + Animal lado a lado -->
+                <div class="reg-selector-row">
                 <div class="glass-panel plan-day-selector">
                     <div class="pds-label">qual treino você realizou hoje?</div>
                     <div class="pds-plans-row" id="pdsPlansList"></div>
@@ -199,7 +197,9 @@
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                         cardio / outro
                     </button>
-                </div>
+                </div><!-- end plan-day-selector -->
+                <div class="glass-panel reg-animal-panel" id="regAnimalPanel" style="display:none"></div>
+                </div><!-- end reg-selector-row -->
 
                 <!-- Exercícios do plano -->
                 <div id="planExercisesForm" style="display:none">

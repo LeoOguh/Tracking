@@ -10,6 +10,16 @@
 </head>
 <body>
 
+    <!-- CALENDÁRIO POPUP -->
+    <div class="date-picker-popup hidden" id="datePicker">
+        <div class="dp-header">
+            <button class="dp-nav" onclick="dpPrevMonth()">‹</button>
+            <span id="dpMonthLabel"></span>
+            <button class="dp-nav" onclick="dpNextMonth()">›</button>
+        </div>
+        <div class="dp-grid" id="dpGrid"></div>
+    </div>
+
 <div class="estudos-page-layout">
     <!-- DRAWER LATERAL -->
     <aside class="side-drawer study-drawer">
@@ -35,7 +45,8 @@
         <!-- Navegação de data com largura fixa para botões não se moverem -->
         <div class="study-date-nav">
             <button class="nav-btn" onclick="changeDate(-1)">‹</button>
-            <div id="dateTitle">...</div>
+            <div id="dateTitle" onclick="toggleDatePicker()" style="cursor:pointer" title="clique para escolher data">...</div>
+            <button class="today-btn hidden" id="todayBtn" onclick="goToToday()">hoje</button>
             <button class="nav-btn" onclick="changeDate(1)">›</button>
         </div>
 
