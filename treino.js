@@ -413,22 +413,24 @@ function selectPlan(id) {
                             <button class="btn-add-set acc-btn-add" onclick="addSetToAccordion('${id}','${muscle}','${exFullName(ex.name,ex.obs).replace(/'/g,"\\'")}','${ex.equip||'livre'}')">+ add</button>
                         </div>
                     </div>
-                    <script>
-                    (function(){
-                        const row = document.getElementById('${id}_w')?.closest('.acc-fields-row');
-                        if(row) row.addEventListener('keydown', function(e){
-                            if(e.key==='Enter'){e.preventDefault(); addSetToAccordion('${id}','${muscle}','${exFullName(ex.name,ex.obs).replace(/'/g,"\\'")}','${ex.equip||'livre'}');}
-                        });
-                    })();
-                    </script>
                                         <div class="pef-chips-wrap" id="${id}_chips"></div>
                 </div>`;
             }).join('')}</div>
         </div>`;
     }).join('');
-    document.getElementById('planExercisesForm').style.display = 'block';
+    document.getElementById('planExercisesForm').style.display = 'flex';
     document.getElementById('formCardio').classList.add('hidden');
     document.getElementById('btnCardioToggle').classList.remove('active');
+
+    // Enter key: delegate on accordion to trigger + add
+    accordion.addEventListener('keydown', function(e) {
+        if (e.key !== 'Enter') return;
+        const block = e.target.closest('.pef-ex-block');
+        if (!block) return;
+        e.preventDefault();
+        const btn = block.querySelector('.acc-btn-add');
+        if (btn) btn.click();
+    });
 }
 
 function cancelPlanSelection() {
