@@ -1084,17 +1084,19 @@ body.light .ee-name { color: rgba(0,0,0,0.8); }
     align-items: flex-end;
     gap: 8px;
     flex-wrap: nowrap;
+    width: 100%;
 }
 .acc-field {
     display: flex;
     flex-direction: column;
     gap: 4px;
     min-width: 0;
-    flex: 0 0 90px;
+    flex: 1 1 0;
 }
-.acc-field-sm  { flex: 0 0 65px; }
-.acc-field-grow { flex: 1; min-width: 70px; }
-.acc-num { width: 100% !important; }
+.acc-field-sm  { flex: 0 0 55px; }
+.acc-field-grow { flex: 2 1 0; min-width: 0; }
+.acc-num { width: 100% !important; max-width: 100% !important; box-sizing: border-box !important; }
+.acc-fields-row .ef-num-input { width: 100% !important; }
 .acc-btn-add {
     flex-shrink: 0;
     align-self: flex-end;
