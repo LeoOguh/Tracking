@@ -194,6 +194,7 @@ body.light .btn-topbar-action:hover { background: rgba(0,0,0,0.1); color: #1a1a1
     border: 1px solid var(--glass-border);
     border-radius: 22px;
     box-shadow: 0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06);
+    transform: translateZ(0); /* fix GPU rendering glitch with backdrop-filter */
 }
 body.light .glass-panel {
     background: rgba(255,255,255,0.65);

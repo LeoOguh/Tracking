@@ -101,7 +101,6 @@
                         <button class="plan-editor-close" onclick="closePlanEditor()" title="Fechar">✕</button>
                     </div>
                 </div>
-                <div id="planMuscleGroups" class="plan-muscle-groups"></div>
                 <div class="plan-add-ex-form">
                     <div class="pae-title">adicionar exercício</div>
                     <div class="pae-with-preview">
@@ -116,18 +115,30 @@
                                         <div class="avatar-img-wrap">
                                             <img src="avatar_front.png" class="avatar-img" alt="frente">
                                             <svg class="avatar-overlay" viewBox="0 0 587 864" xmlns="http://www.w3.org/2000/svg">
-                                                <polygon class="muscle-zone" data-muscle="Peito"       points="175,200 385,200 385,270 280,280 175,270"/>
-                                                <polygon class="muscle-zone" data-muscle="Ombro"       points="155,165 220,165 200,225 155,225"/>
-                                                <polygon class="muscle-zone" data-muscle="Ombro"       points="366,165 432,165 432,225 397,225"/>
-                                                <polygon class="muscle-zone" data-muscle="Bíceps"      points="125,225 186,225 170,355 124,355"/>
-                                                <polygon class="muscle-zone" data-muscle="Bíceps"      points="374,225 436,225 436,355 393,355"/>
-                                                <polygon class="muscle-zone" data-muscle="Antebraço"   points="124,355 167,355 137,450 103,450"/>
-                                                <polygon class="muscle-zone" data-muscle="Antebraço"   points="393,355 436,355 456,450 422,450"/>
-                                                <polygon class="muscle-zone" data-muscle="Abdômen"     points="215,270 345,270 366,460 197,460"/>
-                                                <polygon class="muscle-zone" data-muscle="Quadríceps"  points="197,460 266,460 261,648 203,648"/>
-                                                <polygon class="muscle-zone" data-muscle="Quadríceps"  points="301,460 366,460 368,648 312,648"/>
-                                                <polygon class="muscle-zone" data-muscle="Panturrilha" points="204,658 261,658 245,785 211,785"/>
-                                                <polygon class="muscle-zone" data-muscle="Panturrilha" points="312,658 367,658 364,785 330,785"/>
+                                                <!-- Ombro esquerdo -->
+                                                <polygon class="muscle-zone" data-muscle="Ombro"       points="135,175 215,155 230,210 190,240 140,230"/>
+                                                <!-- Ombro direito -->
+                                                <polygon class="muscle-zone" data-muscle="Ombro"       points="372,155 452,175 447,230 397,240 357,210"/>
+                                                <!-- Peito -->
+                                                <polygon class="muscle-zone" data-muscle="Peito"       points="190,215 293,230 397,215 395,295 293,310 190,295"/>
+                                                <!-- Bíceps esquerdo -->
+                                                <polygon class="muscle-zone" data-muscle="Bíceps"      points="118,235 155,230 170,340 130,350"/>
+                                                <!-- Bíceps direito -->
+                                                <polygon class="muscle-zone" data-muscle="Bíceps"      points="432,230 469,235 457,350 417,340"/>
+                                                <!-- Antebraço esquerdo -->
+                                                <polygon class="muscle-zone" data-muscle="Antebraço"   points="112,355 155,345 140,470 98,460"/>
+                                                <!-- Antebraço direito -->
+                                                <polygon class="muscle-zone" data-muscle="Antebraço"   points="432,345 475,355 489,460 447,470"/>
+                                                <!-- Abdômen -->
+                                                <polygon class="muscle-zone" data-muscle="Abdômen"     points="218,300 370,300 375,475 213,475"/>
+                                                <!-- Quadríceps esquerdo -->
+                                                <polygon class="muscle-zone" data-muscle="Quadríceps"  points="195,485 280,480 275,650 200,660"/>
+                                                <!-- Quadríceps direito -->
+                                                <polygon class="muscle-zone" data-muscle="Quadríceps"  points="307,480 392,485 387,660 312,650"/>
+                                                <!-- Panturrilha esquerda -->
+                                                <polygon class="muscle-zone" data-muscle="Panturrilha" points="205,670 270,665 260,785 215,790"/>
+                                                <!-- Panturrilha direita -->
+                                                <polygon class="muscle-zone" data-muscle="Panturrilha" points="317,665 382,670 372,790 327,785"/>
                                             </svg>
                                         </div>
                                     </div>
@@ -136,18 +147,30 @@
                                         <div class="avatar-img-wrap">
                                             <img src="avatar_back.png" class="avatar-img" alt="costas">
                                             <svg class="avatar-overlay" viewBox="0 0 587 864" xmlns="http://www.w3.org/2000/svg">
-                                                <polygon class="muscle-zone" data-muscle="Costas"      points="189,165 414,165 369,370 235,370"/>
-                                                <polygon class="muscle-zone" data-muscle="Ombro"       points="150,160 210,165 210,230 160,230"/>
-                                                <polygon class="muscle-zone" data-muscle="Ombro"       points="380,165 440,160 432,230 380,230"/>
-                                                <polygon class="muscle-zone" data-muscle="Tríceps"     points="150,225 210,225 174,375 139,375"/>
-                                                <polygon class="muscle-zone" data-muscle="Tríceps"     points="380,225 440,225 465,375 429,375"/>
-                                                <polygon class="muscle-zone" data-muscle="Antebraço"   points="139,375 170,375 154,455 132,455"/>
-                                                <polygon class="muscle-zone" data-muscle="Antebraço"   points="429,375 465,375 473,455 451,455"/>
-                                                <polygon class="muscle-zone" data-muscle="Glúteo"      points="220,370 368,370 385,470 216,470"/>
-                                                <polygon class="muscle-zone" data-muscle="Posterior"   points="216,475 281,475 271,650 215,650"/>
-                                                <polygon class="muscle-zone" data-muscle="Posterior"   points="317,475 380,475 380,650 324,650"/>
-                                                <polygon class="muscle-zone" data-muscle="Panturrilha" points="215,658 271,658 251,785 222,785"/>
-                                                <polygon class="muscle-zone" data-muscle="Panturrilha" points="323,658 380,658 370,785 341,785"/>
+                                                <!-- Trapézio / Costas superior + latíssimo -->
+                                                <polygon class="muscle-zone" data-muscle="Costas"      points="200,160 387,160 410,290 375,385 212,385 177,290"/>
+                                                <!-- Ombro esquerdo -->
+                                                <polygon class="muscle-zone" data-muscle="Ombro"       points="135,165 200,155 195,230 145,230"/>
+                                                <!-- Ombro direito -->
+                                                <polygon class="muscle-zone" data-muscle="Ombro"       points="387,155 452,165 442,230 392,230"/>
+                                                <!-- Tríceps esquerdo -->
+                                                <polygon class="muscle-zone" data-muscle="Tríceps"     points="120,235 165,230 155,370 115,370"/>
+                                                <!-- Tríceps direito -->
+                                                <polygon class="muscle-zone" data-muscle="Tríceps"     points="422,230 467,235 472,370 432,370"/>
+                                                <!-- Antebraço esquerdo -->
+                                                <polygon class="muscle-zone" data-muscle="Antebraço"   points="105,375 150,370 140,465 95,460"/>
+                                                <!-- Antebraço direito -->
+                                                <polygon class="muscle-zone" data-muscle="Antebraço"   points="437,370 482,375 492,460 447,465"/>
+                                                <!-- Lombar / Glúteo -->
+                                                <polygon class="muscle-zone" data-muscle="Glúteo"      points="215,390 372,390 395,500 192,500"/>
+                                                <!-- Posterior esquerdo -->
+                                                <polygon class="muscle-zone" data-muscle="Posterior"   points="200,505 285,505 280,665 205,665"/>
+                                                <!-- Posterior direito -->
+                                                <polygon class="muscle-zone" data-muscle="Posterior"   points="302,505 387,505 382,665 307,665"/>
+                                                <!-- Panturrilha esquerda -->
+                                                <polygon class="muscle-zone" data-muscle="Panturrilha" points="210,675 278,670 265,790 220,795"/>
+                                                <!-- Panturrilha direita -->
+                                                <polygon class="muscle-zone" data-muscle="Panturrilha" points="309,670 377,675 367,795 322,790"/>
                                             </svg>
                                         </div>
                                     </div>
@@ -175,6 +198,7 @@
                         </div>
                     </div>
                 </div>
+                <div id="planMuscleGroups" class="plan-muscle-groups"></div>
             </div>
         </div>
     </div>

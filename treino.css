@@ -135,6 +135,7 @@ body.light .form-title { color: rgba(0,0,0,0.4); }
     padding: 22px 26px; border-radius: 20px;
     background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08);
     cursor: pointer; transition: all 0.25s; display: flex; flex-direction: column; gap: 10px;
+    transform: translateZ(0); /* fix GPU rendering glitch */
 }
 .plan-card:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.18); transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
 body.light .plan-card { background: rgba(255,255,255,0.6); border-color: rgba(0,0,0,0.08); }
@@ -163,8 +164,9 @@ body.light .plans-empty { color: rgba(0,0,0,0.2); border-color: rgba(0,0,0,0.08)
 /* Editor à direita — flex:1 para ocupar o resto da largura */
 .plan-editor-card {
     flex: 1; min-width: 0; padding: 26px 28px;
-    display: flex; flex-direction: column; gap: 18px;
+    display: flex; flex-direction: column; gap: 24px;
     animation: slideInRight 0.25s ease;
+    transform: translateZ(0); /* fix GPU rendering glitch */
 }
 @keyframes slideInRight { from { opacity:0; transform:translateX(20px); } to { opacity:1; transform:none; } }
 .plan-editor-close {
@@ -443,7 +445,7 @@ body.light .btn-save-plan { color:#27ae60;background:rgba(39,174,96,0.1);border-
 .btn-del-plan:hover { background:rgba(255,77,77,0.1);color:#ff7675; }
 
 /* Grupos de músculo no editor */
-.plan-muscle-groups { display:flex;flex-direction:column;gap:10px;max-height:320px;overflow-y:auto;padding-right:4px; }
+.plan-muscle-groups { display:flex;flex-direction:column;gap:12px;max-height:none;overflow-y:visible;padding-right:0; }
 .plan-muscle-block { display:flex;flex-direction:column;gap:4px; }
 .plan-muscle-label { font-size:0.62rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;padding:4px 0; }
 .plan-ex-row { display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06); }
@@ -458,7 +460,7 @@ body.light .plan-ex-obs { color:rgba(0,0,0,0.35); }
 body.light .plan-ex-del { color:rgba(0,0,0,0.2); }
 
 /* Form adicionar ao plano */
-.plan-add-ex-form { background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px; }
+.plan-add-ex-form { background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:14px; }
 body.light .plan-add-ex-form { background:rgba(0,0,0,0.03);border-color:rgba(0,0,0,0.07); }
 .pae-title { font-size:0.62rem;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,0.35); }
 body.light .pae-title { color:rgba(0,0,0,0.4); }
@@ -754,14 +756,14 @@ body.light .cal-day-ex-sets { color: rgba(0,0,0,0.4); background: rgba(0,0,0,0.0
 .pae-with-preview { display: flex; flex-direction: column; gap: 14px; }
 /* Preview aparece ao lado do avatar como row */
 /* ─── AVATAR MUSCULAR ──────────────────────────────────── */
-.muscle-avatar-selector { display: flex; flex-direction: column; gap: 12px; }
+.muscle-avatar-selector { display: flex; flex-direction: column; gap: 14px; }
 .muscle-avatar-main-row { display: flex; gap: 20px; align-items: flex-start; }
 .muscle-avatars-row { display: flex; gap: 28px; align-items: flex-start; }
 .avatar-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .avatar-img-wrap {
     position: relative;
-    width: 260px;
-    height: 382px; /* maintains 587:864 ratio */
+    width: 280px;
+    height: 412px; /* maintains 587:864 ratio */
 }
 .avatar-img {
     width: 100%; height: 100%;
@@ -827,7 +829,7 @@ body.light .muscle-selected-name { color: rgba(0,0,0,0.7); }
     .plan-editor-panel { width: 100% !important; min-width: unset !important; }
     .registro-grid { grid-template-columns: 1fr !important; }
     .muscle-avatars-row { gap: 10px; }
-    .avatar-img-wrap { width: 130px !important; height: 191px !important; }
+    .avatar-img-wrap { width: 145px !important; height: 213px !important; }
     .medidas-container { grid-template-columns: 1fr !important; }
 }
 
