@@ -305,8 +305,19 @@
                 <div class="stats-panel-title">frequência — últimas 4 semanas</div>
                 <div class="stats-chart-wrap"><canvas id="statsFreqChart"></canvas></div>
             </div>
-            <!-- Calendário navegável com botões de mês -->
+            <!-- Progressão de carga nas stats (ACIMA do calendário) -->
             <div class="glass-panel stats-panel stats-panel--wide">
+                <div class="stats-panel-title">
+                    progressão de carga
+                    <select id="statsChartExSel" class="f-select pcp-sel" onchange="renderStatsProgressChart()" style="margin-left:8px">
+                        <option value="">— exercício —</option>
+                    </select>
+                </div>
+                <div class="pcp-chart-wrap" style="height:200px"><canvas id="statsProgressChart"></canvas></div>
+                <div class="pcp-pr" id="statsChartPR"></div>
+            </div>
+            <!-- Calendário e Resumo lado a lado -->
+            <div class="glass-panel stats-panel">
                 <div class="stats-panel-title">
                     calendário de treinos 📅
                     <div class="cal-nav-row">
@@ -320,17 +331,6 @@
             <div class="glass-panel stats-panel">
                 <div class="stats-panel-title">resumo — últimos 30 dias</div>
                 <div id="statsSummary" class="stats-summary-list"></div>
-            </div>
-            <!-- Progressão de carga nas stats -->
-            <div class="glass-panel stats-panel stats-panel--wide">
-                <div class="stats-panel-title">
-                    progressão de carga
-                    <select id="statsChartExSel" class="f-select pcp-sel" onchange="renderStatsProgressChart()" style="margin-left:8px">
-                        <option value="">— exercício —</option>
-                    </select>
-                </div>
-                <div class="pcp-chart-wrap" style="height:200px"><canvas id="statsProgressChart"></canvas></div>
-                <div class="pcp-pr" id="statsChartPR"></div>
             </div>
             <div class="glass-panel stats-panel">
                 <div class="stats-panel-title">força comparada (todos os treinos) 🦁</div>

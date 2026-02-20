@@ -404,7 +404,7 @@ function selectPlan(id) {
                             </div>
                             <div class="acc-field acc-field-sm">
                                 <label class="ef-add-label">séries</label>
-                                <input type="number" id="${id}_s" class="f-input ef-num-input acc-num" min="1" step="1" value="1">
+                                <input type="number" id="${id}_s" class="f-input ef-num-input acc-num" min="1" step="1" value="4">
                             </div>
                             <div class="acc-field acc-field-grow">
                                 <label class="ef-add-label">obs.</label>
@@ -413,6 +413,14 @@ function selectPlan(id) {
                             <button class="btn-add-set acc-btn-add" onclick="addSetToAccordion('${id}','${muscle}','${exFullName(ex.name,ex.obs).replace(/'/g,"\\'")}','${ex.equip||'livre'}')">+ add</button>
                         </div>
                     </div>
+                    <script>
+                    (function(){
+                        const row = document.getElementById('${id}_w')?.closest('.acc-fields-row');
+                        if(row) row.addEventListener('keydown', function(e){
+                            if(e.key==='Enter'){e.preventDefault(); addSetToAccordion('${id}','${muscle}','${exFullName(ex.name,ex.obs).replace(/'/g,"\\'")}','${ex.equip||'livre'}');}
+                        });
+                    })();
+                    </script>
                                         <div class="pef-chips-wrap" id="${id}_chips"></div>
                 </div>`;
             }).join('')}</div>
@@ -563,7 +571,7 @@ function getProgressionSuggestion(exerciseName) {
     if (!sets.length) return null;
     const maxW    = Math.max(...sets.map(s=>s.weight));
     const total   = sets.reduce((s,x)=>s+(x.count||1),0);
-    return `Última: ${maxW}kg · ${total} série${total!==1?'s':''}. Tente ${maxW+2.5}kg ou +1 série.`;
+    return `Última: ${maxW}kg · ${total} série${total!==1?'s':''}. Tente ${maxW+2.5}kg ou melhorar a execução.`;
 }
 
 // ─── RENDER REGISTRO ──────────────────────────────────────────────────────────
@@ -591,10 +599,10 @@ function renderDayAnimal() {
     const animal = [...FORCE_REFS].reverse().find(a=>a.kg<=maxLift)||FORCE_REFS[0];
     const nextAn = FORCE_REFS.find(a=>a.kg>maxLift);
     panel.innerHTML=`<div class="reg-animal-inner">
-        <div style="font-size:2.2rem;line-height:1">${animal.emoji}</div>
+        <div style="font-size:3.2rem;line-height:1">${animal.emoji}</div>
         <div class="animal-info">
             <div class="animal-title">força deste treino</div>
-            <div class="animal-desc">com <strong>${maxLift}kg</strong> <span class="animal-ex-name">(${maxLiftEx})</span> você levanta um <strong>${animal.name}</strong> ${animal.emoji} (${animal.kg}kg)</div>
+            <div class="animal-desc">com <strong>${maxLift}kg</strong> em ${maxLiftEx} você levanta um <strong>${animal.name}</strong> ${animal.emoji} — ${animal.kg}kg</div>
             ${nextAn?`<div class="animal-next">próximo: ${nextAn.emoji} ${nextAn.name} — faltam <strong>${nextAn.kg-maxLift}kg</strong></div>`:'<div class="animal-next">🏆 nível máximo atingido!</div>'}
         </div>
     </div>`;
@@ -628,47 +636,87 @@ function renderExercisesList() {
     const delBtn = document.getElementById('btnDelSession');
     if (delBtn) delBtn.classList.toggle('hidden', !exes.length);
     if (!exes.length) { el.innerHTML=`<div class="empty-exercises">nenhum exercício registrado neste dia</div>`; return; }
-    // Sort by muscle group so same muscles are together
-    const sortedExes = [...exes].sort((a,b) => {
-        const ma = a.muscle||'', mb = b.muscle||'';
-        if (ma !== mb) return ma.localeCompare(mb);
-        return (a.name||'').localeCompare(b.name||'');
+
+    // Group by muscle
+    const groups = {};
+    const groupOrder = [];
+    exes.forEach(ex => {
+        const m = ex.type==='cardio' ? 'Cardio' : (ex.muscle||'Outro');
+        if (!groups[m]) { groups[m] = []; groupOrder.push(m); }
+        groups[m].push(ex);
     });
-    el.innerHTML = sortedExes.map(ex => {
-        const color = MUSCLE_COLORS[ex.muscle]||'#7f8c8d';
-        if (ex.type==='cardio') {
-            const parts = [ex.duration&&`${ex.duration} min`, ex.distance&&`${ex.distance} km`, ex.intensity].filter(Boolean);
-            return `<div class="exercise-entry"><div class="ee-header">
-                <span class="ee-muscle-tag" style="background:${color}22;color:${color}">cardio</span>
-                <span class="ee-name">${ex.name}</span>
-                <button class="ee-del" onclick="removeExercise(${ex.id})">✕</button>
-            </div>
-            <div class="ee-cardio-info">${parts.map(p=>`<span class="ee-cardio-badge">${p}</span>`).join('')}</div>
-            ${ex.notes?`<div class="ee-notes">${ex.notes}</div>`:''}</div>`;
-        }
-        const totalSets = totalSetsOfExercise(ex);
-        const setsHtml  = (ex.sets||[]).map(s=>{
-            const allPrev = Object.keys(workoutLog).filter(d=>d<key).flatMap(d=>(workoutLog[d].exercises||[]).filter(e=>e.name===ex.name&&e.type!=='cardio').flatMap(e=>(e.sets||[]).map(x=>x.weight)));
-            const isPR    = s.weight>0 && (!allPrev.length||s.weight>Math.max(...allPrev));
-            return `<span class="ee-set-chip${isPR?' pr':''}">${setLabel(s)}${isPR?' 🏆':''}</span>`;
+
+    el.innerHTML = groupOrder.map((muscle, gi) => {
+        const color = MUSCLE_COLORS[muscle]||'#7f8c8d';
+        const exesHtml = groups[muscle].map(ex => {
+            if (ex.type==='cardio') {
+                const parts = [ex.duration&&`${ex.duration} min`, ex.distance&&`${ex.distance} km`, ex.intensity].filter(Boolean);
+                return `<div class="exercise-entry">
+                    <div class="ee-content">
+                        <div class="ee-header">
+                            <span class="ee-name">${ex.name}</span>
+                            <button class="ee-del" onclick="removeExercise(${ex.id})">✕</button>
+                        </div>
+                        <div class="ee-cardio-info">${parts.map(p=>`<span class="ee-cardio-badge">${p}</span>`).join('')}</div>
+                        ${ex.notes?`<div class="ee-notes">${ex.notes}</div>`:''}
+                    </div>
+                </div>`;
+            }
+            const totalSets = totalSetsOfExercise(ex);
+            const setsHtml  = (ex.sets||[]).map(s=>{
+                const allPrev = Object.keys(workoutLog).filter(d=>d<key).flatMap(d=>(workoutLog[d].exercises||[]).filter(e=>e.name===ex.name&&e.type!=='cardio').flatMap(e=>(e.sets||[]).map(x=>x.weight)));
+                const isPR    = s.weight>0 && (!allPrev.length||s.weight>Math.max(...allPrev));
+                return `<span class="ee-set-chip${isPR?' pr':''}">${setLabel(s)}${isPR?' 🏆':''}</span>`;
+            }).join('');
+            const equipBadge = ex.equip==='maquina' ? '<span class="equip-badge equip-badge--maquina">⚙️ máquina</span>' : '<span class="equip-badge equip-badge--livre">🏋️ livre</span>';
+            return `<div class="exercise-entry">
+                <div class="ee-content">
+                    <div class="ee-header">
+                        <span class="ee-name">${ex.name}</span>
+                        ${equipBadge}
+                        <button class="ee-del" onclick="removeExercise(${ex.id})">✕</button>
+                    </div>
+                    <div class="ee-sets">${setsHtml}</div>
+                    <div class="ee-footer">
+                        <span class="ee-serie-total">${totalSets} série${totalSets!==1?'s':''}</span>
+                    </div>
+                </div>
+            </div>`;
         }).join('');
-        const equipBadge = ex.equip==='maquina' ? '<span class="equip-badge equip-badge--maquina">⚙️ máquina</span>' : '<span class="equip-badge equip-badge--livre">🏋️ livre</span>';
-        return `<div class="exercise-entry">
-            <div class="ee-muscle-stripe" style="background:${color}"></div>
-            <div class="ee-content">
-                <div class="ee-header">
-                    <span class="ee-name">${ex.name}</span>
-                    ${equipBadge}
-                    <button class="ee-del" onclick="removeExercise(${ex.id})">✕</button>
-                </div>
-                <div class="ee-sets">${setsHtml}</div>
-                <div class="ee-footer">
-                    <span class="ee-muscle-tag" style="color:${color}">${ex.muscle}</span>
-                    <span class="ee-serie-total">${totalSets} série${totalSets!==1?'s':''}</span>
-                </div>
+
+        return `<div class="eel-muscle-group" draggable="true" data-muscle-idx="${gi}"
+                     ondragstart="eelDragStart(event,${gi})" ondragover="eelDragOver(event)" ondrop="eelDrop(event,${gi})" ondragend="eelDragEnd(event)">
+            <div class="eel-muscle-header" style="border-left:4px solid ${color};background:${color}11">
+                <span class="eel-muscle-name" style="color:${color}">${muscle}</span>
+                <span class="eel-muscle-count">${groups[muscle].length} exerc.</span>
+                <span class="eel-drag-handle">⠿</span>
             </div>
+            <div class="eel-muscle-exercises">${exesHtml}</div>
         </div>`;
     }).join('');
+}
+
+// ─── DRAG & DROP (reordenar grupos musculares) ───────────────────────────────
+let eelDragIdx = null;
+function eelDragStart(e, idx) { eelDragIdx = idx; e.dataTransfer.effectAllowed = 'move'; e.currentTarget.style.opacity = '0.4'; }
+function eelDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+function eelDragEnd(e) { e.currentTarget.style.opacity = '1'; }
+function eelDrop(e, targetIdx) {
+    e.preventDefault();
+    if (eelDragIdx === null || eelDragIdx === targetIdx) return;
+    const key = dateKey(currentDate);
+    const exes = workoutLog[key]?.exercises || [];
+    // Build group order
+    const groups = {}; const order = [];
+    exes.forEach(ex => { const m = ex.type==='cardio'?'Cardio':(ex.muscle||'Outro'); if (!groups[m]) { groups[m]=[]; order.push(m); } groups[m].push(ex); });
+    // Swap groups
+    const moved = order.splice(eelDragIdx, 1)[0];
+    order.splice(targetIdx, 0, moved);
+    // Rebuild exercises array
+    workoutLog[key].exercises = order.flatMap(m => groups[m]);
+    saveLog();
+    renderExercisesList();
+    eelDragIdx = null;
 }
 
 // ─── GRÁFICO PROGRESSÃO ───────────────────────────────────────────────────────

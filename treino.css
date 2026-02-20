@@ -993,9 +993,10 @@ body { overflow-x: hidden; }
     font-weight: 400;
 }
 body.light .animal-ex-name { color: rgba(0,0,0,0.4); }
-.animal-desc { font-size: 0.95rem; line-height: 1.5; }
+.animal-desc { font-size: 1.05rem; line-height: 1.5; }
 .animal-desc strong { color: rgba(255,255,255,0.9); }
 body.light .animal-desc strong { color: rgba(0,0,0,0.8); }
+.animal-next { font-size: 0.82rem; }
 
 /* Plan day selector — more compact */
 .plan-day-selector { padding: 12px 16px !important; gap: 8px !important; }
@@ -1102,4 +1103,86 @@ body.light .ee-name { color: rgba(0,0,0,0.8); }
     align-self: flex-end;
     white-space: nowrap;
     padding: 8px 12px;
+}
+
+/* ─── EXERCISE LIST: MUSCLE GROUPS ────────────────────────────────────────── */
+.eel-muscle-group {
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.015);
+    transition: opacity 0.2s;
+}
+body.light .eel-muscle-group {
+    border-color: rgba(0,0,0,0.06);
+    background: rgba(0,0,0,0.015);
+}
+.eel-muscle-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 16px;
+    cursor: grab;
+}
+.eel-muscle-header:active { cursor: grabbing; }
+.eel-muscle-name {
+    font-size: 0.85rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1.5px; flex: 1;
+}
+.eel-muscle-count {
+    font-size: 0.68rem; color: rgba(255,255,255,0.3);
+}
+body.light .eel-muscle-count { color: rgba(0,0,0,0.35); }
+.eel-drag-handle {
+    font-size: 1rem; color: rgba(255,255,255,0.15); cursor: grab;
+    user-select: none;
+}
+body.light .eel-drag-handle { color: rgba(0,0,0,0.15); }
+.eel-muscle-exercises {
+    padding: 0 12px 8px;
+}
+.eel-muscle-group[draggable]:hover .eel-drag-handle { color: rgba(255,255,255,0.35); }
+body.light .eel-muscle-group[draggable]:hover .eel-drag-handle { color: rgba(0,0,0,0.35); }
+
+/* Exercise entries inside muscle groups — remove old stripe */
+.eel-muscle-exercises .exercise-entry {
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    padding: 8px 4px !important;
+}
+.eel-muscle-exercises .exercise-entry:last-child { border-bottom: none; }
+.eel-muscle-exercises .ee-muscle-stripe { display: none; }
+
+/* ─── PEF: exercises inside muscle group container ────────────────────────── */
+.pef-muscle-group {
+    border-radius: 16px; overflow: hidden; margin: 10px 0;
+    border: 1px solid rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.015);
+}
+body.light .pef-muscle-group {
+    border-color: rgba(0,0,0,0.06);
+    background: rgba(0,0,0,0.015);
+}
+.pef-muscle-group-header {
+    padding: 10px 16px; border-radius: 0;
+    background: none; margin-bottom: 0;
+    display: flex; align-items: center;
+}
+.pef-exes-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 10px 12px 12px;
+}
+.pef-ex-block {
+    border-radius: 14px !important;
+}
+
+/* ─── planExercisesForm alignment fix ─────────────────────────────────────── */
+#planExercisesForm {
+    display: flex; flex-direction: column; gap: 12px;
+}
+#planExercisesForm .pef-header-panel {
+    border-radius: 16px;
+}
+#pefExercisesAccordion {
+    display: flex; flex-direction: column; gap: 0;
 }
