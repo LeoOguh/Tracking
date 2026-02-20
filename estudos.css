@@ -4,7 +4,7 @@
 .study-topbar {
     display: flex; align-items: center; justify-content: flex-start;
     gap: 12px; margin-bottom: 28px; flex-wrap: wrap;
-    padding: 20px 24px 0; box-sizing: border-box;
+    padding: 28px 32px 0; box-sizing: border-box;
 }
 .study-date-nav {
     display: flex; align-items: center; gap: 0;
@@ -109,7 +109,7 @@ body.light .btn-topbar-action:hover { background: rgba(0,0,0,0.09); color: #1a1a
 /* ═══════════════════════════════════════════════════════════
    LAYOUT
    ═══════════════════════════════════════════════════════════ */
-.study-container { display: flex; flex-direction: column; gap: 20px; width: 100%; }
+.study-container { display: flex; flex-direction: column; gap: 24px; width: 100%; }
 
 /* STATS */
 .quick-stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
@@ -623,7 +623,7 @@ body.light .study-drawer .drawer-title { color: rgba(0,0,0,0.4); }
 body.light .study-drawer .drawer-item { color: rgba(0,0,0,0.45); }
 body.light .study-drawer .drawer-item:hover { background: rgba(0,0,0,0.05); color: rgba(0,0,0,0.7); }
 body.light .study-drawer .drawer-item--active { background: rgba(59,130,246,0.12); color: #2563eb; border-left-color: #3b82f6; }
-.study-with-sidebar { padding: 0 24px 80px; box-sizing: border-box; width: 100%; }
+.study-with-sidebar { padding: 0 32px 80px; box-sizing: border-box; width: 100%; }
 .study-view { display: flex; flex-direction: column; gap: 20px; }
 .study-view.hidden { display: none; }
 #viewErros { width: 100%; }
@@ -645,7 +645,6 @@ body.light .study-drawer .drawer-item--active { background: rgba(59,130,246,0.12
     min-width: 0; /* prevent flex overflow */
     display: flex;
     flex-direction: column;
-    padding: 0 28px;
     box-sizing: border-box;
 }
 /* Body deve ser block para não interferir */
@@ -653,3 +652,20 @@ body {
     display: block !important;
     padding: 0 !important;
 }
+
+/* ─── PAUSE BUTTON & TIMER LAYOUT ───────────────────────────────────────────── */
+.timer-btns {
+    display: flex; gap: 6px; align-items: center;
+}
+.timer-display {
+    flex-wrap: wrap;
+}
+.btn-pause-timer {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(255,200,0,0.1); border: 1px solid rgba(255,200,0,0.25);
+    color: rgba(255,200,0,0.8); border-radius: 8px; padding: 6px 12px;
+    font-size: 0.75rem; font-weight: 600; font-family: inherit; cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-pause-timer:hover { background: rgba(255,200,0,0.2); color: #ffc800; }
+body.light .btn-pause-timer { background: rgba(180,130,0,0.08); border-color: rgba(180,130,0,0.2); color: rgba(150,100,0,0.8); }

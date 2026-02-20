@@ -162,10 +162,16 @@
                     </button>
                     <div class="timer-display" id="timerDisplay" style="display:none">
                         <span class="timer-counter" id="timerCounter">00:00:00</span>
-                        <button class="btn-stop-timer" id="btnStopTimer" onclick="stopTimer()">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
-                            parar e salvar
-                        </button>
+                        <div class="timer-btns">
+                            <button class="btn-pause-timer" id="btnPauseTimer" onclick="pauseTimer()">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                                pausar
+                            </button>
+                            <button class="btn-stop-timer" id="btnStopTimer" onclick="stopTimer()">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+                                parar e salvar
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <p class="session-mode-hint">Selecione a matéria, clique em iniciar e o tempo será calculado automaticamente ao parar.</p>

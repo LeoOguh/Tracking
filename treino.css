@@ -967,3 +967,50 @@ body.light .registro-sidebar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0
 *::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
 body.light *::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); }
 body.light *::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.2); }
+
+/* ─── CALCULADORA DE PLACAS ─────────────────────────────────────────────────── */
+.weight-mode-toggle {
+    display: flex; border-radius: 8px; overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.1); margin-bottom: 6px;
+    width: fit-content;
+}
+.wm-btn {
+    font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1px;
+    padding: 4px 12px; background: transparent; border: none;
+    color: rgba(255,255,255,0.35); cursor: pointer; transition: all 0.15s;
+}
+.wm-btn--active { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.85); }
+.wm-btn:hover:not(.wm-btn--active) { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.6); }
+body.light .wm-btn { color: rgba(0,0,0,0.35); }
+body.light .wm-btn--active { background: rgba(0,0,0,0.08); color: rgba(0,0,0,0.8); }
+
+.plates-row {
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 4px;
+}
+.plates-chips { display: flex; gap: 4px; flex-wrap: wrap; }
+.plate-chip {
+    font-size: 0.68rem; background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12); border-radius: 20px;
+    padding: 2px 6px; display: flex; align-items: center; gap: 4px; color: rgba(255,255,255,0.7);
+}
+.plate-chip button {
+    background: none; border: none; color: rgba(255,255,255,0.4);
+    cursor: pointer; font-size: 0.6rem; padding: 0; line-height: 1;
+}
+.plate-chip button:hover { color: #ff5050; }
+.plates-plus { color: rgba(255,255,255,0.3); font-size: 0.9rem; }
+.plates-total {
+    font-size: 0.7rem; color: rgba(255,255,255,0.5); margin-top: 4px;
+    letter-spacing: 0.5px;
+}
+.btn-add-plate {
+    font-size: 0.68rem; background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12); border-radius: 8px;
+    color: rgba(255,255,255,0.6); cursor: pointer; padding: 4px 8px;
+    transition: all 0.15s; white-space: nowrap;
+}
+.btn-add-plate:hover { background: rgba(255,255,255,0.13); color: #fff; }
+body.light .plate-chip { background: rgba(0,0,0,0.06); border-color: rgba(0,0,0,0.1); color: rgba(0,0,0,0.65); }
+body.light .plates-total { color: rgba(0,0,0,0.4); }
+body.light .btn-add-plate { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.1); color: rgba(0,0,0,0.55); }
+.plates-sel { min-width: 60px; padding: 4px 6px; font-size: 0.72rem; }

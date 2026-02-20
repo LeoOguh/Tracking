@@ -94,7 +94,12 @@ const FORCE_REFS = [
 
 const EXERCISE_IMAGES = {}; // imagens desativadas
 
-function dateKey(d)  { return d.toISOString().split('T')[0]; }
+function dateKey(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,'0');
+    const day = String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${day}`;
+}
 function todayKey()  { return dateKey(new Date()); }
 function saveLog()   { localStorage.setItem('clarity_workout_log',   JSON.stringify(workoutLog)); }
 function savePlans() { localStorage.setItem('clarity_workout_plans', JSON.stringify(workoutPlans)); }
@@ -378,8 +383,31 @@ function selectPlan(id) {
                     ${hint?`<div class="progression-hint" style="margin:0 0 8px"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>${hint}</div>`:''}
                     <div class="ef-row-add" id="${id}_row">
                         <div class="ef-add-field">
-                            <label class="ef-add-label">carga (kg)</label>
-                            <input type="number" id="${id}_w" class="f-input ef-num-input" min="0" step="0.5" placeholder="0">
+                            <div class="weight-mode-toggle">
+                                <button class="wm-btn wm-btn--active" id="${id}_mkg" onclick="setWeightMode('${id}','kg')">kg</button>
+                                <button class="wm-btn" id="${id}_mpl" onclick="setWeightMode('${id}','plates')">placas</button>
+                            </div>
+                            <div id="${id}_kg_wrap">
+                                <label class="ef-add-label">carga (kg)</label>
+                                <input type="number" id="${id}_w" class="f-input ef-num-input" min="0" step="0.5" placeholder="0">
+                            </div>
+                            <div id="${id}_pl_wrap" class="hidden">
+                                <label class="ef-add-label">barra + placas</label>
+                                <div class="plates-row" id="${id}_plates">
+                                    <input type="number" id="${id}_bar" class="f-input ef-num-input" min="0" step="5" placeholder="barra (kg)" value="20" style="width:80px">
+                                    <span class="plates-plus">+</span>
+                                    <div class="plates-chips" id="${id}_pchips"></div>
+                                    <select class="f-select plates-sel" id="${id}_padd" style="width:70px">
+                                        <option value="1.25">1,25</option><option value="2.5">2,5</option>
+                                        <option value="5" selected>5</option><option value="10">10</option>
+                                        <option value="15">15</option><option value="20">20</option>
+                                        <option value="25">25</option>
+                                    </select>
+                                    <button class="btn-add-plate" onclick="addPlate('${id}')">+ placa</button>
+                                </div>
+                                <div class="plates-total" id="${id}_ptotal">total: 20 kg</div>
+                                <input type="hidden" id="${id}_w" value="0">
+                            </div>
                         </div>
                         <div class="ef-add-field ef-add-field--sm">
                             <label class="ef-add-label">séries</label>
@@ -1090,3 +1118,58 @@ document.addEventListener('click', function(e) {
     if (!picker || picker.classList.contains('hidden')) return;
     if (!picker.contains(e.target) && e.target !== title) closeDatePicker();
 });
+
+// ─── CALCULADORA DE PLACAS ────────────────────────────────────────────────────
+let plateSets = {}; // {id: [1.25, 5, 10, ...]} plates added (each side × 2)
+
+function setWeightMode(id, mode) {
+    const kgWrap  = document.getElementById(id+'_kg_wrap');
+    const plWrap  = document.getElementById(id+'_pl_wrap');
+    const btnKg   = document.getElementById(id+'_mkg');
+    const btnPl   = document.getElementById(id+'_mpl');
+    if (mode === 'plates') {
+        kgWrap.classList.add('hidden');
+        plWrap.classList.remove('hidden');
+        btnKg.classList.remove('wm-btn--active');
+        btnPl.classList.add('wm-btn--active');
+        updatePlatesTotal(id);
+    } else {
+        plWrap.classList.add('hidden');
+        kgWrap.classList.remove('hidden');
+        btnPl.classList.remove('wm-btn--active');
+        btnKg.classList.add('wm-btn--active');
+    }
+}
+
+function addPlate(id) {
+    const val = parseFloat(document.getElementById(id+'_padd').value);
+    if (!plateSets[id]) plateSets[id] = [];
+    plateSets[id].push(val);
+    renderPlateChips(id);
+    updatePlatesTotal(id);
+}
+
+function removePlate(id, idx) {
+    if (plateSets[id]) plateSets[id].splice(idx, 1);
+    renderPlateChips(id);
+    updatePlatesTotal(id);
+}
+
+function renderPlateChips(id) {
+    const wrap = document.getElementById(id+'_pchips');
+    if (!wrap) return;
+    const plates = plateSets[id] || [];
+    wrap.innerHTML = plates.map((p,i) =>
+        `<span class="plate-chip">${p}kg<button onclick="removePlate('${id}',${i})">✕</button></span>`
+    ).join('');
+}
+
+function updatePlatesTotal(id) {
+    const bar    = parseFloat(document.getElementById(id+'_bar')?.value) || 20;
+    const plates = plateSets[id] || [];
+    const total  = bar + plates.reduce((s,p) => s + p*2, 0);
+    const totalEl = document.getElementById(id+'_ptotal');
+    const hidden  = document.getElementById(id+'_w');
+    if (totalEl) totalEl.textContent = `total: ${total} kg`;
+    if (hidden)  hidden.value = total;
+}

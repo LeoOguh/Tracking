@@ -22,6 +22,9 @@ let timerStartTime   = null; // Date object quando o timer começou
 let timerSubject     = '';
 let timerContent     = '';
 let timerRunning     = false;
+let timerPaused      = false;
+let timerPausedAt    = null;  // Date when paused
+let timerPausedMs    = 0;     // Accumulated paused milliseconds
 
 const monthNames = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
 
@@ -55,7 +58,13 @@ function toggleTheme() {
 }
 
 // ─── UTILITÁRIOS ──────────────────────────────────────────────────────────────
-function dateKey(d)    { return d.toISOString().split('T')[0]; }
+function dateKey(d) {
+    // Use local date to avoid UTC timezone offset shifting the day
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,'0');
+    const day = String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${day}`;
+}
 function todayKey()    { return dateKey(new Date()); }
 function addDays(dateStr, n) {
     const d = new Date(dateStr + 'T00:00:00'); d.setDate(d.getDate() + n); return dateKey(d);
@@ -316,8 +325,11 @@ function startTimer() {
 
     timerSubject   = subject;
     timerContent   = content;
-    timerStartTime = new Date();
-    timerRunning   = true;
+    timerStartTime  = new Date();
+    timerRunning    = true;
+    timerPaused     = false;
+    timerPausedAt   = null;
+    timerPausedMs   = 0;
 
     // Registra horário de início no campo
     const h = String(timerStartTime.getHours()).padStart(2,'0');
@@ -335,9 +347,10 @@ function startTimer() {
 }
 
 function updateTimerDisplay() {
-    if (!timerStartTime) return;
-    const elapsed = Math.floor((new Date() - timerStartTime) / 1000);
-    document.getElementById('timerCounter').textContent = formatHHMMSS(elapsed);
+    if (!timerStartTime || timerPaused) return;
+    const pausedOffset = timerPausedMs;
+    const elapsed = Math.floor((new Date() - timerStartTime - pausedOffset) / 1000);
+    document.getElementById('timerCounter').textContent = formatHHMMSS(Math.max(0, elapsed));
 }
 
 function stopTimer() {
@@ -351,8 +364,8 @@ function stopTimer() {
     document.getElementById('fEnd').value = `${eh}:${em}`;
 
     // Calcula duração em minutos, lidando com virada de dia
-    const diffMs      = endTime - timerStartTime;
-    const totalMinutes = Math.round(diffMs / 60000);
+    const diffMs      = (endTime - timerStartTime) - timerPausedMs;
+    const totalMinutes = Math.round(Math.max(0, diffMs) / 60000);
 
     document.getElementById('timerDisplay').style.display = 'none';
     document.getElementById('btnStartTimer').style.display = 'inline-flex';
@@ -372,7 +385,7 @@ function stopTimer() {
 
         saveTimerSession(startDateKey, timerSubject, timerContent, `${startH}:${startM}`, '23:59', minsDay1, document.getElementById('fReviewDays').value);
         saveTimerSession(endDateKey,   timerSubject, timerContent, '00:00', `${eh}:${em}`, minsDay2, '');
-        alert(`Sessão cruzou a meia-noite!\nDia ${startDateKey}: ${minToLabel(minsDay1)}\nDia ${endDateKey}: ${minToLabel(minsDay2)}`);
+        // Sessão cruzou meia-noite — salva silenciosamente nos dois dias
     } else {
         saveTimerSession(startDateKey, timerSubject, timerContent,
             document.getElementById('fStart').value, `${eh}:${em}`,
@@ -385,12 +398,39 @@ function stopTimer() {
     document.getElementById('fDuration').textContent = '—';
     document.getElementById('fDuration').style.color = '';
     document.getElementById('timerCounter').textContent = '00:00:00';
-    timerStartTime = null; timerSubject = ''; timerContent = '';
+    timerStartTime = null; timerSubject = ''; timerContent = ''; timerPausedMs = 0; timerPausedAt = null; timerPaused = false;
 
     // Avança fStart para o horário de término
     document.getElementById('fStart').value = `${eh}:${em}`;
     render();
 }
+
+function pauseTimer() {
+    if (!timerRunning) return;
+    if (!timerPaused) {
+        // Pause
+        timerPaused   = true;
+        timerPausedAt = new Date();
+        clearInterval(timerInterval);
+        timerInterval = null;
+        document.getElementById('btnPauseTimer').innerHTML = `
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+            retomar`;
+        document.getElementById('timerCounter').style.opacity = '0.4';
+    } else {
+        // Resume
+        timerPausedMs += (new Date() - timerPausedAt);
+        timerPaused   = false;
+        timerPausedAt = null;
+        timerInterval = setInterval(updateTimerDisplay, 1000);
+        updateTimerDisplay();
+        document.getElementById('btnPauseTimer').innerHTML = `
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+            pausar`;
+        document.getElementById('timerCounter').style.opacity = '1';
+    }
+}
+
 
 function saveTimerSession(dateStr, subject, content, start, end, minutes, reviewDays) {
     if (!studySessions[dateStr]) studySessions[dateStr] = [];
