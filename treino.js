@@ -387,32 +387,33 @@ function selectPlan(id) {
                         <span class="pef-ex-name">${exFullName(ex.name, ex.obs)}</span>
                     </div>
                     ${hint?`<div class="progression-hint" style="margin:0 0 8px"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>${hint}</div>`:''}
-                    <div class="ef-row-add" id="${id}_row">
-                        <div class="ef-add-field" id="${id}_load_field">
-                            <div class="weight-mode-toggle" style="margin-bottom:4px">
-                                <button class="wm-btn wm-btn--active" id="${id}_mkg" onclick="setWeightMode('${id}','kg')">kg</button>
-                                <button class="wm-btn" id="${id}_mpl" onclick="setWeightMode('${id}','plates')">placas</button>
-                            </div>
-                            <div id="${id}_kg_wrap">
-                                <label class="ef-add-label">carga (kg)</label>
-                                <input type="number" id="${id}_w" class="f-input ef-num-input" min="0" step="0.5" placeholder="0">
-                            </div>
-                            <div id="${id}_pl_wrap" class="hidden">
-                                <label class="ef-add-label">placas</label>
-                                <input type="number" id="${id}_pw" class="f-input ef-num-input" min="0" step="1" placeholder="0">
-                            </div>
-                                                </div>
-                        <div class="ef-add-field ef-add-field--sm">
-                            <label class="ef-add-label">séries</label>
-                            <input type="number" id="${id}_s" class="f-input ef-num-input" min="1" step="1" value="1">
+                      <div class="acc-input-area">
+                        <div class="acc-mode-toggle">
+                            <button class="wm-btn wm-btn--active" id="${id}_mkg" onclick="setWeightMode('${id}','kg')">kg</button>
+                            <button class="wm-btn" id="${id}_mpl" onclick="setWeightMode('${id}','plates')">placas</button>
                         </div>
-                        <div class="ef-add-field ef-add-field--lg">
-                            <label class="ef-add-label">obs.</label>
-                            <input type="text" id="${id}_n" class="f-input" placeholder="opcional">
+                        <div class="acc-fields-row">
+                            <div class="acc-field">
+                                <label class="ef-add-label" id="${id}_wlabel">carga (kg)</label>
+                                <div id="${id}_kg_wrap" style="display:block">
+                                    <input type="number" id="${id}_w" class="f-input ef-num-input acc-num" min="0" step="0.5" placeholder="0">
+                                </div>
+                                <div id="${id}_pl_wrap" style="display:none">
+                                    <input type="number" id="${id}_pw" class="f-input ef-num-input acc-num" min="0" step="1" placeholder="0">
+                                </div>
+                            </div>
+                            <div class="acc-field acc-field-sm">
+                                <label class="ef-add-label">séries</label>
+                                <input type="number" id="${id}_s" class="f-input ef-num-input acc-num" min="1" step="1" value="1">
+                            </div>
+                            <div class="acc-field acc-field-grow">
+                                <label class="ef-add-label">obs.</label>
+                                <input type="text" id="${id}_n" class="f-input" placeholder="opcional">
+                            </div>
+                            <button class="btn-add-set acc-btn-add" onclick="addSetToAccordion('${id}','${muscle}','${exFullName(ex.name,ex.obs).replace(/'/g,"\\'")}','${ex.equip||'livre'}')">+ add</button>
                         </div>
-                        <button class="btn-add-set" onclick="addSetToAccordion('${id}','${muscle}','${exFullName(ex.name,ex.obs).replace(/'/g,"\\'")}','${ex.equip||"livre"}')">+ adicionar</button>
                     </div>
-                    <div class="pef-chips-wrap" id="${id}_chips"></div>
+                                        <div class="pef-chips-wrap" id="${id}_chips"></div>
                 </div>`;
             }).join('')}</div>
         </div>`;
@@ -433,7 +434,7 @@ let accordionSets = {};
 
 function addSetToAccordion(id, muscle, name, equip) {
     const plWrap = document.getElementById(id+'_pl_wrap');
-    const inPlatesMode = plWrap && !plWrap.classList.contains('hidden');
+    const inPlatesMode = plWrap && plWrap.style.display !== 'none';
     let weight, isPlates = false;
     if (inPlatesMode) {
         isPlates = true;
@@ -1056,6 +1057,37 @@ function deleteMedida(date) {
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
+
+// ─── MIGRAÇÃO: atualiza nomes históricos para incluir obs ─────────────────────
+(function migrateExerciseNames() {
+    // Build map: baseName → Set of full names (to detect ambiguous cases)
+    const variants = {}; // { 'Remada sentado': Set(['Remada sentado (Reto)', 'Remada sentado (Declinado)']) }
+    workoutPlans.forEach(plan => {
+        (plan.exercises||[]).forEach(ex => {
+            if (ex.obs && ex.obs.trim()) {
+                if (!variants[ex.name]) variants[ex.name] = new Set();
+                variants[ex.name].add(exFullName(ex.name, ex.obs));
+            }
+        });
+    });
+    // Only migrate base names that map to EXACTLY ONE full name (unambiguous)
+    const nameMap = {};
+    Object.entries(variants).forEach(([base, fulls]) => {
+        if (fulls.size === 1) nameMap[base] = [...fulls][0];
+    });
+    if (!Object.keys(nameMap).length) return;
+    let changed = false;
+    Object.keys(workoutLog).forEach(dateStr => {
+        (workoutLog[dateStr]?.exercises||[]).forEach(ex => {
+            if (ex.type !== 'cardio' && nameMap[ex.name]) {
+                ex.name = nameMap[ex.name];
+                changed = true;
+            }
+        });
+    });
+    if (changed) saveLog();
+})();
+
 renderPlansList();
 renderRegistro();
 initMuscleAvatar();
@@ -1184,17 +1216,20 @@ function setWeightMode(id, mode) {
     const plWrap = document.getElementById(id+'_pl_wrap');
     const btnKg  = document.getElementById(id+'_mkg');
     const btnPl  = document.getElementById(id+'_mpl');
+    const wLabel = document.getElementById(id+'_wlabel');
     if (!kgWrap || !plWrap) return;
     if (mode === 'plates') {
-        kgWrap.classList.add('hidden');
-        plWrap.classList.remove('hidden');
+        kgWrap.style.display = 'none';
+        plWrap.style.display = 'block';
         btnKg.classList.remove('wm-btn--active');
         btnPl.classList.add('wm-btn--active');
+        if (wLabel) wLabel.textContent = 'placas';
     } else {
-        plWrap.classList.add('hidden');
-        kgWrap.classList.remove('hidden');
+        plWrap.style.display = 'none';
+        kgWrap.style.display = 'block';
         btnPl.classList.remove('wm-btn--active');
         btnKg.classList.add('wm-btn--active');
+        if (wLabel) wLabel.textContent = 'carga (kg)';
     }
 }
 

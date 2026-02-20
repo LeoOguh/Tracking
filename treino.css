@@ -1056,7 +1056,7 @@ body { overflow-x: hidden; }
     font-weight: 400;
 }
 body.light .animal-ex-name { color: rgba(0,0,0,0.4); }
-.animal-desc { font-size: 0.82rem; line-height: 1.4; }
+.animal-desc { font-size: 0.95rem; line-height: 1.5; }
 .animal-desc strong { color: rgba(255,255,255,0.9); }
 body.light .animal-desc strong { color: rgba(0,0,0,0.8); }
 
@@ -1080,18 +1080,17 @@ body.light .pef-muscle-group-header { background: rgba(0,0,0,0.03); }
 /* 2-column exercise grid in accordion */
 .pef-exes-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 10px;
+}
+@media (max-width: 900px) {
+    .pef-exes-grid { grid-template-columns: 1fr; }
 }
 .pef-ex-block {
     padding: 12px 14px !important;
     gap: 8px !important;
 }
-.ef-row-add {
-    flex-wrap: wrap;
-    gap: 6px !important;
-}
-.ef-add-field { min-width: 70px; }
+/* ef-row-add overrides removed */
 
 /* ─── PLATES COUNTER ─────────────────────────────────────────────────────── */
 /* plates counter replaced with simple input */
@@ -1123,3 +1122,39 @@ body.light .ee-name { color: rgba(0,0,0,0.8); }
 
 /* ─── PROGRESS CHART — hide when no exercises ────────────────────────────── */
 .progress-chart-panel { transition: opacity 0.2s; }
+
+/* ─── ACCORDION INPUT LAYOUT (v41) ───────────────────────────────────────── */
+.acc-input-area {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.acc-mode-toggle {
+    display: flex;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.1);
+    width: 100%;
+}
+.acc-mode-toggle .wm-btn { flex: 1; }
+.acc-fields-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    flex-wrap: nowrap;
+}
+.acc-field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+.acc-field-sm  { flex: 0 0 60px; }
+.acc-field-grow { flex: 1; min-width: 60px; }
+.acc-num { width: 100% !important; }
+.acc-btn-add {
+    flex-shrink: 0;
+    align-self: flex-end;
+    white-space: nowrap;
+    padding: 8px 12px;
+}
