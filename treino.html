@@ -55,8 +55,20 @@
         <div class="treino-topbar-center">
             <div class="treino-date-nav">
                 <button class="nav-btn" onclick="changeDate(-1)">‹</button>
-                <div id="treinoDateTitle">...</div>
+                <div class="date-nav-center">
+                    <div id="treinoDateTitle" onclick="toggleDatePicker()" style="cursor:pointer" title="clique para escolher data">...</div>
+                    <button class="today-btn hidden" id="todayBtn" onclick="goToToday()">hoje</button>
+                </div>
                 <button class="nav-btn" onclick="changeDate(1)">›</button>
+            </div>
+            <!-- Mini calendário -->
+            <div class="date-picker-popup hidden" id="datePicker">
+                <div class="dp-header">
+                    <button class="dp-nav" onclick="dpPrevMonth()">‹</button>
+                    <span id="dpMonthLabel"></span>
+                    <button class="dp-nav" onclick="dpNextMonth()">›</button>
+                </div>
+                <div class="dp-grid" id="dpGrid"></div>
             </div>
             <div class="treino-view-label" id="treinoViewLabel">planos</div>
         </div>
@@ -88,7 +100,6 @@
                         <button class="plan-editor-close" onclick="closePlanEditor()" title="Fechar">✕</button>
                     </div>
                 </div>
-                <div id="planMuscleGroups" class="plan-muscle-groups"></div>
                 <div class="plan-add-ex-form">
                     <div class="pae-title">adicionar exercício</div>
                     <div class="pae-with-preview">
@@ -162,6 +173,7 @@
                         </div>
                     </div>
                 </div>
+                <div id="planMuscleGroups" class="plan-muscle-groups"></div>
             </div>
         </div>
     </div>
@@ -229,7 +241,10 @@
 
                 <!-- Lista do dia -->
                 <div class="exercises-list-panel glass-panel">
-                    <div class="form-title" id="exercisesListTitle">exercícios do dia</div>
+                    <div class="exercises-list-header">
+                        <div class="form-title" id="exercisesListTitle">exercícios do dia</div>
+                        <button class="btn-del-session hidden" id="btnDelSession" onclick="deleteSession()">🗑 apagar treino</button>
+                    </div>
                     <div id="exercisesList"></div>
                 </div>
             </div>

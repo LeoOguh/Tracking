@@ -123,7 +123,7 @@ function exportTreino() {
 }
 
 // ─── NAVEGAÇÃO DE DATA ────────────────────────────────────────────────────────
-function changeDate(delta) { currentDate.setDate(currentDate.getDate()+delta); renderRegistro(); }
+function changeDate(delta) { currentDate.setDate(currentDate.getDate()+delta); updateTodayBtn(); renderRegistro(); }
 
 // ─── DRAWER ───────────────────────────────────────────────────────────────────
 // Drawer agora sempre visível - funções mantidas para compatibilidade mas não fazem nada
@@ -373,8 +373,8 @@ function selectPlan(id) {
                     <div class="pef-ex-header">
                         <span class="pef-ex-equip">${ex.equip==='maquina'?'⚙️':'🏋️'}</span>
                         <span class="pef-ex-name">${ex.name}</span>
-                        ${ex.obs?`<span class="pef-ex-obs-tag">${ex.obs}</span>`:''}
                     </div>
+                    ${ex.obs?`<div class="pef-ex-plan-obs">📝 ${ex.obs}</div>`:''}
                     ${hint?`<div class="progression-hint" style="margin:0 0 8px"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>${hint}</div>`:''}
                     <div class="ef-row-add" id="${id}_row">
                         <div class="ef-add-field">
@@ -589,6 +589,8 @@ function renderExercisesList() {
     const el   = document.getElementById('exercisesList');
     const title= document.getElementById('exercisesListTitle');
     title.textContent = key===todayKey() ? 'exercícios de hoje' : `exercícios — ${new Date(key+'T00:00:00').toLocaleDateString('pt-br',{day:'2-digit',month:'2-digit'})}`;
+    const delBtn = document.getElementById('btnDelSession');
+    if (delBtn) delBtn.classList.toggle('hidden', !exes.length);
     if (!exes.length) { el.innerHTML=`<div class="empty-exercises">nenhum exercício registrado neste dia</div>`; return; }
     el.innerHTML = exes.map(ex => {
         const color = MUSCLE_COLORS[ex.muscle]||'#7f8c8d';
@@ -1011,3 +1013,80 @@ function attachPaeExListener() {
         sel.addEventListener('change', updatePaePreview);
     }
 }
+
+// ─── DATE PICKER ─────────────────────────────────────────────────────────────
+let dpDate = new Date();
+
+function toggleDatePicker() {
+    const popup = document.getElementById('datePicker');
+    dpDate = new Date(currentDate);
+    popup.classList.toggle('hidden');
+    if (!popup.classList.contains('hidden')) renderDpGrid();
+}
+
+function closeDatePicker() {
+    document.getElementById('datePicker').classList.add('hidden');
+}
+
+function dpPrevMonth() { dpDate.setMonth(dpDate.getMonth()-1); renderDpGrid(); }
+function dpNextMonth() { dpDate.setMonth(dpDate.getMonth()+1); renderDpGrid(); }
+
+function renderDpGrid() {
+    const label = document.getElementById('dpMonthLabel');
+    const grid  = document.getElementById('dpGrid');
+    const y = dpDate.getFullYear(), m = dpDate.getMonth();
+    label.textContent = new Date(y,m,1).toLocaleDateString('pt-br',{month:'long',year:'numeric'});
+    const firstDay = new Date(y,m,1).getDay(); // 0=sun
+    const daysInMonth = new Date(y,m+1,0).getDate();
+    const todayStr = todayKey();
+    const selStr   = dateKey(currentDate);
+    let html = '<div class="dp-weekdays"><span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span></div><div class="dp-days">';
+    for (let i=0;i<firstDay;i++) html += '<span class="dp-empty"></span>';
+    for (let d=1;d<=daysInMonth;d++) {
+        const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const isToday = ds===todayStr;
+        const isSel   = ds===selStr;
+        const hasLog  = !!(workoutLog[ds]?.exercises?.length);
+        html += `<span class="dp-day${isSel?' dp-sel':''}${isToday?' dp-today':''}${hasLog?' dp-has-log':''}" onclick="dpSelectDate('${ds}')">${d}</span>`;
+    }
+    html += '</div>';
+    grid.innerHTML = html;
+}
+
+function dpSelectDate(ds) {
+    currentDate = new Date(ds+'T12:00:00');
+    closeDatePicker();
+    updateTodayBtn();
+    renderRegistro();
+}
+
+function goToToday() {
+    currentDate = new Date();
+    updateTodayBtn();
+    renderRegistro();
+}
+
+function updateTodayBtn() {
+    const btn = document.getElementById('todayBtn');
+    if (!btn) return;
+    const isToday = dateKey(currentDate) === todayKey();
+    btn.classList.toggle('hidden', isToday);
+}
+
+// ─── DELETE SESSION ───────────────────────────────────────────────────────────
+function deleteSession() {
+    const key = dateKey(currentDate);
+    if (!workoutLog[key]?.exercises?.length) return;
+    if (!confirm('Apagar todos os exercícios deste dia?')) return;
+    delete workoutLog[key];
+    saveLog();
+    renderRegistro();
+}
+
+// Close date picker when clicking outside
+document.addEventListener('click', function(e) {
+    const picker = document.getElementById('datePicker');
+    const title  = document.getElementById('treinoDateTitle');
+    if (!picker || picker.classList.contains('hidden')) return;
+    if (!picker.contains(e.target) && e.target !== title) closeDatePicker();
+});

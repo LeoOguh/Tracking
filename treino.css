@@ -823,3 +823,147 @@ body.light .muscle-selected-name { color: rgba(0,0,0,0.7); }
     .avatar-img-wrap { width: 130px !important; height: 191px !important; }
     .medidas-container { grid-template-columns: 1fr !important; }
 }
+
+/* ─── DATE NAV CENTER ────────────────────────────────────────────────────────── */
+.date-nav-center {
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    flex: 1;
+}
+#treinoDateTitle {
+    font-size: 1rem; font-weight: 300; letter-spacing: 1.5px;
+    text-transform: lowercase; font-variant: small-caps; color: #fff;
+    text-align: center; padding: 0 10px;
+    transition: opacity 0.15s;
+}
+#treinoDateTitle:hover { opacity: 0.75; }
+body.light #treinoDateTitle { color: #1a1a1a; }
+
+.today-btn {
+    font-size: 0.58rem; text-transform: uppercase; letter-spacing: 1.5px;
+    color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12); border-radius: 20px;
+    padding: 2px 10px; cursor: pointer; transition: all 0.2s;
+}
+.today-btn:hover { color: #fff; background: rgba(255,255,255,0.14); }
+body.light .today-btn { color: rgba(0,0,0,0.45); background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.12); }
+body.light .today-btn:hover { color: #000; background: rgba(0,0,0,0.1); }
+
+/* ─── DATE PICKER POPUP ──────────────────────────────────────────────────────── */
+.date-picker-popup {
+    position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+    z-index: 500; width: 260px;
+    background: rgba(16,22,36,0.97); backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.12); border-radius: 16px;
+    padding: 14px; box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
+body.light .date-picker-popup {
+    background: rgba(255,255,255,0.97); border-color: rgba(0,0,0,0.1);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+}
+.dp-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 10px;
+}
+#dpMonthLabel {
+    font-size: 0.78rem; text-transform: capitalize; letter-spacing: 0.5px;
+    color: rgba(255,255,255,0.8);
+}
+body.light #dpMonthLabel { color: rgba(0,0,0,0.7); }
+.dp-nav {
+    background: none; border: none; color: rgba(255,255,255,0.5);
+    font-size: 1.1rem; cursor: pointer; padding: 2px 8px; border-radius: 8px;
+    transition: all 0.15s;
+}
+.dp-nav:hover { background: rgba(255,255,255,0.08); color: #fff; }
+body.light .dp-nav { color: rgba(0,0,0,0.4); }
+body.light .dp-nav:hover { background: rgba(0,0,0,0.06); color: #000; }
+.dp-weekdays {
+    display: grid; grid-template-columns: repeat(7,1fr);
+    margin-bottom: 4px;
+}
+.dp-weekdays span {
+    text-align: center; font-size: 0.6rem; text-transform: uppercase;
+    letter-spacing: 0.5px; color: rgba(255,255,255,0.3); padding: 2px 0;
+}
+body.light .dp-weekdays span { color: rgba(0,0,0,0.3); }
+.dp-days {
+    display: grid; grid-template-columns: repeat(7,1fr); gap: 2px;
+}
+.dp-day, .dp-empty {
+    text-align: center; font-size: 0.76rem; padding: 6px 0;
+    border-radius: 8px; cursor: pointer; color: rgba(255,255,255,0.65);
+    transition: all 0.15s; position: relative;
+}
+body.light .dp-day { color: rgba(0,0,0,0.6); }
+.dp-day:hover { background: rgba(255,255,255,0.1); color: #fff; }
+body.light .dp-day:hover { background: rgba(0,0,0,0.07); color: #000; }
+.dp-day.dp-today { color: #fff; font-weight: 600; }
+body.light .dp-day.dp-today { color: #000; }
+.dp-day.dp-today::after {
+    content: ''; position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%);
+    width: 4px; height: 4px; border-radius: 50%; background: rgba(255,255,255,0.6);
+}
+body.light .dp-day.dp-today::after { background: rgba(0,0,0,0.4); }
+.dp-day.dp-sel {
+    background: rgba(255,255,255,0.15); color: #fff; font-weight: 600;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.25);
+}
+body.light .dp-day.dp-sel { background: rgba(0,0,0,0.1); color: #000; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.2); }
+.dp-day.dp-has-log::before {
+    content: ''; position: absolute; top: 3px; right: 4px;
+    width: 4px; height: 4px; border-radius: 50%; background: #4ade80;
+}
+.dp-empty { cursor: default; }
+
+/* ─── TOPBAR: relative for popup positioning ────────────────────────────────── */
+.treino-date-nav { position: relative; }
+
+/* ─── DELETE SESSION BUTTON ─────────────────────────────────────────────────── */
+.exercises-list-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 10px;
+}
+.exercises-list-header .form-title { margin-bottom: 0; }
+.btn-del-session {
+    font-size: 0.7rem; color: rgba(255,80,80,0.7);
+    background: rgba(255,80,80,0.08); border: 1px solid rgba(255,80,80,0.15);
+    border-radius: 8px; padding: 5px 12px; cursor: pointer; transition: all 0.2s;
+}
+.btn-del-session:hover { background: rgba(255,80,80,0.18); color: #ff5050; }
+body.light .btn-del-session { color: rgba(180,30,30,0.7); background: rgba(180,30,30,0.07); border-color: rgba(180,30,30,0.15); }
+
+/* ─── PLAN OBS VISIBLE IN ACCORDION ────────────────────────────────────────── */
+.pef-ex-plan-obs {
+    font-size: 0.72rem; color: rgba(255,255,255,0.45);
+    background: rgba(255,255,255,0.05); border-radius: 6px;
+    padding: 3px 8px; margin: 2px 0 8px; display: inline-block;
+    border-left: 2px solid rgba(255,255,255,0.15);
+}
+body.light .pef-ex-plan-obs { color: rgba(0,0,0,0.45); background: rgba(0,0,0,0.04); border-left-color: rgba(0,0,0,0.15); }
+
+/* ─── PLAN MUSCLE GROUPS (exercícios adicionados) — below form ──────────────── */
+.plan-muscle-groups {
+    margin-top: 16px; display:flex; flex-direction:column; gap:10px;
+    max-height: none; overflow-y: visible; padding-right: 0;
+    border-top: 1px solid rgba(255,255,255,0.06); padding-top: 14px;
+}
+body.light .plan-muscle-groups { border-top-color: rgba(0,0,0,0.07); }
+.plan-muscle-groups:empty { display: none; }
+
+/* ─── SCROLLBAR STYLING (sidebar) ───────────────────────────────────────────── */
+.registro-sidebar { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.12) transparent; }
+.registro-sidebar::-webkit-scrollbar { width: 4px; }
+.registro-sidebar::-webkit-scrollbar-track { background: transparent; }
+.registro-sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 4px; }
+.registro-sidebar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
+body.light .registro-sidebar { scrollbar-color: rgba(0,0,0,0.12) transparent; }
+body.light .registro-sidebar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); }
+
+/* Global scrollbar styling */
+* { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent; }
+*::-webkit-scrollbar { width: 4px; height: 4px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+*::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+body.light *::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); }
+body.light *::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.2); }
