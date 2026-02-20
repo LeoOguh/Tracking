@@ -107,7 +107,7 @@ function saveMeasures() { localStorage.setItem('clarity_body_measures', JSON.str
 
 function totalSetsOfExercise(ex) { return (ex.sets||[]).reduce((s,x) => s + (x.count||1), 0); }
 function setLabel(s) {
-    const w = s.weight > 0 ? `${s.weight}kg` : 'BW';
+    const w = s.plates ? `${s.weight}x placa/lado` : (s.weight > 0 ? `${s.weight}kg` : 'BW');
     const c = (s.count||1) > 1 ? `${s.count}×` : '';
     const n = s.note ? ` (${s.note})` : '';
     return `${c} ${w}${n}`.trim();
@@ -370,7 +370,7 @@ function selectPlan(id) {
     accordion.innerHTML = Object.entries(groups).map(([muscle, exes]) => {
         const color = MUSCLE_COLORS[muscle] || '#7f8c8d';
         return `<div class="pef-muscle-group">
-            <div class="pef-muscle-title" style="border-left:3px solid ${color};padding-left:10px">${muscle}</div>
+            <div class="pef-muscle-group-header" style="border-left:4px solid ${color}"><span class="pef-muscle-title-big" style="color:${color}">${muscle}</span></div>
             ${exes.map(ex => {
                 const hint = getProgressionSuggestion(ex.name);
                 const id   = `pef_${ex._planIdx}`;
@@ -378,12 +378,12 @@ function selectPlan(id) {
                     <div class="pef-ex-header">
                         <span class="pef-ex-equip">${ex.equip==='maquina'?'⚙️':'🏋️'}</span>
                         <span class="pef-ex-name">${ex.name}</span>
+                        ${(ex.obs&&ex.obs.trim())?`<span class="pef-ex-obs-inline">📝 ${ex.obs}</span>`:''}
                     </div>
-                    ${ex.obs?`<div class="pef-ex-plan-obs">📝 ${ex.obs}</div>`:''}
                     ${hint?`<div class="progression-hint" style="margin:0 0 8px"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>${hint}</div>`:''}
                     <div class="ef-row-add" id="${id}_row">
-                        <div class="ef-add-field">
-                            <div class="weight-mode-toggle">
+                        <div class="ef-add-field" id="${id}_load_field">
+                            <div class="weight-mode-toggle" style="margin-bottom:4px">
                                 <button class="wm-btn wm-btn--active" id="${id}_mkg" onclick="setWeightMode('${id}','kg')">kg</button>
                                 <button class="wm-btn" id="${id}_mpl" onclick="setWeightMode('${id}','plates')">placas</button>
                             </div>
@@ -392,23 +392,15 @@ function selectPlan(id) {
                                 <input type="number" id="${id}_w" class="f-input ef-num-input" min="0" step="0.5" placeholder="0">
                             </div>
                             <div id="${id}_pl_wrap" class="hidden">
-                                <label class="ef-add-label">barra + placas</label>
-                                <div class="plates-row" id="${id}_plates">
-                                    <input type="number" id="${id}_bar" class="f-input ef-num-input" min="0" step="5" placeholder="barra (kg)" value="20" style="width:80px">
-                                    <span class="plates-plus">+</span>
-                                    <div class="plates-chips" id="${id}_pchips"></div>
-                                    <select class="f-select plates-sel" id="${id}_padd" style="width:70px">
-                                        <option value="1.25">1,25</option><option value="2.5">2,5</option>
-                                        <option value="5" selected>5</option><option value="10">10</option>
-                                        <option value="15">15</option><option value="20">20</option>
-                                        <option value="25">25</option>
-                                    </select>
-                                    <button class="btn-add-plate" onclick="addPlate('${id}')">+ placa</button>
+                                <label class="ef-add-label">placas / lado</label>
+                                <div class="plates-count-row">
+                                    <button class="pl-count-btn" onclick="changePlateCount('${id}',-1)">−</button>
+                                    <span class="pl-count-val" id="${id}_plcount">0</span>
+                                    <button class="pl-count-btn" onclick="changePlateCount('${id}',1)">+</button>
+                                    <span class="pl-count-unit">placas</span>
                                 </div>
-                                <div class="plates-total" id="${id}_ptotal">total: 20 kg</div>
-                                <input type="hidden" id="${id}_w" value="0">
                             </div>
-                        </div>
+                                                </div>
                         <div class="ef-add-field ef-add-field--sm">
                             <label class="ef-add-label">séries</label>
                             <input type="number" id="${id}_s" class="f-input ef-num-input" min="1" step="1" value="1">
@@ -439,13 +431,21 @@ function cancelPlanSelection() {
 let accordionSets = {};
 
 function addSetToAccordion(id, muscle, name, equip) {
-    const weight = parseFloat(document.getElementById(`${id}_w`).value) || 0;
+    const plWrap = document.getElementById(id+'_pl_wrap');
+    const inPlatesMode = plWrap && !plWrap.classList.contains('hidden');
+    let weight, isPlates = false;
+    if (inPlatesMode) {
+        isPlates = true;
+        weight = plateCountMap[id] || 0; // store plate count as "weight" with special flag
+    } else {
+        weight = parseFloat(document.getElementById(`${id}_w`).value) || 0;
+    }
     const count  = parseInt(document.getElementById(`${id}_s`).value)   || 1;
     const note   = document.getElementById(`${id}_n`).value.trim();
     if (!accordionSets[id]) accordionSets[id] = { muscle, name, equip, sets:[] };
-    const existing = accordionSets[id].sets.find(s=>s.weight===weight && s.note===note);
+    const existing = accordionSets[id].sets.find(s=>s.weight===weight && s.note===note && !!s.plates===isPlates);
     if (existing) existing.count += count;
-    else accordionSets[id].sets.push({weight,count,note});
+    else accordionSets[id].sets.push({weight,count,note,plates:isPlates||false});
     // Reset campos mas mantém foco em carga
     document.getElementById(`${id}_w`).value = '';
     document.getElementById(`${id}_s`).value = '1';
@@ -568,6 +568,7 @@ function renderRegistro() {
     renderPlanDaySelector();
     renderRecentHistory();
     populateProgressChartSel();
+    populateStatsProgressSel();
 }
 
 // ─── ANIMAL DO DIA (aba registro) ────────────────────────────────────────────
@@ -576,8 +577,8 @@ function renderDayAnimal() {
     const exes  = (workoutLog[key]?.exercises||[]).filter(e=>e.type!=='cardio');
     const panel = document.getElementById('regAnimalPanel');
     if (!exes.length || !panel) { if (panel) panel.style.display='none'; return; }
-    let maxLift=0;
-    exes.forEach(ex=>(ex.sets||[]).forEach(s=>{ if(s.weight>maxLift) maxLift=s.weight; }));
+    let maxLift=0, maxLiftEx='';
+    exes.forEach(ex=>(ex.sets||[]).forEach(s=>{ if(s.weight>maxLift){maxLift=s.weight; maxLiftEx=ex.name;} }));
     if (!maxLift) { panel.style.display='none'; return; }
     panel.style.display='block';
     const animal = [...FORCE_REFS].reverse().find(a=>a.kg<=maxLift)||FORCE_REFS[0];
@@ -586,7 +587,7 @@ function renderDayAnimal() {
         <div style="font-size:2.2rem;line-height:1">${animal.emoji}</div>
         <div class="animal-info">
             <div class="animal-title">força deste treino</div>
-            <div class="animal-desc">com <strong>${maxLift}kg</strong> você consegue levantar um <strong>${animal.name}</strong> (${animal.kg}kg)</div>
+            <div class="animal-desc">com <strong>${maxLift}kg</strong> <span class="animal-ex-name">(${maxLiftEx})</span> você levanta um <strong>${animal.name}</strong> ${animal.emoji} (${animal.kg}kg)</div>
             ${nextAn?`<div class="animal-next">próximo: ${nextAn.emoji} ${nextAn.name} — faltam <strong>${nextAn.kg-maxLift}kg</strong></div>`:'<div class="animal-next">🏆 nível máximo atingido!</div>'}
         </div>
     </div>`;
@@ -639,25 +640,46 @@ function renderExercisesList() {
             return `<span class="ee-set-chip${isPR?' pr':''}">${setLabel(s)}${isPR?' 🏆':''}</span>`;
         }).join('');
         const equipBadge = ex.equip==='maquina' ? '<span class="equip-badge equip-badge--maquina">⚙️ máquina</span>' : '<span class="equip-badge equip-badge--livre">🏋️ livre</span>';
-        return `<div class="exercise-entry"><div class="ee-header">
-            <span class="ee-muscle-tag" style="background:${color}22;color:${color}">${ex.muscle}</span>
-            <span class="ee-name">${ex.name}</span>
-            ${equipBadge}
-            <button class="ee-del" onclick="removeExercise(${ex.id})">✕</button>
-        </div>
-        <div class="ee-sets">${setsHtml}</div>
-        <div class="ee-serie-total">${totalSets} série${totalSets!==1?'s':''}</div></div>`;
+        return `<div class="exercise-entry">
+            <div class="ee-muscle-stripe" style="background:${color}"></div>
+            <div class="ee-content">
+                <div class="ee-header">
+                    <span class="ee-name">${ex.name}</span>
+                    ${equipBadge}
+                    <button class="ee-del" onclick="removeExercise(${ex.id})">✕</button>
+                </div>
+                <div class="ee-sets">${setsHtml}</div>
+                <div class="ee-footer">
+                    <span class="ee-muscle-tag" style="color:${color}">${ex.muscle}</span>
+                    <span class="ee-serie-total">${totalSets} série${totalSets!==1?'s':''}</span>
+                </div>
+            </div>
+        </div>`;
     }).join('');
 }
 
 // ─── GRÁFICO PROGRESSÃO ───────────────────────────────────────────────────────
 function populateProgressChartSel() {
-    const sel  = document.getElementById('chartExerciseSel');
-    const prev = sel.value;
+    const sel   = document.getElementById('chartExerciseSel');
+    const prev  = sel.value;
+    const key   = dateKey(currentDate);
+    const todayExes = (workoutLog[key]?.exercises||[]).filter(e=>e.type!=='cardio').map(e=>e.name);
     const names = new Set();
     Object.values(workoutLog).forEach(day=>(day.exercises||[]).filter(e=>e.type!=='cardio').forEach(e=>names.add(e.name)));
-    sel.innerHTML = '<option value="">selecione um exercício</option>'+[...names].sort().map(n=>`<option value="${n}">${n}</option>`).join('');
-    if (prev && [...names].includes(prev)) sel.value=prev;
+
+    if (!todayExes.length) {
+        // No exercises today — hide chart panel
+        const panel = document.getElementById('chartExerciseSel')?.closest('.glass-panel');
+        if (panel) panel.style.display = 'none';
+        return;
+    }
+    const panel = document.getElementById('chartExerciseSel')?.closest('.glass-panel');
+    if (panel) panel.style.display = '';
+
+    sel.innerHTML = todayExes.map(n=>`<option value="${n}">${n}</option>`).join('');
+    // If prev was today's exercise keep it, else default to first today
+    if (prev && todayExes.includes(prev)) sel.value = prev;
+    else sel.value = todayExes[0] || '';
     renderProgressChart();
 }
 
@@ -1048,8 +1070,31 @@ let dpDate = new Date();
 function toggleDatePicker() {
     const popup = document.getElementById('datePicker');
     dpDate = new Date(currentDate);
-    popup.classList.toggle('hidden');
-    if (!popup.classList.contains('hidden')) renderDpGrid();
+    const isHidden = popup.classList.contains('hidden');
+    // Hide first to measure, then show positioned
+    popup.classList.add('hidden');
+    if (isHidden) {
+        const title = document.getElementById('treinoDateTitle');
+        const rect  = title.getBoundingClientRect();
+        // position:fixed uses viewport coords directly
+        popup.style.top        = (rect.bottom + 8) + 'px';
+        popup.style.left       = (rect.left + rect.width / 2) + 'px';
+        popup.style.transform  = 'translateX(-50%)';
+        // Clamp so it doesn't go off right edge
+        requestAnimationFrame(() => {
+            const pr = popup.getBoundingClientRect();
+            if (pr.right > window.innerWidth - 8) {
+                popup.style.left = (window.innerWidth - pr.width - 8) + 'px';
+                popup.style.transform = 'none';
+            }
+            if (pr.left < 8) {
+                popup.style.left = '8px';
+                popup.style.transform = 'none';
+            }
+        });
+        popup.classList.remove('hidden');
+        renderDpGrid();
+    }
 }
 
 function closeDatePicker() {
@@ -1119,20 +1164,20 @@ document.addEventListener('click', function(e) {
     if (!picker.contains(e.target) && e.target !== title) closeDatePicker();
 });
 
-// ─── CALCULADORA DE PLACAS ────────────────────────────────────────────────────
-let plateSets = {}; // {id: [1.25, 5, 10, ...]} plates added (each side × 2)
+// ─── CALCULADORA DE PLACAS (modo simples: contagem) ─────────────────────────
+let plateCountMap = {}; // {id: count}
 
 function setWeightMode(id, mode) {
-    const kgWrap  = document.getElementById(id+'_kg_wrap');
-    const plWrap  = document.getElementById(id+'_pl_wrap');
-    const btnKg   = document.getElementById(id+'_mkg');
-    const btnPl   = document.getElementById(id+'_mpl');
+    const kgWrap = document.getElementById(id+'_kg_wrap');
+    const plWrap = document.getElementById(id+'_pl_wrap');
+    const btnKg  = document.getElementById(id+'_mkg');
+    const btnPl  = document.getElementById(id+'_mpl');
+    if (!kgWrap || !plWrap) return;
     if (mode === 'plates') {
         kgWrap.classList.add('hidden');
         plWrap.classList.remove('hidden');
         btnKg.classList.remove('wm-btn--active');
         btnPl.classList.add('wm-btn--active');
-        updatePlatesTotal(id);
     } else {
         plWrap.classList.add('hidden');
         kgWrap.classList.remove('hidden');
@@ -1141,35 +1186,50 @@ function setWeightMode(id, mode) {
     }
 }
 
-function addPlate(id) {
-    const val = parseFloat(document.getElementById(id+'_padd').value);
-    if (!plateSets[id]) plateSets[id] = [];
-    plateSets[id].push(val);
-    renderPlateChips(id);
-    updatePlatesTotal(id);
+function changePlateCount(id, delta) {
+    if (!plateCountMap[id]) plateCountMap[id] = 0;
+    plateCountMap[id] = Math.max(0, plateCountMap[id] + delta);
+    const el = document.getElementById(id+'_plcount');
+    if (el) el.textContent = plateCountMap[id];
 }
 
-function removePlate(id, idx) {
-    if (plateSets[id]) plateSets[id].splice(idx, 1);
-    renderPlateChips(id);
-    updatePlatesTotal(id);
+// ─── GRÁFICO PROGRESSÃO (ESTATÍSTICAS) ───────────────────────────────────────
+let statsProgressChart = null;
+
+function populateStatsProgressSel() {
+    const sel = document.getElementById('statsChartExSel');
+    if (!sel) return;
+    const names = new Set();
+    Object.values(workoutLog).forEach(day=>(day.exercises||[]).filter(e=>e.type!=='cardio').forEach(e=>names.add(e.name)));
+    const prev = sel.value;
+    sel.innerHTML = '<option value="">— exercício —</option>' + [...names].sort().map(n=>`<option value="${n}">${n}</option>`).join('');
+    if (prev && [...names].includes(prev)) sel.value = prev;
+    renderStatsProgressChart();
 }
 
-function renderPlateChips(id) {
-    const wrap = document.getElementById(id+'_pchips');
-    if (!wrap) return;
-    const plates = plateSets[id] || [];
-    wrap.innerHTML = plates.map((p,i) =>
-        `<span class="plate-chip">${p}kg<button onclick="removePlate('${id}',${i})">✕</button></span>`
-    ).join('');
-}
-
-function updatePlatesTotal(id) {
-    const bar    = parseFloat(document.getElementById(id+'_bar')?.value) || 20;
-    const plates = plateSets[id] || [];
-    const total  = bar + plates.reduce((s,p) => s + p*2, 0);
-    const totalEl = document.getElementById(id+'_ptotal');
-    const hidden  = document.getElementById(id+'_w');
-    if (totalEl) totalEl.textContent = `total: ${total} kg`;
-    if (hidden)  hidden.value = total;
+function renderStatsProgressChart() {
+    const name = document.getElementById('statsChartExSel')?.value;
+    if (statsProgressChart) { statsProgressChart.destroy(); statsProgressChart = null; }
+    const prEl = document.getElementById('statsChartPR');
+    if (!name) { if (prEl) prEl.textContent = ''; return; }
+    const points = [];
+    Object.keys(workoutLog).sort().forEach(dateStr => {
+        (workoutLog[dateStr]?.exercises||[]).filter(e=>e.type!=='cardio'&&e.name?.toLowerCase()===name.toLowerCase()).forEach(ex => {
+            const maxLoad = Math.max(...(ex.sets||[]).filter(s=>s.weight>0&&!s.plates).map(s=>s.weight), 0);
+            if (maxLoad > 0) points.push({ dateStr, maxLoad });
+        });
+    });
+    if (!points.length) { if (prEl) prEl.textContent = 'sem dados de carga para este exercício.'; return; }
+    const pr = Math.max(...points.map(p=>p.maxLoad));
+    if (prEl) prEl.textContent = `🏆 recorde: ${pr}kg`;
+    const gc = isLight?'rgba(0,0,0,0.07)':'rgba(255,255,255,0.08)';
+    const tc = isLight?'#555':'rgba(255,255,255,0.6)';
+    statsProgressChart = new Chart(document.getElementById('statsProgressChart'), {
+        type: 'line',
+        data: { labels: points.map(p=>{ const d=new Date(p.dateStr+'T00:00:00'); return `${d.getDate()}/${d.getMonth()+1}`; }),
+                datasets: [{ data: points.map(p=>p.maxLoad), borderColor:'#8b5cf6', borderWidth:2, pointRadius:4, pointBackgroundColor:'#8b5cf6', backgroundColor:'#8b5cf622', fill:true, tension:0.4, label:'carga máx' }] },
+        options: { responsive:true, maintainAspectRatio:false,
+            plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>` ${ctx.parsed.y}kg`}} },
+            scales:{ y:{min:0,grid:{color:gc},ticks:{color:tc,callback:v=>v+'kg'}}, x:{grid:{display:false},ticks:{color:tc}} } }
+    });
 }
