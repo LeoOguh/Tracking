@@ -1066,6 +1066,11 @@ body.light .ee-name { color: rgba(0,0,0,0.8); }
     flex-direction: column;
     gap: 8px;
 }
+.acc-input-area .f-input,
+.acc-input-area .f-select {
+    font-size: 0.88rem;
+    padding: 9px 12px;
+}
 .acc-mode-toggle {
     display: flex;
     border-radius: 8px;
