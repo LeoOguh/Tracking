@@ -63,6 +63,7 @@
             </svg>
         </button>
         <div class="treino-topbar-center">
+            <div class="treino-view-label" id="treinoViewLabel">planos</div>
             <div class="treino-date-nav">
                 <button class="nav-btn" onclick="changeDate(-1)">‹</button>
                 <div class="date-nav-center">
@@ -71,7 +72,6 @@
                 </div>
                 <button class="nav-btn" onclick="changeDate(1)">›</button>
             </div>
-            <div class="treino-view-label" id="treinoViewLabel">planos</div>
         </div>
         <button class="theme-toggle" onclick="toggleTheme()" id="themeToggleBtn">☀ claro</button>
     </div>
@@ -221,6 +221,7 @@
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                         cardio / outro
                     </button>
+                    <button class="btn-close-selector hidden" id="btnCloseSelector" onclick="closeSelector()">✕ fechar</button>
                 </div><!-- end plan-day-selector -->
                 </div>
 
@@ -281,9 +282,7 @@
                 <div class="glass-panel progress-chart-panel">
                     <div class="pcp-header">
                         <span class="pcp-title">progressão de carga</span>
-                        <select id="chartExerciseSel" class="f-select pcp-sel" onchange="renderProgressChart()">
-                            <option value="">selecione um exercício</option>
-                        </select>
+                        <span class="pcp-ex-name" id="pcpExName"></span>
                     </div>
                     <div class="pcp-chart-wrap"><canvas id="progressChart"></canvas></div>
                     <div class="pcp-pr" id="pcpPR"></div>

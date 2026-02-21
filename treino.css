@@ -56,10 +56,10 @@ body.light .drawer-footer { border-color: rgba(0,0,0,0.08); }
 .treino-topbar {
     display: flex; align-items: center; gap: 14px;
     margin-bottom: 10px; width: calc(100vw - 260px);
-    margin-left: 260px; padding: 10px 32px 0; box-sizing: border-box;
+    margin-left: 260px; padding: 6px 32px 0; box-sizing: border-box;
 }
 .treino-topbar-center {
-    flex: 1; display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap;
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
 }
 .drawer-trigger { display: none; } /* Remove botão hambúrguer */
 
@@ -79,8 +79,8 @@ body.light #treinoDateTitle { color: #1a1a1a; }
 
 /* Label da vista atual */
 .treino-view-label {
-    font-size: 0.68rem; text-transform: uppercase; letter-spacing: 2px;
-    color: rgba(255,255,255,0.3); white-space: nowrap;
+    font-size: 0.62rem; text-transform: uppercase; letter-spacing: 2px;
+    color: rgba(255,255,255,0.3); white-space: nowrap; margin-bottom: -2px;
 }
 body.light .treino-view-label { color: rgba(0,0,0,0.35); }
 
@@ -582,7 +582,7 @@ body.light .cal-cell--today   { border-color:rgba(0,0,0,0.5) !important; }
 .animal-stat { display:flex;gap:14px;align-items:flex-start;padding:12px;border-radius:14px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06); }
 body.light .animal-stat { background:rgba(0,0,0,0.03);border-color:rgba(0,0,0,0.07); }
 .animal-emoji { font-size:2.5rem;line-height:1;flex-shrink:0; }
-.animal-info { display:flex;flex-direction:column;gap:4px; }
+.animal-info { display:flex;flex-direction:column;gap:4px;flex:1;padding:8px 14px; }
 .animal-title { font-size:0.6rem;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,0.35); }
 body.light .animal-title { color:rgba(0,0,0,0.4); }
 .animal-desc { font-size:0.88rem;color:rgba(255,255,255,0.8);line-height:1.4; }
@@ -1003,7 +1003,17 @@ body { overflow-x: hidden; }
     grid-column: 1/-1;
     display: grid; grid-template-columns: repeat(3,1fr); gap: 16px;
 }
-.reg-animal-inner { gap: 10px; flex-wrap: wrap; }
+.reg-animal-inner { display: flex; align-items: center; gap: 0; }
+.animal-emoji-side {
+    font-size: 3.5rem; line-height: 1;
+    flex: 0 0 40%; display: flex; align-items: center; justify-content: center;
+    padding: 8px 0;
+}
+.animal-divider {
+    width: 1px; align-self: stretch;
+    background: rgba(255,255,255,0.08); margin: 4px 0;
+}
+body.light .animal-divider { background: rgba(0,0,0,0.08); }
 .animal-emoji-big { font-size: 2.4rem; line-height: 1; }
 .animal-ex-name {
     font-size: 0.72rem; color: rgba(255,255,255,0.4);
@@ -1206,3 +1216,28 @@ body.light .pef-muscle-group-header { background: rgba(0,0,0,0.03); }
 }
 /* Make pef-muscle-group full width aligned with header */
 .pef-muscle-group { width: 100%; max-width: 100% !important; }
+
+/* ─── CLOSE SELECTOR BUTTON ──────────────────────────────────────────────── */
+.btn-close-selector {
+    font-size: 0.72rem; color: rgba(255,255,255,0.4);
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px; padding: 6px 16px; cursor: pointer; transition: all 0.2s;
+}
+.btn-close-selector:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); }
+body.light .btn-close-selector { color: rgba(0,0,0,0.4); background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.1); }
+
+/* ─── CLICKABLE EXERCISE NAME ────────────────────────────────────────────── */
+.ee-name--clickable {
+    cursor: pointer; transition: color 0.15s;
+    text-decoration: underline; text-decoration-color: rgba(255,255,255,0.1);
+    text-underline-offset: 3px;
+}
+.ee-name--clickable:hover { color: #3b82f6; text-decoration-color: #3b82f6; }
+body.light .ee-name--clickable:hover { color: #2563eb; }
+
+/* ─── PCP EXERCISE NAME (no dropdown) ────────────────────────────────────── */
+.pcp-ex-name {
+    font-size: 0.82rem; font-weight: 600; color: rgba(255,255,255,0.75);
+    margin-left: 8px;
+}
+body.light .pcp-ex-name { color: rgba(0,0,0,0.65); }

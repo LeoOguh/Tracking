@@ -601,7 +601,8 @@ function renderDayAnimal() {
     const animal = [...FORCE_REFS].reverse().find(a=>a.kg<=maxLift)||FORCE_REFS[0];
     const nextAn = FORCE_REFS.find(a=>a.kg>maxLift);
     panel.innerHTML=`<div class="reg-animal-inner">
-        <div style="font-size:3.2rem;line-height:1">${animal.emoji}</div>
+        <div class="animal-emoji-side">${animal.emoji}</div>
+        <div class="animal-divider"></div>
         <div class="animal-info">
             <div class="animal-title">força deste treino</div>
             <div class="animal-desc">com <strong>${maxLift}kg</strong> em ${maxLiftEx} você levanta um <strong>${animal.name}</strong> ${animal.emoji} — ${animal.kg}kg</div>
@@ -678,7 +679,7 @@ function renderExercisesList() {
             return `<div class="exercise-entry">
                 <div class="ee-content">
                     <div class="ee-header">
-                        <span class="ee-name">${ex.name}</span>
+                        <span class="ee-name ee-name--clickable" onclick="showExProgress('${ex.name.replace(/'/g,"\\'")}')">${ex.name}</span>
                         ${equipBadge}
                         <button class="ee-del" onclick="removeExercise(${ex.id})">✕</button>
                     </div>
@@ -729,39 +730,52 @@ function eelDrop(e, targetIdx) {
 // ─── EDIT SESSION (show selector again) ──────────────────────────────────────
 function editSession() {
     const selectorWrap = document.getElementById('regSelectorWrap');
+    const closeBtn = document.getElementById('btnCloseSelector');
     if (selectorWrap) selectorWrap.style.display = '';
+    if (closeBtn) closeBtn.classList.remove('hidden');
+}
+function closeSelector() {
+    const key = dateKey(currentDate);
+    const exes = workoutLog[key]?.exercises || [];
+    const selectorWrap = document.getElementById('regSelectorWrap');
+    if (selectorWrap && exes.length) selectorWrap.style.display = 'none';
 }
 
 // ─── GRÁFICO PROGRESSÃO ───────────────────────────────────────────────────────
-function populateProgressChartSel() {
-    const sel   = document.getElementById('chartExerciseSel');
-    const prev  = sel.value;
-    const key   = dateKey(currentDate);
-    const todayExes = (workoutLog[key]?.exercises||[]).filter(e=>e.type!=='cardio').map(e=>e.name);
-    const names = new Set();
-    Object.values(workoutLog).forEach(day=>(day.exercises||[]).filter(e=>e.type!=='cardio').forEach(e=>names.add(e.name)));
+let selectedProgressEx = '';
 
+function populateProgressChartSel() {
+    const key = dateKey(currentDate);
+    const todayExes = (workoutLog[key]?.exercises||[]).filter(e=>e.type!=='cardio').map(e=>e.name);
+    const panel = document.getElementById('progressChart')?.closest('.glass-panel');
     if (!todayExes.length) {
-        // No exercises today — hide chart panel
-        const panel = document.getElementById('chartExerciseSel')?.closest('.glass-panel');
         if (panel) panel.style.display = 'none';
         return;
     }
-    const panel = document.getElementById('chartExerciseSel')?.closest('.glass-panel');
     if (panel) panel.style.display = '';
-
-    sel.innerHTML = todayExes.map(n=>`<option value="${n}">${n}</option>`).join('');
-    // If prev was today's exercise keep it, else default to first today
-    if (prev && todayExes.includes(prev)) sel.value = prev;
-    else sel.value = todayExes[0] || '';
+    // Auto-select first exercise if none selected
+    if (!selectedProgressEx || !todayExes.includes(selectedProgressEx)) {
+        selectedProgressEx = todayExes[0];
+    }
     renderProgressChart();
 }
 
+function showExProgress(name) {
+    selectedProgressEx = name;
+    const panel = document.getElementById('progressChart')?.closest('.glass-panel');
+    if (panel) panel.style.display = '';
+    renderProgressChart();
+    // Scroll to chart
+    panel?.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
 function renderProgressChart() {
-    const name = document.getElementById('chartExerciseSel').value;
+    const name = selectedProgressEx;
     if (progressChart) { progressChart.destroy(); progressChart=null; }
     const el = document.getElementById('pcpPR');
-    if (!name) { el.textContent=''; return; }
+    const nameEl = document.getElementById('pcpExName');
+    if (nameEl) nameEl.textContent = name || '';
+    if (!name) { el.textContent='clique em um exercício para ver a progressão'; return; }
     const points=[];
     Object.keys(workoutLog).sort().forEach(dateStr=>{
         (workoutLog[dateStr]?.exercises||[]).filter(e=>e.type!=='cardio'&&e.name?.toLowerCase()===name.toLowerCase()).forEach(ex=>{

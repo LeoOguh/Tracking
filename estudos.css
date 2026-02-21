@@ -2,9 +2,9 @@
    TOPBAR
    ═══════════════════════════════════════════════════════════ */
 .study-topbar {
-    display: flex; align-items: center; justify-content: flex-start;
+    display: flex; align-items: center; justify-content: center;
     gap: 12px; margin-bottom: 28px; flex-wrap: wrap;
-    padding: 28px 32px 0; box-sizing: border-box;
+    padding: 14px 32px 0; box-sizing: border-box;
 }
 .study-date-nav {
     display: flex; align-items: center; gap: 0;
