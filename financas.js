@@ -476,12 +476,16 @@ const toBase64 = file => new Promise((resolve, reject) => {
 async function processarExtratoComIA() {
     const fileInput = document.getElementById('aiExtratoFile');
     const status = document.getElementById('aiStatus');
-    if (!fileInput.files[0]) return alert("Selecione um PDF.");
+    
+    if (!fileInput.files[0]) return alert("Selecione um PDF primeiro.");
 
-    status.textContent = "Processando... isso pode levar 10 segundos.";
+    status.textContent = "Analisando extrato... isso pode levar alguns segundos.";
+    status.style.color = "#60a5fa";
     
     try {
         const base64File = await toBase64(fileInput.files[0]);
+        
+        // Chamada para a sua API na Vercel
         const response = await fetch('/api/analisar-extrato', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -491,47 +495,63 @@ async function processarExtratoComIA() {
             })
         });
 
-const data = await response.json();
+        const data = await response.json();
 
-        // Se o Google retornar erro de cota ou outro, ele virá aqui
+        // 1. Tratamento de Erros da API/Vercel
         if (data.error) {
-            if (data.error.message.includes("quota")) {
-                throw new Error("Limite de uso da IA atingido. Tente novamente em alguns minutos ou mude o modelo para 1.5 Flash.");
+            let msg = "Erro: ";
+            if (typeof data.error === 'string') msg += data.error;
+            else if (data.error.message) msg += data.error.message;
+            
+            // Tratamento amigável para estouro de cota gratuita
+            if (msg.toLowerCase().includes("quota") || msg.toLowerCase().includes("limit")) {
+                msg = "Limite de uso atingido. Aguarde 1 minuto e tente novamente com um PDF menor.";
             }
-            throw new Error(data.error.message);
+            throw new Error(msg);
         }
 
-        // Verifica se a estrutura de resposta existe antes de ler o [0]
-        if (!data.candidates || !data.candidates[0]) {
-            throw new Error("A IA não retornou dados. Tente um PDF mais curto.");
+        // 2. Validação da estrutura da resposta do Gemini
+        if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+            throw new Error("A IA não conseguiu gerar uma resposta válida. Tente novamente.");
         }
 
         const textoResposta = data.candidates[0].content.parts[0].text;
-        // ... segue o JSON.parse(textoResposta)
+        
+        // Limpa possíveis marcações de markdown do JSON
+        const jsonLimpo = textoResposta.replace(/```json|```/g, "").trim();
+        const resultado = JSON.parse(jsonLimpo);
 
-        const resultado = JSON.parse(textoResposta);
-
-        if (resultado.lancamentos) {
+        // 3. Processamento dos lançamentos retornados
+        if (resultado.lancamentos && Array.isArray(resultado.lancamentos)) {
             resultado.lancamentos.forEach(l => {
+                // Adiciona ao array global do seu app usando sua lógica existente
                 fluxoEntries.push({
                     id: nid(fluxoEntries),
                     type: l.type || 'despesa',
-                    desc: l.desc + " (IA ✨)",
-                    valor: Math.abs(l.valor), // Garante valor positivo
-                    date: l.date,
-                    cat: l.cat,
-                    contaId: contas[0]?.id || 1,
+                    desc: (l.desc || 'Sem descrição') + " (IA ✨)",
+                    valor: Math.abs(parseFloat(l.valor)) || 0, // Garante que o valor seja um número positivo
+                    date: l.date || todayStr(),
+                    cat: l.cat || 'Outros',
+                    contaId: contas[0]?.id || 1, // Associa à primeira conta cadastrada
                     tags: ['importado-ia'],
                     recorrencia: ''
                 });
             });
+
+            // Salva e atualiza a interface (funções já existentes no seu script)
             saveAll();
             renderFluxo();
-            status.textContent = "Sucesso! Lançamentos importados.";
+            status.textContent = "Sucesso! Lançamentos importados e categorizados.";
+            status.style.color = "#22c55e";
+            fileInput.value = ""; // Limpa o campo de arquivo
+        } else {
+            throw new Error("Nenhum lançamento encontrado no arquivo.");
         }
+
     } catch (error) {
-        console.error("Erro completo:", error);
-        status.textContent = "Erro: " + error.message;
+        console.error("Erro completo no processamento:", error);
+        status.textContent = error.message;
+        status.style.color = "#ef4444";
     }
 }
 // ─── INIT ────────────────────────────────────────────────────────────────────
