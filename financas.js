@@ -479,53 +479,41 @@ async function processarExtratoComIA() {
     
     if (!fileInput.files[0]) return alert("Selecione um PDF primeiro.");
 
-    status.textContent = "Lendo PDF e consultando IA...";
+    status.textContent = "Lendo PDF e enviando para análise...";
     
     try {
         const base64File = await toBase64(fileInput.files[0]);
         
-        // Aqui você chamaria sua API (no Vercel ou direto se for para uso pessoal)
-        // Por segurança, NUNCA suba a chave para o GitHub.
-        const API_KEY = "SUA_CHAVE_AQUI"; 
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
-
-        const payload = {
-            contents: [{
-                parts: [
-                    { text: `Analise este extrato bancário. Extraia as transações e as coloque no formato JSON: 
-                             {"lancamentos": [{"desc": "...", "valor": 00.00, "date": "YYYY-MM-DD", "type": "despesa ou receita", "cat": "..."}]}. 
-                             Use as categorias: ${CAT_DESP.join(', ')} e ${CAT_REC.join(', ')}.` },
-                    { inline_data: { mime_type: "application/pdf", data: base64File } }
-                ]
-            }]
-        };
-
-        const response = await fetch(url, {
+        // Chamada para a SUA ponte na Vercel (Passo 3)
+        const response = await fetch('/api/analisar-extrato', {
             method: 'POST',
-            body: JSON.stringify(payload)
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                pdfBase64: base64File,
+                categorias: [...CAT_DESP, ...CAT_REC].join(', ') 
+            })
         });
 
         const data = await response.json();
-        const textoResposta = data.candidates[0].content.parts[0].text;
         
-        // Limpar o texto (o Gemini às vezes coloca crases de markdown)
+        // O Gemini retorna o texto dentro dessa estrutura
+        const textoResposta = data.candidates[0].content.parts[0].text;
         const jsonLimpo = textoResposta.replace(/```json|```/g, "").trim();
         const resultado = JSON.parse(jsonLimpo);
 
-        // Integrar os lançamentos ao seu sistema atual
+        // Salva os lançamentos no seu sistema atual
         resultado.lancamentos.forEach(l => {
-            const novaEntry = {
+            fluxoEntries.push({
                 id: nid(fluxoEntries),
                 type: l.type,
-                desc: l.desc + " (IA)",
+                desc: l.desc + " (IA ✨)",
                 valor: l.valor,
                 date: l.date,
                 cat: l.cat,
-                contaId: contas[0].id, // Default para a primeira conta
+                contaId: contas[0].id,
                 tags: ['importado-ia'],
                 recorrencia: ''
-            };
-            fluxoEntries.push(novaEntry);
+            });
         });
 
         saveAll();
@@ -534,7 +522,7 @@ async function processarExtratoComIA() {
 
     } catch (error) {
         console.error(error);
-        status.textContent = "Erro ao processar extrato.";
+        status.textContent = "Erro ao processar. Verifique se o PDF é válido.";
     }
 }
 // ─── INIT ────────────────────────────────────────────────────────────────────
