@@ -497,59 +497,58 @@ async function processarExtratoComIA() {
 
         const data = await response.json();
 
-        // 1. Tratamento de Erros da API/Vercel
+        // 1. Tratamento de Erros Robusto para evitar 'undefined'
         if (data.error) {
             let msg = "Erro: ";
-            if (typeof data.error === 'string') msg += data.error;
-            else if (data.error.message) msg += data.error.message;
+            // Verifica se a mensagem de erro existe antes de usar o .includes()
+            const erroTexto = typeof data.error === 'string' ? data.error : (data.error.message || "");
             
-            // Tratamento amigável para estouro de cota gratuita
-            if (msg.toLowerCase().includes("quota") || msg.toLowerCase().includes("limit")) {
-                msg = "Limite de uso atingido. Aguarde 1 minuto e tente novamente com um PDF menor.";
+            if (erroTexto.toLowerCase().includes("quota") || erroTexto.toLowerCase().includes("limit")) {
+                msg = "Limite de uso atingido. O Google limita arquivos grandes no plano gratuito. Aguarde 1 minuto.";
+            } else {
+                msg += erroTexto || "Erro desconhecido na API.";
             }
             throw new Error(msg);
         }
 
-        // 2. Validação da estrutura da resposta do Gemini
+        // 2. Validação da estrutura da resposta
         if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
-            throw new Error("A IA não conseguiu gerar uma resposta válida. Tente novamente.");
+            throw new Error("A IA não conseguiu gerar uma resposta. O arquivo pode ser muito grande para a cota gratuita.");
         }
 
         const textoResposta = data.candidates[0].content.parts[0].text;
         
-        // Limpa possíveis marcações de markdown do JSON
+        // Limpa marcações de markdown do JSON
         const jsonLimpo = textoResposta.replace(/```json|```/g, "").trim();
         const resultado = JSON.parse(jsonLimpo);
 
-        // 3. Processamento dos lançamentos retornados
+        // 3. Processamento e Salvamento
         if (resultado.lancamentos && Array.isArray(resultado.lancamentos)) {
             resultado.lancamentos.forEach(l => {
-                // Adiciona ao array global do seu app usando sua lógica existente
                 fluxoEntries.push({
                     id: nid(fluxoEntries),
                     type: l.type || 'despesa',
                     desc: (l.desc || 'Sem descrição') + " (IA ✨)",
-                    valor: Math.abs(parseFloat(l.valor)) || 0, // Garante que o valor seja um número positivo
+                    valor: Math.abs(parseFloat(l.valor)) || 0,
                     date: l.date || todayStr(),
                     cat: l.cat || 'Outros',
-                    contaId: contas[0]?.id || 1, // Associa à primeira conta cadastrada
+                    contaId: contas[0]?.id || 1,
                     tags: ['importado-ia'],
                     recorrencia: ''
                 });
             });
 
-            // Salva e atualiza a interface (funções já existentes no seu script)
             saveAll();
             renderFluxo();
-            status.textContent = "Sucesso! Lançamentos importados e categorizados.";
+            status.textContent = "Sucesso! Lançamentos importados.";
             status.style.color = "#22c55e";
-            fileInput.value = ""; // Limpa o campo de arquivo
+            fileInput.value = ""; 
         } else {
-            throw new Error("Nenhum lançamento encontrado no arquivo.");
+            throw new Error("Nenhum lançamento encontrado no JSON da IA.");
         }
 
     } catch (error) {
-        console.error("Erro completo no processamento:", error);
+        console.error("Erro completo:", error);
         status.textContent = error.message;
         status.style.color = "#ef4444";
     }
