@@ -485,7 +485,6 @@ async function processarExtratoComIA() {
     try {
         const base64File = await toBase64(fileInput.files[0]);
         
-        // Chamada para a sua API na Vercel
         const response = await fetch('/api/analisar-extrato', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -497,38 +496,33 @@ async function processarExtratoComIA() {
 
         const data = await response.json();
 
-        // 1. Tratamento de Erros Robusto para evitar 'undefined'
+        // Tratamento de erro robusto para evitar quebra do código
         if (data.error) {
-            let msg = "Erro: ";
-            // Verifica se a mensagem de erro existe antes de usar o .includes()
-            const erroTexto = typeof data.error === 'string' ? data.error : (data.error.message || "");
+            let msgErro = "Erro: ";
+            // Extrai a mensagem de erro de forma segura
+            const infoErro = typeof data.error === 'string' ? data.error : (data.error.message || "");
             
-            if (erroTexto.toLowerCase().includes("quota") || erroTexto.toLowerCase().includes("limit")) {
-                msg = "Limite de uso atingido. O Google limita arquivos grandes no plano gratuito. Aguarde 1 minuto.";
+            if (infoErro.toLowerCase().includes("quota") || infoErro.toLowerCase().includes("limit")) {
+                msgErro = "Limite atingido. Como seu PDF tem 6 páginas, aguarde 60 segundos e tente novamente.";
             } else {
-                msg += erroTexto || "Erro desconhecido na API.";
+                msgErro += infoErro || "Falha na comunicação com a IA.";
             }
-            throw new Error(msg);
+            throw new Error(msgErro);
         }
 
-        // 2. Validação da estrutura da resposta
         if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
-            throw new Error("A IA não conseguiu gerar uma resposta. O arquivo pode ser muito grande para a cota gratuita.");
+            throw new Error("A IA não retornou resultados válidos para este arquivo.");
         }
 
         const textoResposta = data.candidates[0].content.parts[0].text;
-        
-        // Limpa marcações de markdown do JSON
-        const jsonLimpo = textoResposta.replace(/```json|```/g, "").trim();
-        const resultado = JSON.parse(jsonLimpo);
+        const resultado = JSON.parse(textoResposta);
 
-        // 3. Processamento e Salvamento
         if (resultado.lancamentos && Array.isArray(resultado.lancamentos)) {
             resultado.lancamentos.forEach(l => {
                 fluxoEntries.push({
                     id: nid(fluxoEntries),
                     type: l.type || 'despesa',
-                    desc: (l.desc || 'Sem descrição') + " (IA ✨)",
+                    desc: (l.desc || 'Transação') + " (IA ✨)",
                     valor: Math.abs(parseFloat(l.valor)) || 0,
                     date: l.date || todayStr(),
                     cat: l.cat || 'Outros',
@@ -543,12 +537,10 @@ async function processarExtratoComIA() {
             status.textContent = "Sucesso! Lançamentos importados.";
             status.style.color = "#22c55e";
             fileInput.value = ""; 
-        } else {
-            throw new Error("Nenhum lançamento encontrado no JSON da IA.");
         }
 
     } catch (error) {
-        console.error("Erro completo:", error);
+        console.error("Erro detectado:", error);
         status.textContent = error.message;
         status.style.color = "#ef4444";
     }
