@@ -491,14 +491,24 @@ async function processarExtratoComIA() {
             })
         });
 
-        const data = await response.json();
+const data = await response.json();
 
-        // Se o servidor retornar erro (ex: API Key inválida)
+        // Se o Google retornar erro de cota ou outro, ele virá aqui
         if (data.error) {
-            throw new Error(typeof data.error === 'string' ? data.error : JSON.stringify(data.error));
+            if (data.error.message.includes("quota")) {
+                throw new Error("Limite de uso da IA atingido. Tente novamente em alguns minutos ou mude o modelo para 1.5 Flash.");
+            }
+            throw new Error(data.error.message);
+        }
+
+        // Verifica se a estrutura de resposta existe antes de ler o [0]
+        if (!data.candidates || !data.candidates[0]) {
+            throw new Error("A IA não retornou dados. Tente um PDF mais curto.");
         }
 
         const textoResposta = data.candidates[0].content.parts[0].text;
+        // ... segue o JSON.parse(textoResposta)
+
         const resultado = JSON.parse(textoResposta);
 
         if (resultado.lancamentos) {
