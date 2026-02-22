@@ -479,50 +479,54 @@ async function processarExtratoComIA() {
     
     if (!fileInput.files[0]) return alert("Selecione um PDF primeiro.");
 
-    status.textContent = "Lendo PDF e enviando para análise...";
+    status.textContent = "Analisando extrato... aguarde.";
     
     try {
         const base64File = await toBase64(fileInput.files[0]);
         
-        // Chamada para a SUA ponte na Vercel (Passo 3)
         const response = await fetch('/api/analisar-extrato', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 pdfBase64: base64File,
-                categorias: [...CAT_DESP, ...CAT_REC].join(', ') 
+                categorias: [...CAT_DESP, ...CAT_REC].join(', ')
             })
         });
 
         const data = await response.json();
-        
-        // O Gemini retorna o texto dentro dessa estrutura
+
+        // Verificação de segurança para evitar o erro do console
+        if (!data.candidates || !data.candidates[0]) {
+            console.error("Resposta da IA inválida:", data);
+            throw new Error("A IA não conseguiu processar o arquivo. Verifique sua API Key na Vercel.");
+        }
+
         const textoResposta = data.candidates[0].content.parts[0].text;
         const jsonLimpo = textoResposta.replace(/```json|```/g, "").trim();
         const resultado = JSON.parse(jsonLimpo);
 
-        // Salva os lançamentos no seu sistema atual
-        resultado.lancamentos.forEach(l => {
-            fluxoEntries.push({
-                id: nid(fluxoEntries),
-                type: l.type,
-                desc: l.desc + " (IA ✨)",
-                valor: l.valor,
-                date: l.date,
-                cat: l.cat,
-                contaId: contas[0].id,
-                tags: ['importado-ia'],
-                recorrencia: ''
+        if (resultado.lancamentos) {
+            resultado.lancamentos.forEach(l => {
+                fluxoEntries.push({
+                    id: nid(fluxoEntries),
+                    type: l.type || 'despesa',
+                    desc: l.desc + " (IA ✨)",
+                    valor: l.valor,
+                    date: l.date,
+                    cat: l.cat,
+                    contaId: contas[0]?.id || 1,
+                    tags: ['importado-ia'],
+                    recorrencia: ''
+                });
             });
-        });
-
-        saveAll();
-        renderFluxo();
-        status.textContent = "Sucesso! Lançamentos importados.";
+            saveAll();
+            renderFluxo();
+            status.textContent = "Sucesso! Lançamentos importados.";
+        }
 
     } catch (error) {
         console.error(error);
-        status.textContent = "Erro ao processar. Verifique se o PDF é válido.";
+        status.textContent = "Erro: " + error.message;
     }
 }
 // ─── INIT ────────────────────────────────────────────────────────────────────
