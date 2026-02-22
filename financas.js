@@ -465,5 +465,77 @@ function exportFinancas(){
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`financas_${todayStr()}.json`;a.click();
 }
 
+// Função para converter arquivo para Base64
+const toBase64 = file => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = error => reject(error);
+});
+
+async function processarExtratoComIA() {
+    const fileInput = document.getElementById('aiExtratoFile');
+    const status = document.getElementById('aiStatus');
+    
+    if (!fileInput.files[0]) return alert("Selecione um PDF primeiro.");
+
+    status.textContent = "Lendo PDF e consultando IA...";
+    
+    try {
+        const base64File = await toBase64(fileInput.files[0]);
+        
+        // Aqui você chamaria sua API (no Vercel ou direto se for para uso pessoal)
+        // Por segurança, NUNCA suba a chave para o GitHub.
+        const API_KEY = "SUA_CHAVE_AQUI"; 
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+
+        const payload = {
+            contents: [{
+                parts: [
+                    { text: `Analise este extrato bancário. Extraia as transações e as coloque no formato JSON: 
+                             {"lancamentos": [{"desc": "...", "valor": 00.00, "date": "YYYY-MM-DD", "type": "despesa ou receita", "cat": "..."}]}. 
+                             Use as categorias: ${CAT_DESP.join(', ')} e ${CAT_REC.join(', ')}.` },
+                    { inline_data: { mime_type: "application/pdf", data: base64File } }
+                ]
+            }]
+        };
+
+        const response = await fetch(url, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+        const textoResposta = data.candidates[0].content.parts[0].text;
+        
+        // Limpar o texto (o Gemini às vezes coloca crases de markdown)
+        const jsonLimpo = textoResposta.replace(/```json|```/g, "").trim();
+        const resultado = JSON.parse(jsonLimpo);
+
+        // Integrar os lançamentos ao seu sistema atual
+        resultado.lancamentos.forEach(l => {
+            const novaEntry = {
+                id: nid(fluxoEntries),
+                type: l.type,
+                desc: l.desc + " (IA)",
+                valor: l.valor,
+                date: l.date,
+                cat: l.cat,
+                contaId: contas[0].id, // Default para a primeira conta
+                tags: ['importado-ia'],
+                recorrencia: ''
+            };
+            fluxoEntries.push(novaEntry);
+        });
+
+        saveAll();
+        renderFluxo();
+        status.textContent = "Sucesso! Lançamentos importados.";
+
+    } catch (error) {
+        console.error(error);
+        status.textContent = "Erro ao processar extrato.";
+    }
+}
 // ─── INIT ────────────────────────────────────────────────────────────────────
 setFinView('dash');

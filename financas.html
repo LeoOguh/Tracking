@@ -166,6 +166,14 @@
                     <button class="btn-save-fluxo" onclick="saveFluxo()">✓ salvar</button>
                 </div>
             </div>
+            <div class="glass-panel fluxo-form-panel" style="margin-top: 10px; border: 1px dashed #3b82f6;">
+                <div class="sec-title">Importar Extrato Bancário (IA)</div>
+                <div style="display:flex; gap:10px; align-items:center; margin-top:8px;">
+                    <input type="file" id="aiExtratoFile" accept="application/pdf" style="font-size: 0.8rem; color: #fff;">
+                    <button class="btn-sm" id="btnLerExtrato" onclick="processarExtratoComIA()">✨ Analisar com Gemini</button>
+                </div>
+                <div id="aiStatus" style="font-size: 0.7rem; color: #60a5fa; margin-top: 5px;"></div>
+            </div>            
             <!-- Metas de gasto + receita -->
             <div class="fluxo-metas-row">
                 <div class="glass-panel fluxo-metas-panel">
