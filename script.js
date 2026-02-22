@@ -1289,8 +1289,11 @@ function showWeeklySummary() {
         const key = d.toISOString().split('T')[0];
         // Hábitos
         habits.forEach(h => {
+            // Check if habit was active on this day
+            if (!isHabitActiveOnDate(h, d)) return;
+            habitsPossible++;
             const val = (history[key]||{})[h.name];
-            if (val !== undefined) { habitsPossible++; if (val) habitsCompleted++; }
+            if (val) habitsCompleted++;
         });
         // Sono
         const s = sonoHistory[key];
