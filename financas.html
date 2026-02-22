@@ -20,6 +20,43 @@
         <div class="dp-grid" id="dpGrid"></div>
     </div>
 
+    <!-- DRAWER LATERAL -->
+    <aside class="fin-drawer" id="finDrawer">
+        <div class="drawer-header">
+            <span class="drawer-title">finanças</span>
+        </div>
+        <nav class="drawer-nav">
+            <button class="drawer-item drawer-item--active" id="dItemDash" onclick="setFinView('dash')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                dashboard
+            </button>
+            <button class="drawer-item" id="dItemCartoes" onclick="setFinView('cartoes')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                cartões
+            </button>
+            <button class="drawer-item" id="dItemFluxo" onclick="setFinView('fluxo')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                entradas & saídas
+            </button>
+            <button class="drawer-item" id="dItemInvest" onclick="setFinView('invest')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                investimentos
+            </button>
+            <button class="drawer-item" id="dItemMetas" onclick="setFinView('metas')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                metas
+            </button>
+        </nav>
+        <div class="drawer-footer">
+            <button class="btn-topbar-action" onclick="exportFinancas()" style="width:100%;justify-content:center;gap:8px;border-radius:12px">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                exportar dados
+            </button>
+        </div>
+    </aside>
+
     <!-- TOPBAR -->
     <div class="fin-topbar">
         <div class="fin-topbar-center">
@@ -33,40 +70,14 @@
         <button class="theme-toggle" onclick="toggleTheme()" id="themeToggleBtn">☀ claro</button>
     </div>
 
-    <!-- TABS -->
-    <div class="fin-tabs">
-        <button class="fin-tab fin-tab--active" id="tabDash" onclick="setFinView('dash')">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-            dashboard
-        </button>
-        <button class="fin-tab" id="tabCartoes" onclick="setFinView('cartoes')">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-            cartões
-        </button>
-        <button class="fin-tab" id="tabFluxo" onclick="setFinView('fluxo')">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-            entradas & saídas
-        </button>
-        <button class="fin-tab" id="tabInvest" onclick="setFinView('invest')">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-            investimentos
-        </button>
-        <button class="fin-tab" id="tabMetas" onclick="setFinView('metas')">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-            metas
-        </button>
-    </div>
-
     <!-- ═══════ DASHBOARD ═══════ -->
     <div id="viewDash" class="fin-page">
         <div class="dash-grid">
-            <!-- Saldo total -->
             <div class="glass-panel dash-card dash-card--wide">
                 <div class="dash-card-label">saldo total</div>
                 <div class="dash-card-value" id="dashSaldoTotal">R$ 0,00</div>
                 <div class="dash-card-sub" id="dashSaldoSub">—</div>
             </div>
-            <!-- Receitas / Despesas / Balanço -->
             <div class="glass-panel dash-card dash-card--receita">
                 <div class="dash-card-label">receitas do mês</div>
                 <div class="dash-card-value" id="dashReceitas">R$ 0,00</div>
@@ -79,23 +90,19 @@
                 <div class="dash-card-label">balanço do mês</div>
                 <div class="dash-card-value" id="dashBalanco">R$ 0,00</div>
             </div>
-            <!-- Fatura próxima -->
             <div class="glass-panel dash-card">
                 <div class="dash-card-label">próxima fatura</div>
                 <div class="dash-card-value" id="dashFatura">—</div>
                 <div class="dash-card-sub" id="dashFaturaSub">—</div>
             </div>
-            <!-- Gráfico evolução -->
             <div class="glass-panel dash-card dash-card--wide">
                 <div class="dash-card-label">evolução do patrimônio</div>
                 <div class="dash-chart-wrap"><canvas id="dashPatrimonioChart"></canvas></div>
             </div>
-            <!-- Gastos por categoria -->
             <div class="glass-panel dash-card">
                 <div class="dash-card-label">gastos por categoria</div>
                 <div class="dash-chart-wrap"><canvas id="dashCatChart"></canvas></div>
             </div>
-            <!-- Alertas -->
             <div class="glass-panel dash-card">
                 <div class="dash-card-label">alertas</div>
                 <div id="dashAlertas" class="dash-alertas-list"></div>
@@ -103,22 +110,18 @@
         </div>
     </div>
 
-    <!-- ═══════ CARTÕES DE CRÉDITO ═══════ -->
+    <!-- ═══════ CARTÕES ═══════ -->
     <div id="viewCartoes" class="fin-page hidden">
         <div class="cartoes-layout">
-            <!-- Lista de cartões -->
             <div class="cartoes-sidebar">
-                <div class="cartoes-header">
-                    <span class="cartoes-title">meus cartões</span>
-                    <button class="btn-add-card" onclick="openCardModal()">+ novo</button>
-                </div>
+                <div class="cartoes-header"><span class="sec-title">meus cartões</span><button class="btn-sm" onclick="openCardModal()">+ novo</button></div>
                 <div id="cartoesList" class="cartoes-list"></div>
+                <!-- Quem me deve -->
+                <div class="sec-title" style="margin-top:16px">quem me deve</div>
+                <div id="devedoresResumo" class="devedores-resumo"></div>
             </div>
-            <!-- Detalhes / Faturas -->
             <div class="cartoes-main">
-                <div id="cartoesDetail" class="cartoes-detail-area">
-                    <div class="empty-state">selecione ou crie um cartão</div>
-                </div>
+                <div id="cartoesDetail" class="cartoes-detail-area"><div class="empty-state">selecione ou crie um cartão</div></div>
             </div>
         </div>
     </div>
@@ -129,61 +132,66 @@
             <!-- Contas -->
             <div class="fluxo-contas-bar glass-panel">
                 <div class="fluxo-contas-header">
-                    <span class="fluxo-contas-title">contas</span>
-                    <button class="btn-sm" onclick="openContaModal()">+ nova</button>
+                    <span class="sec-title">contas</span>
+                    <div style="display:flex;gap:6px">
+                        <button class="btn-sm" onclick="openContaModal()">+ nova</button>
+                        <button class="btn-sm" onclick="openTransferModal()">↔ transferir</button>
+                    </div>
                 </div>
                 <div id="contasList" class="contas-list"></div>
             </div>
-            <!-- Form + Lista -->
-            <div class="fluxo-main">
-                <!-- Formulário -->
-                <div class="glass-panel fluxo-form-panel">
-                    <div class="fluxo-form-title">novo lançamento</div>
-                    <div class="fluxo-form-row">
-                        <div class="fluxo-type-toggle">
-                            <button class="ftt-btn ftt-btn--despesa ftt-btn--active" id="fttDespesa" onclick="setFluxoType('despesa')">despesa</button>
-                            <button class="ftt-btn ftt-btn--receita" id="fttReceita" onclick="setFluxoType('receita')">receita</button>
-                        </div>
-                    </div>
-                    <div class="fluxo-form-row">
-                        <input type="text" id="fluxoDesc" class="f-input" placeholder="descrição" style="flex:2">
-                        <input type="number" id="fluxoValor" class="f-input" placeholder="valor" min="0" step="0.01" style="flex:1">
-                    </div>
-                    <div class="fluxo-form-row">
-                        <input type="date" id="fluxoData" class="f-input" style="flex:1">
-                        <select id="fluxoCat" class="f-select" style="flex:1"><option value="">— categoria —</option></select>
-                        <select id="fluxoConta" class="f-select" style="flex:1"><option value="">— conta —</option></select>
-                    </div>
-                    <div class="fluxo-form-row">
-                        <input type="text" id="fluxoTags" class="f-input" placeholder="tags (separar por vírgula)" style="flex:1">
-                        <select id="fluxoRecorrencia" class="f-select" style="width:140px">
-                            <option value="">sem recorrência</option>
-                            <option value="mensal">mensal</option>
-                            <option value="semanal">semanal</option>
-                        </select>
-                        <button class="btn-save-fluxo" onclick="saveFluxo()">✓ salvar</button>
+            <!-- Form -->
+            <div class="glass-panel fluxo-form-panel">
+                <div class="sec-title">novo lançamento</div>
+                <div class="fluxo-form-row">
+                    <div class="fluxo-type-toggle">
+                        <button class="ftt-btn ftt-btn--despesa ftt-btn--active" id="fttDespesa" onclick="setFluxoType('despesa')">despesa</button>
+                        <button class="ftt-btn ftt-btn--receita" id="fttReceita" onclick="setFluxoType('receita')">receita</button>
+                        <button class="ftt-btn ftt-btn--meta" id="fttMeta" onclick="setFluxoType('meta')">meta</button>
                     </div>
                 </div>
-                <!-- Metas de gasto por categoria -->
+                <div class="fluxo-form-grid">
+                    <input type="text" id="fluxoDesc" class="f-input" placeholder="descrição">
+                    <input type="number" id="fluxoValor" class="f-input" placeholder="valor" min="0" step="0.01">
+                    <input type="date" id="fluxoData" class="f-input">
+                    <select id="fluxoCat" class="f-select"></select>
+                    <select id="fluxoConta" class="f-select"></select>
+                    <select id="fluxoMeta" class="f-select hidden"><option value="">— meta —</option></select>
+                    <input type="text" id="fluxoTags" class="f-input" placeholder="tags (separar por vírgula)">
+                    <select id="fluxoRecorrencia" class="f-select">
+                        <option value="">sem recorrência</option>
+                        <option value="mensal">mensal</option>
+                        <option value="semanal">semanal</option>
+                    </select>
+                    <button class="btn-save-fluxo" onclick="saveFluxo()">✓ salvar</button>
+                </div>
+            </div>
+            <!-- Metas de gasto + receita -->
+            <div class="fluxo-metas-row">
                 <div class="glass-panel fluxo-metas-panel">
-                    <div class="fluxo-form-title">metas de gasto</div>
+                    <div class="sec-title">metas de gasto</div>
                     <div id="fluxoMetasGasto" class="fluxo-metas-grid"></div>
-                    <button class="btn-sm" onclick="openMetaGastoModal()" style="align-self:flex-start;margin-top:8px">+ meta</button>
+                    <button class="btn-sm" onclick="openMetaGastoModal()" style="margin-top:6px">+ meta</button>
                 </div>
-                <!-- Lista -->
-                <div class="glass-panel fluxo-list-panel">
-                    <div class="fluxo-list-header">
-                        <div class="fluxo-list-title" id="fluxoListTitle">lançamentos</div>
-                        <div class="fluxo-filters">
-                            <select id="fluxoFilterCat" class="f-select f-select--sm" onchange="renderFluxoList()"><option value="">todas categorias</option></select>
-                            <select id="fluxoFilterType" class="f-select f-select--sm" onchange="renderFluxoList()">
-                                <option value="">todos</option><option value="receita">receitas</option><option value="despesa">despesas</option>
-                            </select>
-                        </div>
+                <div class="glass-panel fluxo-metas-panel">
+                    <div class="sec-title">meta de receita</div>
+                    <div id="fluxoMetaReceita"></div>
+                    <button class="btn-sm" onclick="openMetaReceitaModal()" style="margin-top:6px">editar meta</button>
+                </div>
+            </div>
+            <!-- Lista -->
+            <div class="glass-panel fluxo-list-panel">
+                <div class="fluxo-list-header">
+                    <div class="sec-title" id="fluxoListTitle">lançamentos</div>
+                    <div class="fluxo-filters">
+                        <select id="fluxoFilterCat" class="f-select f-select--sm" onchange="renderFluxoList()"><option value="">todas categorias</option></select>
+                        <select id="fluxoFilterType" class="f-select f-select--sm" onchange="renderFluxoList()">
+                            <option value="">todos</option><option value="receita">receitas</option><option value="despesa">despesas</option><option value="meta">metas</option>
+                        </select>
                     </div>
-                    <div id="fluxoList" class="fluxo-entries"></div>
-                    <div class="fluxo-totals" id="fluxoTotals"></div>
                 </div>
+                <div id="fluxoList" class="fluxo-entries"></div>
+                <div class="fluxo-totals" id="fluxoTotals"></div>
             </div>
         </div>
     </div>
@@ -191,65 +199,43 @@
     <!-- ═══════ INVESTIMENTOS ═══════ -->
     <div id="viewInvest" class="fin-page hidden">
         <div class="invest-layout">
-            <!-- Resumo -->
             <div class="invest-summary-row">
-                <div class="glass-panel dash-card">
-                    <div class="dash-card-label">patrimônio investido</div>
-                    <div class="dash-card-value" id="investTotal">R$ 0,00</div>
-                </div>
-                <div class="glass-panel dash-card">
-                    <div class="dash-card-label">rentabilidade total</div>
-                    <div class="dash-card-value" id="investRent">—</div>
-                </div>
-                <div class="glass-panel dash-card">
-                    <div class="dash-card-label">dividendos recebidos</div>
-                    <div class="dash-card-value" id="investDiv">R$ 0,00</div>
-                </div>
+                <div class="glass-panel dash-card"><div class="dash-card-label">patrimônio investido</div><div class="dash-card-value" id="investTotal">R$ 0,00</div></div>
+                <div class="glass-panel dash-card"><div class="dash-card-label">rentabilidade total</div><div class="dash-card-value" id="investRent">—</div></div>
+                <div class="glass-panel dash-card"><div class="dash-card-label">dividendos recebidos</div><div class="dash-card-value" id="investDiv">R$ 0,00</div></div>
             </div>
-            <!-- Alocação -->
             <div class="invest-main-grid">
                 <div class="glass-panel invest-panel">
-                    <div class="invest-panel-title">alocação por classe</div>
+                    <div class="sec-title">alocação por classe</div>
                     <div class="invest-chart-wrap"><canvas id="investAllocChart"></canvas></div>
                     <div id="investAllocLegend" class="invest-alloc-legend"></div>
                 </div>
                 <div class="glass-panel invest-panel">
-                    <div class="invest-panel-title">meta de alocação</div>
+                    <div class="sec-title">meta de alocação</div>
                     <div id="investMetaAlloc" class="invest-meta-list"></div>
                     <button class="btn-sm" onclick="openMetaAllocModal()" style="margin-top:8px">editar meta</button>
                 </div>
             </div>
-            <!-- Ativos -->
             <div class="glass-panel invest-panel invest-panel--wide">
-                <div class="invest-panel-header">
-                    <span class="invest-panel-title">meus ativos</span>
-                    <button class="btn-sm" onclick="openAtivoModal()">+ novo aporte</button>
-                </div>
-                <div id="investAtivosList" class="invest-ativos-table"></div>
+                <div class="invest-panel-header"><span class="sec-title">meus ativos</span><button class="btn-sm" onclick="openAtivoModal()">+ novo aporte</button></div>
+                <div id="investAtivosList"></div>
             </div>
-            <!-- Dividendos -->
             <div class="glass-panel invest-panel invest-panel--wide">
-                <div class="invest-panel-header">
-                    <span class="invest-panel-title">dividendos & rendimentos</span>
-                    <button class="btn-sm" onclick="openDividendoModal()">+ registrar</button>
-                </div>
-                <div id="investDivList" class="invest-div-list"></div>
+                <div class="invest-panel-header"><span class="sec-title">dividendos & rendimentos</span><button class="btn-sm" onclick="openDividendoModal()">+ registrar</button></div>
+                <div id="investDivList"></div>
             </div>
         </div>
     </div>
 
-    <!-- ═══════ METAS FINANCEIRAS ═══════ -->
+    <!-- ═══════ METAS ═══════ -->
     <div id="viewMetas" class="fin-page hidden">
         <div class="metas-layout">
-            <div class="metas-header">
-                <span class="metas-title">minhas metas</span>
-                <button class="btn-sm" onclick="openMetaFinModal()">+ nova meta</button>
-            </div>
+            <div class="metas-header"><span class="sec-title">minhas metas</span><button class="btn-sm" onclick="openMetaFinModal()">+ nova meta</button></div>
             <div id="metasFinList" class="metas-grid"></div>
         </div>
     </div>
 
-    <!-- ═══════ MODAIS ═══════ -->
+    <!-- MODAL -->
     <div class="modal-overlay hidden" id="modalOverlay" onclick="closeModal()">
         <div class="modal-card glass-panel" onclick="event.stopPropagation()">
             <div class="modal-title" id="modalTitle">—</div>
@@ -258,7 +244,7 @@
         </div>
     </div>
 
-    <!-- NAV FLUTUANTE -->
+    <!-- NAV -->
     <nav class="float-nav">
         <a href="index.html" class="fn-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg><span>hábitos</span></a>
         <a href="nutricao.html" class="fn-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg><span>nutrição</span></a>
