@@ -476,14 +476,12 @@ const toBase64 = file => new Promise((resolve, reject) => {
 async function processarExtratoComIA() {
     const fileInput = document.getElementById('aiExtratoFile');
     const status = document.getElementById('aiStatus');
-    
-    if (!fileInput.files[0]) return alert("Selecione um PDF primeiro.");
+    if (!fileInput.files[0]) return alert("Selecione um PDF.");
 
-    status.textContent = "Analisando extrato... aguarde.";
+    status.textContent = "Processando... isso pode levar 10 segundos.";
     
     try {
         const base64File = await toBase64(fileInput.files[0]);
-        
         const response = await fetch('/api/analisar-extrato', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -495,15 +493,13 @@ async function processarExtratoComIA() {
 
         const data = await response.json();
 
-        // Verificação de segurança para evitar o erro do console
-        if (!data.candidates || !data.candidates[0]) {
-            console.error("Resposta da IA inválida:", data);
-            throw new Error("A IA não conseguiu processar o arquivo. Verifique sua API Key na Vercel.");
+        // Se o servidor retornar erro (ex: API Key inválida)
+        if (data.error) {
+            throw new Error(typeof data.error === 'string' ? data.error : JSON.stringify(data.error));
         }
 
         const textoResposta = data.candidates[0].content.parts[0].text;
-        const jsonLimpo = textoResposta.replace(/```json|```/g, "").trim();
-        const resultado = JSON.parse(jsonLimpo);
+        const resultado = JSON.parse(textoResposta);
 
         if (resultado.lancamentos) {
             resultado.lancamentos.forEach(l => {
@@ -511,7 +507,7 @@ async function processarExtratoComIA() {
                     id: nid(fluxoEntries),
                     type: l.type || 'despesa',
                     desc: l.desc + " (IA ✨)",
-                    valor: l.valor,
+                    valor: Math.abs(l.valor), // Garante valor positivo
                     date: l.date,
                     cat: l.cat,
                     contaId: contas[0]?.id || 1,
@@ -523,9 +519,8 @@ async function processarExtratoComIA() {
             renderFluxo();
             status.textContent = "Sucesso! Lançamentos importados.";
         }
-
     } catch (error) {
-        console.error(error);
+        console.error("Erro completo:", error);
         status.textContent = "Erro: " + error.message;
     }
 }
