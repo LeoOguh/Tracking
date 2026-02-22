@@ -479,7 +479,7 @@ async function processarExtratoComIA() {
     
     if (!fileInput.files[0]) return alert("Selecione um PDF primeiro.");
 
-    status.textContent = "Analisando extrato... isso pode levar alguns segundos.";
+    status.textContent = "Analisando 6 páginas... aguarde.";
     status.style.color = "#60a5fa";
     
     try {
@@ -496,28 +496,24 @@ async function processarExtratoComIA() {
 
         const data = await response.json();
 
-        // Tratamento de erro robusto para evitar quebra do código
+        // Tratamento de erro seguro
         if (data.error) {
-            let msgErro = "Erro: ";
-            // Extrai a mensagem de erro de forma segura
-            const infoErro = typeof data.error === 'string' ? data.error : (data.error.message || "");
-            
-            if (infoErro.toLowerCase().includes("quota") || infoErro.toLowerCase().includes("limit")) {
-                msgErro = "Limite atingido. Como seu PDF tem 6 páginas, aguarde 60 segundos e tente novamente.";
-            } else {
-                msgErro += infoErro || "Falha na comunicação com a IA.";
-            }
-            throw new Error(msgErro);
+            const erroMsg = typeof data.error === 'string' ? data.error : (data.error.message || "Erro desconhecido");
+            if (erroMsg.toLowerCase().includes("quota")) throw new Error("Cota atingida. Aguarde 60s.");
+            throw new Error(erroMsg);
         }
 
-        if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
-            throw new Error("A IA não retornou resultados válidos para este arquivo.");
-        }
+        if (!data.candidates || !data.candidates[0]) throw new Error("A IA não retornou dados.");
 
-        const textoResposta = data.candidates[0].content.parts[0].text;
-        const resultado = JSON.parse(textoResposta);
+        let texto = data.candidates[0].content.parts[0].text;
+        
+        // Limpeza agressiva para garantir que tenhamos apenas o JSON
+        const jsonMatch = texto.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) throw new Error("Formato de resposta inválido da IA.");
+        
+        const resultado = JSON.parse(jsonMatch[0]);
 
-        if (resultado.lancamentos && Array.isArray(resultado.lancamentos)) {
+        if (resultado.lancamentos) {
             resultado.lancamentos.forEach(l => {
                 fluxoEntries.push({
                     id: nid(fluxoEntries),
@@ -531,16 +527,13 @@ async function processarExtratoComIA() {
                     recorrencia: ''
                 });
             });
-
             saveAll();
             renderFluxo();
-            status.textContent = "Sucesso! Lançamentos importados.";
+            status.textContent = "Sucesso! " + resultado.lancamentos.length + " lançamentos importados.";
             status.style.color = "#22c55e";
-            fileInput.value = ""; 
         }
-
     } catch (error) {
-        console.error("Erro detectado:", error);
+        console.error("Erro:", error);
         status.textContent = error.message;
         status.style.color = "#ef4444";
     }
