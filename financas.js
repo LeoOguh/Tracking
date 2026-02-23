@@ -143,14 +143,15 @@ function calcFM(cid, y, m) {
     const c = cartoes.find(x => x.id === cid);
     if (!c) return [];
     
-    const f = c.fechamento || 19; 
+    // AQUI ESTÁ O HERÓI: parseInt converte o texto para número e evita o bug do '191'
+    const f = parseInt(c.fechamento) || 19; 
+    
     const s = new Date(y, m - 1, f + 1, 0, 0, 0); 
     const e = new Date(y, m, f, 23, 59, 59); 
     
     return lancCartao.filter(l => {
         if (l.cardId !== cid) return false;
         
-        // CORREÇÃO DO FUSO HORÁRIO: Força o meio-dia (12,0,0) para o dia não voltar para trás
         const [ano, mes, dia] = l.date.split('-');
         const cd = new Date(ano, mes - 1, dia, 12, 0, 0); 
         
