@@ -479,7 +479,7 @@ async function processarExtratoComIA() {
     
     if (!fileInput.files[0]) return alert("Selecione um PDF primeiro.");
 
-    status.textContent = "Processando 6 páginas... aguarde.";
+    status.textContent = "Processando arquivo... aguarde.";
     status.style.color = "#60a5fa";
     
     try {
@@ -496,35 +496,42 @@ async function processarExtratoComIA() {
 
         const data = await response.json();
 
-        // Tratamento de erro seguro para não quebrar o código
         if (data.error) {
             const msg = typeof data.error === 'string' ? data.error : (data.error.message || "");
-            if (msg.toLowerCase().includes("quota")) {
-                throw new Error("Limite de cota atingido. Aguarde 60 segundos antes de tentar novamente.");
-            }
+            if (msg.toLowerCase().includes("quota")) throw new Error("Limite de cota atingido. Aguarde 60s.");
             throw new Error(msg || "Erro desconhecido na API.");
         }
 
-        if (!data.candidates || !data.candidates[0]) {
-            throw new Error("A IA não retornou dados. O arquivo pode ser pesado demais para o plano gratuito.");
-        }
+        if (!data.candidates || !data.candidates[0]) throw new Error("A IA não retornou dados.");
 
-        const textoRaw = data.candidates[0].content.parts[0].text;
+        let textoRaw = data.candidates[0].content.parts[0].text;
         
-        // Remove qualquer texto extra ou blocos de código markdown que a IA possa enviar
         const jsonMatch = textoRaw.match(/\{[\s\S]*\}/);
-        if (!jsonMatch) throw new Error("A IA não retornou um formato JSON válido.");
+        if (!jsonMatch) throw new Error("Formato inválido retornado pela IA.");
         
         const resultado = JSON.parse(jsonMatch[0]);
 
         if (resultado.lancamentos && Array.isArray(resultado.lancamentos)) {
+            
+            // LIMPEZA: Remove os itens invisíveis do teste anterior para não duplicar
+            fluxoEntries = fluxoEntries.filter(e => !e.tags || !e.tags.includes('importado-ia') || e.date.includes('-'));
+
             resultado.lancamentos.forEach(l => {
+                // Conversor automático de data (DD/MM/YYYY para YYYY-MM-DD)
+                let dataFormatada = l.date || todayStr();
+                if (dataFormatada.includes('/')) {
+                    const partes = dataFormatada.split('/');
+                    if (partes.length === 3 && partes[2].length === 4) {
+                        dataFormatada = `${partes[2]}-${partes[1]}-${partes[0]}`;
+                    }
+                }
+
                 fluxoEntries.push({
                     id: nid(fluxoEntries),
                     type: l.type || 'despesa',
                     desc: (l.desc || 'Transação') + " (IA ✨)",
                     valor: Math.abs(parseFloat(l.valor)) || 0,
-                    date: l.date || todayStr(),
+                    date: dataFormatada,
                     cat: l.cat || 'Outros',
                     contaId: contas[0]?.id || 1,
                     tags: ['importado-ia'],
@@ -533,14 +540,14 @@ async function processarExtratoComIA() {
             });
 
             saveAll();
-            renderCurrentView(); // Atualiza a tela que você estiver vendo
-            status.textContent = "Sucesso! " + resultado.lancamentos.length + " itens importados.";
+            renderCurrentView(); 
+            status.textContent = "Sucesso! " + resultado.lancamentos.length + " itens visíveis.";
             status.style.color = "#22c55e";
             fileInput.value = ""; 
         }
 
     } catch (error) {
-        console.error("Erro no processamento:", error);
+        console.error("Erro:", error);
         status.textContent = error.message;
         status.style.color = "#ef4444";
     }
