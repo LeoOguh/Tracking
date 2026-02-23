@@ -148,18 +148,47 @@ function calcFM(cid,y,m){
 }
 function calcFT(cid,y,m){ return calcFM(cid,y,m).reduce((s,l)=>s+(l.vp||l.valor),0); }
 function renderCardDetail(){
-    const c=cartoes.find(x=>x.id===selCardId);if(!c){document.getElementById('cartoesDetail').innerHTML='<div class="empty-state">selecione um cartão</div>';return;}
+    const c=cartoes.find(x=>x.id===selCardId);
+    if(!c){document.getElementById('cartoesDetail').innerHTML='<div class="empty-state">selecione um cartão</div>';return;}
     const fy=finYear+Math.floor((finMonth+fatOff)/12),fm=((finMonth+fatOff)%12+12)%12;
     const ls=calcFM(c.id,fy,fm),tot=ls.reduce((s,l)=>s+(l.vp||l.valor),0);
     const fl=new Date(fy,fm).toLocaleDateString('pt-br',{month:'long',year:'numeric'});
     const bp={};ls.filter(l=>l.pessoa).forEach(l=>{bp[l.pessoa]=(bp[l.pessoa]||0)+(l.vp||l.valor);});
+    
     document.getElementById('cartoesDetail').innerHTML=`<div class="glass-panel" style="padding:16px 20px;display:flex;flex-direction:column;gap:10px">
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px"><span style="font-size:0.9rem;font-weight:700;color:rgba(255,255,255,0.9)">${c.name}</span><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn-sm" onclick="openCardLancModal()">+ lançamento</button><button class="btn-sm" onclick="openCardRecModal()">+ recorrente</button><button class="btn-sm" onclick="editCard(${c.id})" style="background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.1);color:rgba(255,255,255,0.5)">✏️</button><button class="btn-sm" onclick="deleteCard(${c.id})" style="background:rgba(239,68,68,0.08);border-color:rgba(239,68,68,0.15);color:#ef4444">🗑</button></div></div>
-        <div class="fatura-nav"><button class="fatura-nav-btn" onclick="fatOff--;renderCardDetail()">‹</button><span class="fatura-label">fatura de ${fl}</span><button class="fatura-nav-btn" onclick="fatOff++;renderCardDetail()">›</button></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+            <span style="font-size:0.9rem;font-weight:700;color:rgba(255,255,255,0.9)">${c.name}</span>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <button class="btn-sm" onclick="openCardLancModal()">+ lançamento</button>
+                <button class="btn-sm" onclick="openCardRecModal()">+ recorrente</button>
+                <button class="btn-sm" onclick="editCard(${c.id})" style="background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.1);color:rgba(255,255,255,0.5)">✏️</button>
+                <button class="btn-sm" onclick="deleteCard(${c.id})" style="background:rgba(239,68,68,0.08);border-color:rgba(239,68,68,0.15);color:#ef4444">🗑</button>
+            </div>
+        </div>
+        <div class="fatura-nav">
+            <button class="fatura-nav-btn" onclick="fatOff--;renderCardDetail()">‹</button>
+            <span class="fatura-label">fatura de ${fl}</span>
+            <button class="fatura-nav-btn" onclick="fatOff++;renderCardDetail()">›</button>
+        </div>
         <div class="fatura-total">${fmt(tot)}</div>
         ${Object.keys(bp).length?`<div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center">${Object.entries(bp).map(([p,v])=>`<span class="cl-pessoa" style="font-size:0.72rem">👤 ${p}: ${fmt(v)}</span>`).join('')}</div>`:''}
-        <div style="display:flex;flex-direction:column">${ls.length?ls.map(l=>`<div class="card-lancamento"><span class="cl-date">${dOf(l.date)}</span><span class="cl-desc">${l.desc}</span>${l.tags?.length?l.tags.map(t=>`<span class="cl-tag">${t}</span>`).join(''):''}${l.pessoa?`<span class="cl-pessoa">👤 ${l.pessoa}</span>`:''}${l.parcelas>1?`<span class="cl-parcela">${l.pa}/${l.parcelas}</span>`:''}
-        <span class="cl-valor">${fmt(l.vp||l.valor)}</span><div class="cl-actions"><button class="cl-btn" onclick="editCardLanc(${l.id})">✏️</button><button class="cl-btn cl-btn--del" onclick="delCardLanc(${l.id})">✕</button></div></div>`).join(''):'<div class="empty-state">sem lançamentos</div>'}</div></div>`;
+        <div style="display:flex;flex-direction:column">${ls.length?ls.map(l=>{
+            const cc=CAT_COLORS[l.cat]||'#64748b';
+            return `<div class="card-lancamento">
+                <span class="cl-date">${dOf(l.date)}</span>
+                <span style="font-size:0.6rem; padding:2px 6px; border-radius:4px; background:${cc}22; color:${cc}; white-space:nowrap; margin-right:6px; text-transform:lowercase;">${l.cat||'outros'}</span>
+                <span class="cl-desc">${l.desc}</span>
+                ${l.tags?.length?l.tags.map(t=>`<span class="cl-tag">${t}</span>`).join(''):''}
+                ${l.pessoa?`<span class="cl-pessoa">👤 ${l.pessoa}</span>`:''}
+                ${l.parcelas>1?`<span class="cl-parcela">${l.pa}/${l.parcelas}</span>`:''}
+                <span class="cl-valor">${fmt(l.vp||l.valor)}</span>
+                <div class="cl-actions">
+                    <button class="cl-btn" onclick="editCardLanc(${l.id})">✏️</button>
+                    <button class="cl-btn cl-btn--del" onclick="delCardLanc(${l.id})">✕</button>
+                </div>
+            </div>`;
+        }).join(''):'<div class="empty-state">sem lançamentos</div>'}</div>
+    </div>`;
 }
 function renderDevedores(){
     const bp={};lancCartao.forEach(l=>{if(l.pessoa){const v=l.parcelas>1?l.valor/l.parcelas:l.valor;bp[l.pessoa]=(bp[l.pessoa]||0)+v;}});
@@ -217,9 +246,19 @@ function renderFluxoList(){
     document.getElementById('fluxoListTitle').textContent=`lançamentos — ${new Date(finYear,finMonth).toLocaleDateString('pt-br',{month:'long'})}`;
     const el=document.getElementById('fluxoList');
     if(!en.length)el.innerHTML='<div class="empty-state">sem lançamentos</div>';
-    else el.innerHTML=en.map(e=>{const cc=CAT_COLORS[e.cat]||'#64748b';const ct=contas.find(c=>c.id===e.contaId);
-    return `<div class="fluxo-entry"><span class="fe-date">${dOf(e.date)}</span><span class="fe-cat-dot" style="background:${cc}"></span><span class="fe-desc">${e.desc}</span>${e.tags?.length?`<div class="fe-tags">${e.tags.map(t=>`<span class="fe-tag">${t}</span>`).join('')}</div>`:''}${ct?`<span class="fe-conta">${ct.name}</span>`:''}
-    <span class="fe-valor fe-valor--${e.type}">${e.type==='receita'?'+':e.type==='meta'?'→':'-'} ${fmtS(e.valor)}</span><div class="fe-actions"><button class="fe-btn" onclick="editFluxo(${e.id})">✏️</button><button class="fe-btn fe-btn--del" onclick="delFluxo(${e.id})">✕</button></div></div>`;}).join('');
+    else el.innerHTML=en.map(e=>{
+        const cc=CAT_COLORS[e.cat]||'#64748b';
+        const ct=contas.find(c=>c.id===e.contaId);
+        return `<div class="fluxo-entry">
+            <span class="fe-date">${dOf(e.date)}</span>
+            <span style="font-size:0.6rem; padding:2px 6px; border-radius:4px; background:${cc}22; color:${cc}; white-space:nowrap; margin-right:6px; text-transform:lowercase;">${e.cat||'outros'}</span>
+            <span class="fe-desc">${e.desc}</span>
+            ${e.tags?.length?`<div class="fe-tags">${e.tags.map(t=>`<span class="fe-tag">${t}</span>`).join('')}</div>`:''}
+            ${ct?`<span class="fe-conta">${ct.name}</span>`:''}
+            <span class="fe-valor fe-valor--${e.type}">${e.type==='receita'?'+':e.type==='meta'?'→':'-'} ${fmtS(e.valor)}</span>
+            <div class="fe-actions"><button class="fe-btn" onclick="editFluxo(${e.id})">✏️</button><button class="fe-btn fe-btn--del" onclick="delFluxo(${e.id})">✕</button></div>
+        </div>`;
+    }).join('');
     const am=fluxoEntries.filter(e=>mOf(e.date)===mk);
     const r=am.filter(e=>e.type==='receita').reduce((s,e)=>s+e.valor,0),d=am.filter(e=>e.type==='despesa').reduce((s,e)=>s+e.valor,0),mt=am.filter(e=>e.type==='meta').reduce((s,e)=>s+e.valor,0);
     document.getElementById('fluxoTotals').innerHTML=`<span>receitas: <strong style="color:#22c55e">${fmt(r)}</strong></span><span>despesas: <strong style="color:#ef4444">${fmt(d)}</strong></span>${mt?`<span>metas: <strong style="color:#8b5cf6">${fmt(mt)}</strong></span>`:''}<span>balanço: <strong style="color:${r-d>=0?'#22c55e':'#ef4444'}">${fmt(r-d)}</strong></span>`;
@@ -474,6 +513,9 @@ const toBase64 = file => new Promise((resolve, reject) => {
 });
 
 async function processarExtratoComIA() {
+    // Exige que um cartão esteja selecionado
+    if (!selCardId) return alert("Selecione um cartão na lista à esquerda antes de importar a fatura.");
+
     const fileInput = document.getElementById('aiExtratoFile');
     const status = document.getElementById('aiStatus');
     
@@ -512,36 +554,42 @@ async function processarExtratoComIA() {
 
         if (resultado.lancamentos && Array.isArray(resultado.lancamentos)) {
             
-            // Log para você ver as datas "cruas" que a IA gerou (pressione F12 para ver)
-            console.log("🔍 Dados crus recebidos da IA:", resultado.lancamentos);
-
             resultado.lancamentos.forEach(l => {
-                // BLINDAGEM EXTREMA DE DATA
-                let dataSegura = todayStr(); // Se der erro, joga para a data de hoje para não sumir!
-                
+                let dataSegura = todayStr(); 
                 if (l.date && typeof l.date === 'string') {
-                    // Troca barras (/) e pontos (.) por traços (-)
                     let dLimpa = l.date.replace(/[\/\.]/g, '-'); 
                     let partes = dLimpa.split('-');
-                    
                     if (partes.length === 3) {
-                        if (partes[2].length === 4) { 
-                            // IA mandou DD-MM-YYYY -> Converte para YYYY-MM-DD
-                            dataSegura = `${partes[2]}-${partes[1].padStart(2,'0')}-${partes[0].padStart(2,'0')}`;
-                        } else if (partes[0].length === 4) { 
-                            // IA mandou certo (YYYY-MM-DD), só garante os zeros extras
-                            dataSegura = `${partes[0]}-${partes[1].padStart(2,'0')}-${partes[2].padStart(2,'0')}`;
-                        }
+                        if (partes[2].length === 4) dataSegura = `${partes[2]}-${partes[1].padStart(2,'0')}-${partes[0].padStart(2,'0')}`;
+                        else if (partes[0].length === 4) dataSegura = `${partes[0]}-${partes[1].padStart(2,'0')}-${partes[2].padStart(2,'0')}`;
                     }
                 }
 
+                const valorCorrigido = Math.abs(parseFloat(l.valor)) || 0;
+                const categoria = l.cat || 'Outros';
+                const descFormatada = (l.desc || 'Transação') + " (IA ✨)";
+
+                // 1. SALVA NA ABA DE CARTÕES
+                lancCartao.push({
+                    id: nid(lancCartao),
+                    cardId: selCardId,
+                    desc: descFormatada,
+                    valor: valorCorrigido,
+                    date: dataSegura,
+                    parcelas: 1,
+                    tags: ['importado-ia'],
+                    pessoa: '',
+                    cat: categoria
+                });
+
+                // 2. SALVA NA ABA DE LANÇAMENTOS (Fluxo Geral)
                 fluxoEntries.push({
                     id: nid(fluxoEntries),
                     type: l.type || 'despesa',
-                    desc: (l.desc || 'Transação') + " (IA ✨)",
-                    valor: Math.abs(parseFloat(l.valor)) || 0,
-                    date: dataSegura, // Usa a data à prova de falhas
-                    cat: l.cat || 'Outros',
+                    desc: descFormatada,
+                    valor: valorCorrigido,
+                    date: dataSegura,
+                    cat: categoria,
                     contaId: contas[0]?.id || 1,
                     tags: ['importado-ia'],
                     recorrencia: ''
@@ -549,9 +597,9 @@ async function processarExtratoComIA() {
             });
 
             saveAll();
-            renderCurrentView(); // Atualiza a tela imediatamente
+            renderCurrentView(); 
             
-            status.textContent = "Sucesso! " + resultado.lancamentos.length + " itens formatados e salvos.";
+            status.textContent = `Sucesso! ${resultado.lancamentos.length} itens salvos no Cartão e no Balanço Geral.`;
             status.style.color = "#22c55e";
             fileInput.value = ""; 
         }
