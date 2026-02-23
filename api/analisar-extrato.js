@@ -18,6 +18,7 @@ export default async function handler(req, res) {
       - Lojas de roupa e departamento (ex: Cea, Renner, Riachuelo) DEVEM ser 'Roupas'.
       - Serviços digitais e assinaturas (ex: Claude, Netflix, Amazon Prime, Spotify) DEVEM ser 'Assinaturas'.
       - Pagamentos de faturas, boletos genéricos ou Pix sem nome claro podem ir para 'Outros'.
+      - Desconsidere os lançamentos que iniciam em "Pagamento em"
       
       LIMPEZA DO NOME (desc):
       - Remova códigos estranhos ou números de transação do nome do estabelecimento para ficar legível.
