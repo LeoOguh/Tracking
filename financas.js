@@ -479,7 +479,7 @@ async function processarExtratoComIA() {
     
     if (!fileInput.files[0]) return alert("Selecione um PDF primeiro.");
 
-    status.textContent = "Processando arquivo... aguarde.";
+    status.textContent = "Lendo PDF e formatando dados...";
     status.style.color = "#60a5fa";
     
     try {
@@ -498,14 +498,13 @@ async function processarExtratoComIA() {
 
         if (data.error) {
             const msg = typeof data.error === 'string' ? data.error : (data.error.message || "");
-            if (msg.toLowerCase().includes("quota")) throw new Error("Limite de cota atingido. Aguarde 60s.");
+            if (msg.toLowerCase().includes("quota")) throw new Error("Cota atingida. Aguarde 60s.");
             throw new Error(msg || "Erro desconhecido na API.");
         }
 
         if (!data.candidates || !data.candidates[0]) throw new Error("A IA não retornou dados.");
 
-        let textoRaw = data.candidates[0].content.parts[0].text;
-        
+        const textoRaw = data.candidates[0].content.parts[0].text;
         const jsonMatch = textoRaw.match(/\{[\s\S]*\}/);
         if (!jsonMatch) throw new Error("Formato inválido retornado pela IA.");
         
@@ -513,16 +512,26 @@ async function processarExtratoComIA() {
 
         if (resultado.lancamentos && Array.isArray(resultado.lancamentos)) {
             
-            // LIMPEZA: Remove os itens invisíveis do teste anterior para não duplicar
-            fluxoEntries = fluxoEntries.filter(e => !e.tags || !e.tags.includes('importado-ia') || e.date.includes('-'));
+            // Log para você ver as datas "cruas" que a IA gerou (pressione F12 para ver)
+            console.log("🔍 Dados crus recebidos da IA:", resultado.lancamentos);
 
             resultado.lancamentos.forEach(l => {
-                // Conversor automático de data (DD/MM/YYYY para YYYY-MM-DD)
-                let dataFormatada = l.date || todayStr();
-                if (dataFormatada.includes('/')) {
-                    const partes = dataFormatada.split('/');
-                    if (partes.length === 3 && partes[2].length === 4) {
-                        dataFormatada = `${partes[2]}-${partes[1]}-${partes[0]}`;
+                // BLINDAGEM EXTREMA DE DATA
+                let dataSegura = todayStr(); // Se der erro, joga para a data de hoje para não sumir!
+                
+                if (l.date && typeof l.date === 'string') {
+                    // Troca barras (/) e pontos (.) por traços (-)
+                    let dLimpa = l.date.replace(/[\/\.]/g, '-'); 
+                    let partes = dLimpa.split('-');
+                    
+                    if (partes.length === 3) {
+                        if (partes[2].length === 4) { 
+                            // IA mandou DD-MM-YYYY -> Converte para YYYY-MM-DD
+                            dataSegura = `${partes[2]}-${partes[1].padStart(2,'0')}-${partes[0].padStart(2,'0')}`;
+                        } else if (partes[0].length === 4) { 
+                            // IA mandou certo (YYYY-MM-DD), só garante os zeros extras
+                            dataSegura = `${partes[0]}-${partes[1].padStart(2,'0')}-${partes[2].padStart(2,'0')}`;
+                        }
                     }
                 }
 
@@ -531,7 +540,7 @@ async function processarExtratoComIA() {
                     type: l.type || 'despesa',
                     desc: (l.desc || 'Transação') + " (IA ✨)",
                     valor: Math.abs(parseFloat(l.valor)) || 0,
-                    date: dataFormatada,
+                    date: dataSegura, // Usa a data à prova de falhas
                     cat: l.cat || 'Outros',
                     contaId: contas[0]?.id || 1,
                     tags: ['importado-ia'],
@@ -540,8 +549,9 @@ async function processarExtratoComIA() {
             });
 
             saveAll();
-            renderCurrentView(); 
-            status.textContent = "Sucesso! " + resultado.lancamentos.length + " itens visíveis.";
+            renderCurrentView(); // Atualiza a tela imediatamente
+            
+            status.textContent = "Sucesso! " + resultado.lancamentos.length + " itens formatados e salvos.";
             status.style.color = "#22c55e";
             fileInput.value = ""; 
         }
