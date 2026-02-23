@@ -473,37 +473,77 @@ const toBase64 = file => new Promise((resolve, reject) => {
     reader.onerror = error => reject(error);
 });
 
-export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Método não permitido' });
+async function processarExtratoComIA() {
+    const fileInput = document.getElementById('aiExtratoFile');
+    const status = document.getElementById('aiStatus');
+    
+    if (!fileInput.files[0]) return alert("Selecione um PDF primeiro.");
 
-  const { pdfBase64, categorias } = req.body;
-  const API_KEY = process.env.GEMINI_API_KEY;
+    status.textContent = "Processando 6 páginas... aguarde.";
+    status.style.color = "#60a5fa";
+    
+    try {
+        const base64File = await toBase64(fileInput.files[0]);
+        
+        const response = await fetch('/api/analisar-extrato', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                pdfBase64: base64File,
+                categorias: [...CAT_DESP, ...CAT_REC].join(', ')
+            })
+        });
 
-  if (!API_KEY) return res.status(500).json({ error: 'Chave GEMINI_API_KEY não configurada na Vercel.' });
+        const data = await response.json();
 
-  try {
-    // Usando o modelo atualizado gemini-2.0-flash na v1beta
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{
-          parts: [
-            { text: `Analise este PDF e extraia os lançamentos bancários. Retorne APENAS um JSON puro (sem markdown) neste formato: {"lancamentos": [{"desc": "string", "valor": number, "date": "YYYY-MM-DD", "type": "despesa", "cat": "string"}]}. Categorias: ${categorias}` },
-            { inline_data: { mime_type: "application/pdf", data: pdfBase64 } }
-          ]
-        }],
-        generationConfig: { response_mime_type: "application/json" } // Força a saída em JSON
-      })
-    });
+        // Tratamento de erro seguro para não quebrar o código
+        if (data.error) {
+            const msg = typeof data.error === 'string' ? data.error : (data.error.message || "");
+            if (msg.toLowerCase().includes("quota")) {
+                throw new Error("Limite de cota atingido. Aguarde 60 segundos antes de tentar novamente.");
+            }
+            throw new Error(msg || "Erro desconhecido na API.");
+        }
 
-    const data = await response.json();
-    if (data.error) return res.status(400).json({ error: data.error });
+        if (!data.candidates || !data.candidates[0]) {
+            throw new Error("A IA não retornou dados. O arquivo pode ser pesado demais para o plano gratuito.");
+        }
 
-    res.status(200).json(data);
-  } catch (error) {
-    res.status(500).json({ error: 'Erro interno no servidor da Vercel.' });
-  }
+        const textoRaw = data.candidates[0].content.parts[0].text;
+        
+        // Remove qualquer texto extra ou blocos de código markdown que a IA possa enviar
+        const jsonMatch = textoRaw.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) throw new Error("A IA não retornou um formato JSON válido.");
+        
+        const resultado = JSON.parse(jsonMatch[0]);
+
+        if (resultado.lancamentos && Array.isArray(resultado.lancamentos)) {
+            resultado.lancamentos.forEach(l => {
+                fluxoEntries.push({
+                    id: nid(fluxoEntries),
+                    type: l.type || 'despesa',
+                    desc: (l.desc || 'Transação') + " (IA ✨)",
+                    valor: Math.abs(parseFloat(l.valor)) || 0,
+                    date: l.date || todayStr(),
+                    cat: l.cat || 'Outros',
+                    contaId: contas[0]?.id || 1,
+                    tags: ['importado-ia'],
+                    recorrencia: ''
+                });
+            });
+
+            saveAll();
+            renderCurrentView(); // Atualiza a tela que você estiver vendo
+            status.textContent = "Sucesso! " + resultado.lancamentos.length + " itens importados.";
+            status.style.color = "#22c55e";
+            fileInput.value = ""; 
+        }
+
+    } catch (error) {
+        console.error("Erro no processamento:", error);
+        status.textContent = error.message;
+        status.style.color = "#ef4444";
+    }
 }
 // ─── INIT ────────────────────────────────────────────────────────────────────
 setFinView('dash');
