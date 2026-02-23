@@ -140,20 +140,22 @@ function renderCartoesList(){
 }
 function selectCard(id){ selCardId=id;fatOff=0;renderCartoesList();renderCardDetail(); }
 function calcFM(cid, y, m) {
-    const c = cartoes.find(x => x.id === cid);
+    const c = cartoes.find(x => x.id == cid); // == permite comparar texto com número sem quebrar
     if (!c) return [];
     
-    // AQUI ESTÁ O HERÓI: parseInt converte o texto para número e evita o bug do '191'
     const f = parseInt(c.fechamento) || 19; 
-    
     const s = new Date(y, m - 1, f + 1, 0, 0, 0); 
     const e = new Date(y, m, f, 23, 59, 59); 
     
     return lancCartao.filter(l => {
-        if (l.cardId !== cid) return false;
+        if (l.cardId != cid) return false;
         
-        const [ano, mes, dia] = l.date.split('-');
-        const cd = new Date(ano, mes - 1, dia, 12, 0, 0); 
+        // BLINDAGEM MÁXIMA: Se o lançamento for antigo e não tiver data, não quebra a tela!
+        if (!l.date || typeof l.date !== 'string' || !l.date.includes('-')) return false; 
+        
+        const partes = l.date.split('-');
+        // Força a data para meio-dia para o fuso horário não jogar para o dia anterior
+        const cd = new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]), 12, 0, 0); 
         
         if (l.parcelas > 1) {
             for (let p = 0; p < l.parcelas; p++) {
@@ -165,8 +167,8 @@ function calcFM(cid, y, m) {
         return cd >= s && cd <= e;
     }).map(l => {
         if (l.parcelas > 1) {
-            const [ano, mes, dia] = l.date.split('-');
-            const cd = new Date(ano, mes - 1, dia, 12, 0, 0);
+            const partes = l.date.split('-');
+            const cd = new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]), 12, 0, 0);
             for (let p = 0; p < l.parcelas; p++) {
                 const pd = new Date(cd.getFullYear(), cd.getMonth() + p, cd.getDate(), 12, 0, 0);
                 if (pd >= s && pd <= e) {
