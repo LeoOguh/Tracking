@@ -139,49 +139,56 @@ function renderCartoesList(){
     return `<div class="card-item ${selCardId===c.id?'card-item--active':''}" onclick="selectCard(${c.id})"><div class="card-item-top"><div class="card-color-dot" style="background:${c.cor||'#3b82f6'}"></div><span class="card-item-name">${c.name}</span><span class="card-item-bandeira">${c.bandeira||''}</span></div><div class="card-limit-bar"><div class="card-limit-fill" style="width:${p}%;background:${bc}"></div></div><div class="card-limit-info"><span>${fmt(u)}</span><span>${fmt(c.limite)}</span></div></div>`;}).join('');
 }
 function selectCard(id){ selCardId=id;fatOff=0;renderCartoesList();renderCardDetail(); }
-function calcFM(cid,y,m){
-    const c=cartoes.find(x=>x.id===cid);if(!c)return[];const f=c.fechamento||5;
-    const s=new Date(y,m-1,f+1),e=new Date(y,m,f);
-    return lancCartao.filter(l=>{if(l.cardId!==cid)return false;if(l.parcelas>1){const cd=new Date(l.date+'T00:00:00');for(let p=0;p<l.parcelas;p++){const pd=new Date(cd.getFullYear(),cd.getMonth()+p,cd.getDate());if(pd>=s&&pd<=e)return true;}return false;}const d=new Date(l.date+'T00:00:00');return d>=s&&d<=e;}).map(l=>{
-        if(l.parcelas>1){const cd=new Date(l.date+'T00:00:00');for(let p=0;p<l.parcelas;p++){const pd=new Date(cd.getFullYear(),cd.getMonth()+p,cd.getDate());const s2=new Date(y,m-1,f+1),e2=new Date(y,m,f);if(pd>=s2&&pd<=e2)return{...l,pa:p+1,vp:l.valor/l.parcelas};}}
-        return{...l,pa:1,vp:l.valor};});
+function calcFM(cid, y, m) {
+    const c = cartoes.find(x => x.id === cid);
+    if (!c) return [];
+    
+    // 1. REGRA DO FECHAMENTO: Dia 19. 
+    // Isso faz a fatura ir do dia 20 (mês anterior) até o dia 19 (mês atual).
+    const f = c.fechamento || 19; 
+    
+    // Início (s) e Fim (e) do ciclo da fatura
+    const s = new Date(y, m - 1, f + 1, 0, 0, 0); 
+    const e = new Date(y, m, f, 23, 59, 59); // Vai até o último segundo do dia 19
+    
+    return lancCartao.filter(l => {
+        if (l.cardId !== cid) return false;
+        
+        const cd = new Date(l.date + 'T00:00:00');
+        
+        if (l.parcelas > 1) {
+            for (let p = 0; p < l.parcelas; p++) {
+                const pd = new Date(cd.getFullYear(), cd.getMonth() + p, cd.getDate());
+                if (pd >= s && pd <= e) return true;
+            }
+            return false;
+        }
+        return cd >= s && cd <= e;
+    }).map(l => {
+        if (l.parcelas > 1) {
+            const cd = new Date(l.date + 'T00:00:00');
+            for (let p = 0; p < l.parcelas; p++) {
+                const pd = new Date(cd.getFullYear(), cd.getMonth() + p, cd.getDate());
+                if (pd >= s && pd <= e) {
+                    return { ...l, pa: p + 1, vp: l.valor / l.parcelas };
+                }
+            }
+        }
+        return { ...l, pa: 1, vp: l.valor };
+    });
 }
 function calcFT(cid,y,m){ return calcFM(cid,y,m).reduce((s,l)=>s+(l.vp||l.valor),0); }
 function renderCardDetail(){
     const c=cartoes.find(x=>x.id===selCardId);
     if(!c){document.getElementById('cartoesDetail').innerHTML='<div class="empty-state">selecione um cartão</div>';return;}
     
-    // Mês da fatura sendo exibida na tela
-    const fy=finYear+Math.floor((finMonth+fatOff)/12);
-    const fm=((finMonth+fatOff)%12+12)%12;
+    // Mês e Ano da fatura
+    const fy=finYear+Math.floor((finMonth+fatOff)/12), fm=((finMonth+fatOff)%12+12)%12;
+    
+    // Chama o nosso motor de data "calcFM" que agora sabe a regra do dia 20 ao 19
+    const ls=calcFM(c.id,fy,fm), tot=ls.reduce((s,l)=>s+(l.vp||l.valor),0);
+    
     const fl=new Date(fy,fm).toLocaleDateString('pt-br',{month:'long',year:'numeric'});
-
-    // NOVA LÓGICA DE CICLO DE FATURA (Dia 20 ao dia 19)
-    const ls = lancCartao.filter(l => {
-        if(l.cardId !== c.id) return false;
-        
-        const partes = l.date.split('-'); // YYYY-MM-DD
-        if(partes.length !== 3) return false;
-        
-        let anoCompra = parseInt(partes[0]);
-        let mesCompra = parseInt(partes[1]) - 1; // 0 a 11
-        let diaCompra = parseInt(partes[2]);
-
-        let mesFatura = mesCompra;
-        let anoFatura = anoCompra;
-
-        // Se a compra foi dia 20 ou depois, joga para a fatura do próximo mês
-        if (diaCompra >= 20) {
-            mesFatura++;
-            if (mesFatura > 11) {
-                mesFatura = 0;
-                anoFatura++;
-            }
-        }
-        return mesFatura === fm && anoFatura === fy;
-    });
-
-    const tot=ls.reduce((s,l)=>s+(l.vp||l.valor),0);
     const bp={};ls.filter(l=>l.pessoa).forEach(l=>{bp[l.pessoa]=(bp[l.pessoa]||0)+(l.vp||l.valor);});
     
     document.getElementById('cartoesDetail').innerHTML=`<div class="glass-panel" style="padding:16px 20px;display:flex;flex-direction:column;gap:10px">
@@ -203,19 +210,19 @@ function renderCardDetail(){
         ${Object.keys(bp).length?`<div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center">${Object.entries(bp).map(([p,v])=>`<span class="cl-pessoa" style="font-size:0.72rem">👤 ${p}: ${fmt(v)}</span>`).join('')}</div>`:''}
         <div style="display:flex;flex-direction:column">${ls.length?ls.map(l=>{
             const cc=CAT_COLORS[l.cat]||'#64748b';
-            return `<div class="card-lancamento">
-                <span class="cl-date">${dOf(l.date)}</span>
-                <span style="font-size:0.6rem; padding:2px 6px; border-radius:4px; background:${cc}22; color:${cc}; white-space:nowrap; margin-right:6px; text-transform:lowercase;">${l.cat||'outros'}</span>
-                <span class="cl-desc">${l.desc}</span>
-                ${l.tags?.length?l.tags.map(t=>`<span class="cl-tag">${t}</span>`).join(''):''}
-                ${l.pessoa?`<span class="cl-pessoa">👤 ${l.pessoa}</span>`:''}
-                ${l.parcelas>1?`<span class="cl-parcela">${l.pa}/${l.parcelas}</span>`:''}
-                <span class="cl-valor">${fmt(l.vp||l.valor)}</span>
+            return \`<div class="card-lancamento">
+                <span class="cl-date">\${dOf(l.date)}</span>
+                <span style="font-size:0.6rem; padding:2px 6px; border-radius:4px; background:\${cc}22; color:\${cc}; white-space:nowrap; margin-right:6px; text-transform:lowercase;">\${l.cat||'outros'}</span>
+                <span class="cl-desc">\${l.desc}</span>
+                \${l.tags?.length?l.tags.map(t=>\`<span class="cl-tag">\${t}</span>\`).join(''):''}
+                \${l.pessoa?\`<span class="cl-pessoa">👤 \${l.pessoa}</span>\`:\`\`}
+                \${l.parcelas>1?\`<span class="cl-parcela">\${l.pa}/\${l.parcelas}</span>\`:\`\`}
+                <span class="cl-valor">\${fmt(l.vp||l.valor)}</span>
                 <div class="cl-actions">
-                    <button class="cl-btn" onclick="editCardLanc(${l.id})">✏️</button>
-                    <button class="cl-btn cl-btn--del" onclick="delCardLanc(${l.id})">✕</button>
+                    <button class="cl-btn" onclick="editCardLanc(\${l.id})">✏️</button>
+                    <button class="cl-btn cl-btn--del" onclick="delCardLanc(\${l.id})">✕</button>
                 </div>
-            </div>`;
+            </div>\`;
         }).join(''):'<div class="empty-state">sem lançamentos</div>'}</div>
     </div>`;
 }
