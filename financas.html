@@ -10,7 +10,6 @@
 </head>
 <body>
 
-    <!-- CALENDÁRIO POPUP -->
     <div class="date-picker-popup hidden" id="datePicker">
         <div class="dp-header">
             <button class="dp-nav" onclick="dpPrevMonth()">‹</button>
@@ -20,7 +19,6 @@
         <div class="dp-grid" id="dpGrid"></div>
     </div>
 
-    <!-- DRAWER LATERAL -->
     <aside class="fin-drawer" id="finDrawer">
         <div class="drawer-header">
             <span class="drawer-title">finanças</span>
@@ -57,7 +55,6 @@
         </div>
     </aside>
 
-    <!-- TOPBAR -->
     <div class="fin-topbar">
         <div class="fin-topbar-center">
             <div class="fin-view-label" id="finViewLabel">dashboard</div>
@@ -70,7 +67,6 @@
         <button class="theme-toggle" onclick="toggleTheme()" id="themeToggleBtn">☀ claro</button>
     </div>
 
-    <!-- ═══════ DASHBOARD ═══════ -->
     <div id="viewDash" class="fin-page">
         <div class="dash-grid">
             <div class="glass-panel dash-card dash-card--wide">
@@ -110,26 +106,32 @@
         </div>
     </div>
 
-    <!-- ═══════ CARTÕES ═══════ -->
     <div id="viewCartoes" class="fin-page hidden">
         <div class="cartoes-layout">
             <div class="cartoes-sidebar">
                 <div class="cartoes-header"><span class="sec-title">meus cartões</span><button class="btn-sm" onclick="openCardModal()">+ novo</button></div>
                 <div id="cartoesList" class="cartoes-list"></div>
-                <!-- Quem me deve -->
                 <div class="sec-title" style="margin-top:16px">quem me deve</div>
                 <div id="devedoresResumo" class="devedores-resumo"></div>
             </div>
             <div class="cartoes-main">
+                
+                <div class="glass-panel fluxo-form-panel" style="margin-bottom: 14px; border: 1px dashed #3b82f6;">
+                    <div class="sec-title">Importar Fatura do Cartão (IA)</div>
+                    <div style="display:flex; gap:10px; align-items:center; margin-top:8px; flex-wrap: wrap;">
+                        <input type="file" id="aiExtratoFile" accept="application/pdf" style="font-size: 0.8rem; color: #fff;">
+                        <button class="btn-sm" id="btnLerExtrato" onclick="processarExtratoComIA()">✨ Analisar com Gemini</button>
+                    </div>
+                    <div id="aiStatus" style="font-size: 0.7rem; color: #60a5fa; margin-top: 5px;"></div>
+                </div>
+
                 <div id="cartoesDetail" class="cartoes-detail-area"><div class="empty-state">selecione ou crie um cartão</div></div>
             </div>
         </div>
     </div>
 
-    <!-- ═══════ ENTRADAS & SAÍDAS ═══════ -->
     <div id="viewFluxo" class="fin-page hidden">
         <div class="fluxo-layout">
-            <!-- Contas -->
             <div class="fluxo-contas-bar glass-panel">
                 <div class="fluxo-contas-header">
                     <span class="sec-title">contas</span>
@@ -140,7 +142,6 @@
                 </div>
                 <div id="contasList" class="contas-list"></div>
             </div>
-            <!-- Form -->
             <div class="glass-panel fluxo-form-panel">
                 <div class="sec-title">novo lançamento</div>
                 <div class="fluxo-form-row">
@@ -166,15 +167,6 @@
                     <button class="btn-save-fluxo" onclick="saveFluxo()">✓ salvar</button>
                 </div>
             </div>
-            <div class="glass-panel fluxo-form-panel" style="margin-top: 10px; border: 1px dashed #3b82f6;">
-                <div class="sec-title">Importar Extrato Bancário (IA)</div>
-                <div style="display:flex; gap:10px; align-items:center; margin-top:8px;">
-                    <input type="file" id="aiExtratoFile" accept="application/pdf" style="font-size: 0.8rem; color: #fff;">
-                    <button class="btn-sm" id="btnLerExtrato" onclick="processarExtratoComIA()">✨ Analisar com Gemini</button>
-                </div>
-                <div id="aiStatus" style="font-size: 0.7rem; color: #60a5fa; margin-top: 5px;"></div>
-            </div>            
-            <!-- Metas de gasto + receita -->
             <div class="fluxo-metas-row">
                 <div class="glass-panel fluxo-metas-panel">
                     <div class="sec-title">metas de gasto</div>
@@ -187,7 +179,6 @@
                     <button class="btn-sm" onclick="openMetaReceitaModal()" style="margin-top:6px">editar meta</button>
                 </div>
             </div>
-            <!-- Lista -->
             <div class="glass-panel fluxo-list-panel">
                 <div class="fluxo-list-header">
                     <div class="sec-title" id="fluxoListTitle">lançamentos</div>
@@ -204,7 +195,6 @@
         </div>
     </div>
 
-    <!-- ═══════ INVESTIMENTOS ═══════ -->
     <div id="viewInvest" class="fin-page hidden">
         <div class="invest-layout">
             <div class="invest-summary-row">
@@ -235,7 +225,6 @@
         </div>
     </div>
 
-    <!-- ═══════ METAS ═══════ -->
     <div id="viewMetas" class="fin-page hidden">
         <div class="metas-layout">
             <div class="metas-header"><span class="sec-title">minhas metas</span><button class="btn-sm" onclick="openMetaFinModal()">+ nova meta</button></div>
@@ -243,7 +232,6 @@
         </div>
     </div>
 
-    <!-- MODAL -->
     <div class="modal-overlay hidden" id="modalOverlay" onclick="closeModal()">
         <div class="modal-card glass-panel" onclick="event.stopPropagation()">
             <div class="modal-title" id="modalTitle">—</div>
@@ -252,7 +240,6 @@
         </div>
     </div>
 
-    <!-- NAV -->
     <nav class="float-nav">
         <a href="index.html" class="fn-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg><span>hábitos</span></a>
         <a href="nutricao.html" class="fn-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg><span>nutrição</span></a>
