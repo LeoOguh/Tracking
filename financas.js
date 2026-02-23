@@ -144,11 +144,13 @@ function calcFM(cid, y, m) {
     const c = cartoes.find(x => x.id == cid);
     if (!c) return [];
     
-    const fech = parseInt(c.fechamento) || 19;
-    // Fatura do mês M (0-indexed): compras de (fech+1 do mês anterior) até (fech deste mês)
-    // Ex: fechamento=19, fatura de fevereiro (m=1): 20/jan até 19/fev
-    const inicio = new Date(y, m - 1, fech + 1, 0, 0, 0);  // m-1 em Date() funciona: se m=0, Date(y,-1,x) = nov do ano anterior — correto!
-    const fim    = new Date(y, m, fech, 23, 59, 59);
+    const fech = parseInt(c.fechamento) || 20;
+    // Convenção cartões BR (Nubank etc): fechamento dia X = compras ATÉ dia (X-1) entram na fatura.
+    // Compras A PARTIR do dia X entram na próxima fatura.
+    // Ex: fech=20, fatura de jan: compras de 20/dez até 19/jan
+    // Ex: fech=20, fatura de fev: compras de 20/jan até 18/fev (ou 19/fev em meses com 28+ dias)
+    const inicio = new Date(y, m - 1, fech, 0, 0, 0);     // dia do fechamento do mês ANTERIOR
+    const fim    = new Date(y, m, fech - 1, 23, 59, 59);   // dia anterior ao fechamento DESTE mês
     
     return lancCartao.filter(l => {
         if (l.cardId != cid) return false;
@@ -197,9 +199,9 @@ function renderCardDetail(){
     const bp={};ls.filter(l=>l.pessoa).forEach(l=>{bp[l.pessoa]=(bp[l.pessoa]||0)+(l.vp||l.valor);});
     
     // Calculate and show cycle dates
-    const fech = parseInt(c.fechamento) || 19;
-    const cicloInicio = new Date(fy, fm - 1, fech + 1);
-    const cicloFim = new Date(fy, fm, fech);
+    const fech = parseInt(c.fechamento) || 20;
+    const cicloInicio = new Date(fy, fm - 1, fech);
+    const cicloFim = new Date(fy, fm, fech - 1);
     const cicloStr = `compras de ${cicloInicio.toLocaleDateString('pt-br',{day:'2-digit',month:'2-digit'})} a ${cicloFim.toLocaleDateString('pt-br',{day:'2-digit',month:'2-digit'})}`;
     
     document.getElementById('cartoesDetail').innerHTML=`<div class="glass-panel" style="padding:16px 20px;display:flex;flex-direction:column;gap:10px">
@@ -404,10 +406,10 @@ function openCardModal(eid){
         <span class="modal-label">bandeira</span><input type="text" id="mCB" class="f-input" placeholder="visa, master..." value="${c?.bandeira||''}">
         <span class="modal-label">limite</span><input type="number" id="mCL" class="f-input" min="0" step="100" value="${c?.limite||''}">
         <div style="display:flex;gap:8px">
-            <div style="flex:1"><span class="modal-label">fechamento (dia)</span><input type="number" id="mCF" class="f-input" min="1" max="31" value="${c?.fechamento||5}" title="Último dia que compras entram na fatura do mês"></div>
+            <div style="flex:1"><span class="modal-label">fechamento (dia)</span><input type="number" id="mCF" class="f-input" min="1" max="31" value="${c?.fechamento||20}" title="Último dia que compras entram na fatura do mês"></div>
             <div style="flex:1"><span class="modal-label">vencimento (dia)</span><input type="number" id="mCV" class="f-input" min="1" max="31" value="${c?.vencimento||10}" title="Dia do pagamento da fatura"></div>
         </div>
-        <p style="font-size:0.62rem;color:rgba(255,255,255,0.3);margin:-4px 0 2px;line-height:1.4">fechamento = último dia de compras da fatura. ex: se fech. dia 19, compras até 19/jan entram na fatura de jan, a partir de 20/jan entra na de fev.</p>
+        <p style="font-size:0.62rem;color:rgba(255,255,255,0.3);margin:-4px 0 2px;line-height:1.4">fechamento = dia que a fatura fecha. compras até o dia anterior entram na fatura atual; a partir desse dia, entram na próxima. ex: fech. dia 20 → compras até 19/jan = fatura jan, a partir de 20/jan = fatura fev.</p>
         <span class="modal-label">conta vinculada (para importação)</span>
         <select id="mCCt" class="f-select"><option value="">— nenhuma —</option>${contaOpts}</select>
         <div style="display:flex;align-items:center;gap:8px"><span class="modal-label">cor</span><input type="color" id="mCC" value="${c?.cor||'#3b82f6'}" style="width:36px;height:28px;border:none;background:none"></div>
