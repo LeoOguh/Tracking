@@ -479,7 +479,7 @@ async function processarExtratoComIA() {
     
     if (!fileInput.files[0]) return alert("Selecione um PDF primeiro.");
 
-    status.textContent = "Analisando 6 páginas... aguarde.";
+    status.textContent = "Processando 6 páginas... aguarde.";
     status.style.color = "#60a5fa";
     
     try {
@@ -496,24 +496,28 @@ async function processarExtratoComIA() {
 
         const data = await response.json();
 
-        // Tratamento de erro seguro
+        // Tratamento de erro seguro para não quebrar o código
         if (data.error) {
-            const erroMsg = typeof data.error === 'string' ? data.error : (data.error.message || "Erro desconhecido");
-            if (erroMsg.toLowerCase().includes("quota")) throw new Error("Cota atingida. Aguarde 60s.");
-            throw new Error(erroMsg);
+            const msg = typeof data.error === 'string' ? data.error : (data.error.message || "");
+            if (msg.toLowerCase().includes("quota")) {
+                throw new Error("Limite de cota atingido. Aguarde 60 segundos antes de tentar novamente.");
+            }
+            throw new Error(msg || "Erro desconhecido na API.");
         }
 
-        if (!data.candidates || !data.candidates[0]) throw new Error("A IA não retornou dados.");
+        if (!data.candidates || !data.candidates[0]) {
+            throw new Error("A IA não retornou dados. O arquivo pode ser pesado demais para o plano gratuito.");
+        }
 
-        let texto = data.candidates[0].content.parts[0].text;
+        const textoRaw = data.candidates[0].content.parts[0].text;
         
-        // Limpeza agressiva para garantir que tenhamos apenas o JSON
-        const jsonMatch = texto.match(/\{[\s\S]*\}/);
-        if (!jsonMatch) throw new Error("Formato de resposta inválido da IA.");
+        // Remove qualquer texto extra ou blocos de código markdown que a IA possa enviar
+        const jsonMatch = textoRaw.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) throw new Error("A IA não retornou um formato JSON válido.");
         
         const resultado = JSON.parse(jsonMatch[0]);
 
-        if (resultado.lancamentos) {
+        if (resultado.lancamentos && Array.isArray(resultado.lancamentos)) {
             resultado.lancamentos.forEach(l => {
                 fluxoEntries.push({
                     id: nid(fluxoEntries),
@@ -527,13 +531,16 @@ async function processarExtratoComIA() {
                     recorrencia: ''
                 });
             });
+
             saveAll();
-            renderFluxo();
-            status.textContent = "Sucesso! " + resultado.lancamentos.length + " lançamentos importados.";
+            renderCurrentView(); // Atualiza a tela que você estiver vendo
+            status.textContent = "Sucesso! " + resultado.lancamentos.length + " itens importados.";
             status.style.color = "#22c55e";
+            fileInput.value = ""; 
         }
+
     } catch (error) {
-        console.error("Erro:", error);
+        console.error("Erro no processamento:", error);
         status.textContent = error.message;
         status.style.color = "#ef4444";
     }
