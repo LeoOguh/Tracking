@@ -150,9 +150,38 @@ function calcFT(cid,y,m){ return calcFM(cid,y,m).reduce((s,l)=>s+(l.vp||l.valor)
 function renderCardDetail(){
     const c=cartoes.find(x=>x.id===selCardId);
     if(!c){document.getElementById('cartoesDetail').innerHTML='<div class="empty-state">selecione um cartão</div>';return;}
-    const fy=finYear+Math.floor((finMonth+fatOff)/12),fm=((finMonth+fatOff)%12+12)%12;
-    const ls=calcFM(c.id,fy,fm),tot=ls.reduce((s,l)=>s+(l.vp||l.valor),0);
+    
+    // Mês da fatura sendo exibida na tela
+    const fy=finYear+Math.floor((finMonth+fatOff)/12);
+    const fm=((finMonth+fatOff)%12+12)%12;
     const fl=new Date(fy,fm).toLocaleDateString('pt-br',{month:'long',year:'numeric'});
+
+    // NOVA LÓGICA DE CICLO DE FATURA (Dia 20 ao dia 19)
+    const ls = lancCartao.filter(l => {
+        if(l.cardId !== c.id) return false;
+        
+        const partes = l.date.split('-'); // YYYY-MM-DD
+        if(partes.length !== 3) return false;
+        
+        let anoCompra = parseInt(partes[0]);
+        let mesCompra = parseInt(partes[1]) - 1; // 0 a 11
+        let diaCompra = parseInt(partes[2]);
+
+        let mesFatura = mesCompra;
+        let anoFatura = anoCompra;
+
+        // Se a compra foi dia 20 ou depois, joga para a fatura do próximo mês
+        if (diaCompra >= 20) {
+            mesFatura++;
+            if (mesFatura > 11) {
+                mesFatura = 0;
+                anoFatura++;
+            }
+        }
+        return mesFatura === fm && anoFatura === fy;
+    });
+
+    const tot=ls.reduce((s,l)=>s+(l.vp||l.valor),0);
     const bp={};ls.filter(l=>l.pessoa).forEach(l=>{bp[l.pessoa]=(bp[l.pessoa]||0)+(l.vp||l.valor);});
     
     document.getElementById('cartoesDetail').innerHTML=`<div class="glass-panel" style="padding:16px 20px;display:flex;flex-direction:column;gap:10px">
@@ -597,14 +626,19 @@ async function processarExtratoComIA() {
             });
 
             saveAll();
-            renderCurrentView(); 
             
-            status.textContent = `Sucesso! ${resultado.lancamentos.length} itens salvos no Cartão e no Balanço Geral.`;
+            status.textContent = `Sucesso! ${resultado.lancamentos.length} itens salvos. Atualizando...`;
             status.style.color = "#22c55e";
             fileInput.value = ""; 
+            
+            // Força o aplicativo a recarregar tudo para atualizar Gráficos e Contas
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
         }
 
     } catch (error) {
+        // ... (resto do código de erro)
         console.error("Erro:", error);
         status.textContent = error.message;
         status.style.color = "#ef4444";
