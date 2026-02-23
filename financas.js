@@ -136,42 +136,45 @@ function renderCartoesList(){
     const el=document.getElementById('cartoesList');
     if(!cartoes.length){el.innerHTML='<div class="empty-state">nenhum cartão</div>';return;}
     el.innerHTML=cartoes.map(c=>{const u=calcFT(c.id,finYear,finMonth);const p=c.limite?Math.min(100,Math.round(u/c.limite*100)):0;const bc=p>90?'#ef4444':p>70?'#f59e0b':'#22c55e';
-    return `<div class="card-item ${selCardId===c.id?'card-item--active':''}" onclick="selectCard(${c.id})"><div class="card-item-top"><div class="card-color-dot" style="background:${c.cor||'#3b82f6'}"></div><span class="card-item-name">${c.name}</span><span class="card-item-bandeira">${c.bandeira||''}</span></div><div class="card-limit-bar"><div class="card-limit-fill" style="width:${p}%;background:${bc}"></div></div><div class="card-limit-info"><span>${fmt(u)}</span><span>${fmt(c.limite)}</span></div></div>`;}).join('');
+    return `<div class="card-item ${selCardId==c.id?'card-item--active':''}" onclick="selectCard(${c.id})"><div class="card-item-top"><div class="card-color-dot" style="background:${c.cor||'#3b82f6'}"></div><span class="card-item-name">${c.name}</span><span class="card-item-bandeira">${c.bandeira||''}</span></div><div class="card-limit-bar"><div class="card-limit-fill" style="width:${p}%;background:${bc}"></div></div><div class="card-limit-info"><span>${fmt(u)}</span><span>${fmt(c.limite)}</span></div></div>`;}).join('');
 }
 function selectCard(id){ selCardId=id;fatOff=0;renderCartoesList();renderCardDetail(); }
 function calcFM(cid, y, m) {
-    const c = cartoes.find(x => x.id == cid); // == permite comparar texto com número sem quebrar
+    // m is 0-indexed (0=jan, 11=dez) — matches JS Date.getMonth()
+    const c = cartoes.find(x => x.id == cid);
     if (!c) return [];
     
-    const f = parseInt(c.fechamento) || 19; 
-    const s = new Date(y, m - 1, f + 1, 0, 0, 0); 
-    const e = new Date(y, m, f, 23, 59, 59); 
+    const fech = parseInt(c.fechamento) || 19;
+    // Fatura do mês M (0-indexed): compras de (fech+1 do mês anterior) até (fech deste mês)
+    // Ex: fechamento=19, fatura de fevereiro (m=1): 20/jan até 19/fev
+    const inicio = new Date(y, m - 1, fech + 1, 0, 0, 0);  // m-1 em Date() funciona: se m=0, Date(y,-1,x) = nov do ano anterior — correto!
+    const fim    = new Date(y, m, fech, 23, 59, 59);
     
     return lancCartao.filter(l => {
         if (l.cardId != cid) return false;
-        
-        // BLINDAGEM MÁXIMA: Se o lançamento for antigo e não tiver data, não quebra a tela!
         if (!l.date || typeof l.date !== 'string' || !l.date.includes('-')) return false; 
         
         const partes = l.date.split('-');
-        // Força a data para meio-dia para o fuso horário não jogar para o dia anterior
+        if (partes.length !== 3) return false;
         const cd = new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]), 12, 0, 0); 
+        
+        if (isNaN(cd.getTime())) return false;
         
         if (l.parcelas > 1) {
             for (let p = 0; p < l.parcelas; p++) {
                 const pd = new Date(cd.getFullYear(), cd.getMonth() + p, cd.getDate(), 12, 0, 0);
-                if (pd >= s && pd <= e) return true;
+                if (pd >= inicio && pd <= fim) return true;
             }
             return false;
         }
-        return cd >= s && cd <= e;
+        return cd >= inicio && cd <= fim;
     }).map(l => {
         if (l.parcelas > 1) {
             const partes = l.date.split('-');
             const cd = new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]), 12, 0, 0);
             for (let p = 0; p < l.parcelas; p++) {
                 const pd = new Date(cd.getFullYear(), cd.getMonth() + p, cd.getDate(), 12, 0, 0);
-                if (pd >= s && pd <= e) {
+                if (pd >= inicio && pd <= fim) {
                     return { ...l, pa: p + 1, vp: l.valor / l.parcelas };
                 }
             }
@@ -181,7 +184,7 @@ function calcFM(cid, y, m) {
 }
 function calcFT(cid,y,m){ return calcFM(cid,y,m).reduce((s,l)=>s+(l.vp||l.valor),0); }
 function renderCardDetail(){
-    const c=cartoes.find(x=>x.id===selCardId);
+    const c=cartoes.find(x=>x.id==selCardId);
     if(!c){document.getElementById('cartoesDetail').innerHTML='<div class="empty-state">selecione um cartão</div>';return;}
     
     // Mês e Ano da fatura
@@ -192,6 +195,12 @@ function renderCardDetail(){
     
     const fl=new Date(fy,fm).toLocaleDateString('pt-br',{month:'long',year:'numeric'});
     const bp={};ls.filter(l=>l.pessoa).forEach(l=>{bp[l.pessoa]=(bp[l.pessoa]||0)+(l.vp||l.valor);});
+    
+    // Calculate and show cycle dates
+    const fech = parseInt(c.fechamento) || 19;
+    const cicloInicio = new Date(fy, fm - 1, fech + 1);
+    const cicloFim = new Date(fy, fm, fech);
+    const cicloStr = `compras de ${cicloInicio.toLocaleDateString('pt-br',{day:'2-digit',month:'2-digit'})} a ${cicloFim.toLocaleDateString('pt-br',{day:'2-digit',month:'2-digit'})}`;
     
     document.getElementById('cartoesDetail').innerHTML=`<div class="glass-panel" style="padding:16px 20px;display:flex;flex-direction:column;gap:10px">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
@@ -208,6 +217,7 @@ function renderCardDetail(){
             <span class="fatura-label">fatura de ${fl}</span>
             <button class="fatura-nav-btn" onclick="fatOff++;renderCardDetail()">›</button>
         </div>
+        <div style="text-align:center;font-size:0.62rem;color:rgba(255,255,255,0.25);margin-top:-6px">${cicloStr} · fech. dia ${fech} · venc. dia ${c.vencimento||10}</div>
         <div class="fatura-total">${fmt(tot)}</div>
         ${Object.keys(bp).length?`<div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center">${Object.entries(bp).map(([p,v])=>`<span class="cl-pessoa" style="font-size:0.72rem">👤 ${p}: ${fmt(v)}</span>`).join('')}</div>`:''}
         <div style="display:flex;flex-direction:column">${ls.length?ls.map(l=>{
@@ -387,24 +397,31 @@ function openModal(t,b,a){document.getElementById('modalTitle').textContent=t;do
 function closeModal(){document.getElementById('modalOverlay').classList.add('hidden');}
 
 function openCardModal(eid){
-    const c=eid?cartoes.find(x=>x.id===eid):null;
+    const c=eid?cartoes.find(x=>x.id==eid):null;
+    const contaOpts = contas.map(ct=>`<option value="${ct.id}"${c?.contaId==ct.id?' selected':''}>${ct.name}</option>`).join('');
     openModal(c?'Editar Cartão':'Novo Cartão',`
         <span class="modal-label">nome</span><input type="text" id="mCN" class="f-input" value="${c?.name||''}">
         <span class="modal-label">bandeira</span><input type="text" id="mCB" class="f-input" placeholder="visa, master..." value="${c?.bandeira||''}">
         <span class="modal-label">limite</span><input type="number" id="mCL" class="f-input" min="0" step="100" value="${c?.limite||''}">
-        <div style="display:flex;gap:8px"><div style="flex:1"><span class="modal-label">fechamento (dia)</span><input type="number" id="mCF" class="f-input" min="1" max="31" value="${c?.fechamento||5}"></div><div style="flex:1"><span class="modal-label">vencimento (dia)</span><input type="number" id="mCV" class="f-input" min="1" max="31" value="${c?.vencimento||10}"></div></div>
+        <div style="display:flex;gap:8px">
+            <div style="flex:1"><span class="modal-label">fechamento (dia)</span><input type="number" id="mCF" class="f-input" min="1" max="31" value="${c?.fechamento||5}" title="Último dia que compras entram na fatura do mês"></div>
+            <div style="flex:1"><span class="modal-label">vencimento (dia)</span><input type="number" id="mCV" class="f-input" min="1" max="31" value="${c?.vencimento||10}" title="Dia do pagamento da fatura"></div>
+        </div>
+        <p style="font-size:0.62rem;color:rgba(255,255,255,0.3);margin:-4px 0 2px;line-height:1.4">fechamento = último dia de compras da fatura. ex: se fech. dia 19, compras até 19/jan entram na fatura de jan, a partir de 20/jan entra na de fev.</p>
+        <span class="modal-label">conta vinculada (para importação)</span>
+        <select id="mCCt" class="f-select"><option value="">— nenhuma —</option>${contaOpts}</select>
         <div style="display:flex;align-items:center;gap:8px"><span class="modal-label">cor</span><input type="color" id="mCC" value="${c?.cor||'#3b82f6'}" style="width:36px;height:28px;border:none;background:none"></div>
     `,`<button class="modal-btn modal-btn--cancel" onclick="closeModal()">cancelar</button><button class="modal-btn modal-btn--primary" onclick="saveCard(${eid||0})">salvar</button>`);
 }
 function saveCard(eid){
-    const n=document.getElementById('mCN').value.trim(),b=document.getElementById('mCB').value.trim(),l=parseFloat(document.getElementById('mCL').value)||0,f=parseInt(document.getElementById('mCF').value)||5,v=parseInt(document.getElementById('mCV').value)||10,co=document.getElementById('mCC').value;
+    const n=document.getElementById('mCN').value.trim(),b=document.getElementById('mCB').value.trim(),l=parseFloat(document.getElementById('mCL').value)||0,f=parseInt(document.getElementById('mCF').value)||5,v=parseInt(document.getElementById('mCV').value)||10,co=document.getElementById('mCC').value,ct=parseInt(document.getElementById('mCCt').value)||null;
     if(!n){alert('Nome obrigatório.');return;}
-    if(eid){const c=cartoes.find(x=>x.id===eid);if(c)Object.assign(c,{name:n,bandeira:b,limite:l,fechamento:f,vencimento:v,cor:co});}
-    else cartoes.push({id:nid(cartoes),name:n,bandeira:b,limite:l,fechamento:f,vencimento:v,cor:co});
+    if(eid){const c=cartoes.find(x=>x.id==eid);if(c)Object.assign(c,{name:n,bandeira:b,limite:l,fechamento:f,vencimento:v,cor:co,contaId:ct});}
+    else cartoes.push({id:nid(cartoes),name:n,bandeira:b,limite:l,fechamento:f,vencimento:v,cor:co,contaId:ct});
     saveAll();closeModal();renderCartoes();
 }
 function editCard(id){openCardModal(id);}
-function deleteCard(id){if(!confirm('Apagar cartão e lançamentos?'))return;cartoes=cartoes.filter(c=>c.id!==id);lancCartao=lancCartao.filter(l=>l.cardId!==id);selCardId=null;saveAll();renderCartoes();document.getElementById('cartoesDetail').innerHTML='<div class="empty-state">selecione um cartão</div>';}
+function deleteCard(id){if(!confirm('Apagar cartão e lançamentos?'))return;cartoes=cartoes.filter(c=>c.id!=id);lancCartao=lancCartao.filter(l=>l.cardId!=id);selCardId=null;saveAll();renderCartoes();document.getElementById('cartoesDetail').innerHTML='<div class="empty-state">selecione um cartão</div>';}
 
 function openCardLancModal(eid){
     const l=eid?lancCartao.find(x=>x.id===eid):null;
@@ -588,33 +605,56 @@ async function processarExtratoComIA() {
         if (!jsonMatch) throw new Error("Formato inválido retornado pela IA.");
         
         const resultado = JSON.parse(jsonMatch[0]);
-        let itensSalvos = 0; // Contador de novos itens
+        let itensSalvos = 0;
+        let itensIgnorados = 0;
+
+        // Determinar conta vinculada: usa contaId do cartão se existir, senão primeira conta
+        const cartaoAtual = cartoes.find(x => x.id == selCardId);
+        const contaVinculada = (cartaoAtual && cartaoAtual.contaId) ? cartaoAtual.contaId : (contas[0]?.id || 1);
 
         if (resultado.lancamentos && Array.isArray(resultado.lancamentos)) {
             
             resultado.lancamentos.forEach(l => {
-                // REGRA 1: Ignora os "Pagamentos de fatura"
+                // REGRA 1: Ignora os "Pagamentos de fatura" e estornos
                 const descLower = (l.desc || '').toLowerCase();
-                if (descLower.startsWith('pagamento em') || descLower.includes('pagamento recebido')) {
-                    return; // Abandona e vai para o próximo item
+                if (descLower.startsWith('pagamento em') || descLower.includes('pagamento recebido') || descLower.includes('pagamento de fatura')) {
+                    itensIgnorados++;
+                    return;
                 }
 
-                let dataSegura = todayStr(); 
+                // Parsing robusto de data
+                let dataSegura = '';
                 if (l.date && typeof l.date === 'string') {
-                    let dLimpa = l.date.replace(/[\/\.]/g, '-'); 
+                    let dLimpa = l.date.replace(/[\/\.]/g, '-').trim(); 
                     let partes = dLimpa.split('-');
                     if (partes.length === 3) {
-                        if (partes[2].length === 4) dataSegura = `${partes[2]}-${partes[1].padStart(2,'0')}-${partes[0].padStart(2,'0')}`;
-                        else if (partes[0].length === 4) dataSegura = `${partes[0]}-${partes[1].padStart(2,'0')}-${partes[2].padStart(2,'0')}`;
+                        let yy, mm, dd;
+                        if (partes[0].length === 4) { yy=partes[0]; mm=partes[1]; dd=partes[2]; }
+                        else if (partes[2].length === 4) { yy=partes[2]; mm=partes[1]; dd=partes[0]; }
+                        else { yy='20'+partes[2]; mm=partes[1]; dd=partes[0]; } // dd-mm-yy
+                        mm = mm.padStart(2,'0'); dd = dd.padStart(2,'0');
+                        // Validar a data
+                        const testDate = new Date(parseInt(yy), parseInt(mm)-1, parseInt(dd));
+                        if (!isNaN(testDate.getTime()) && testDate.getFullYear() == yy) {
+                            dataSegura = `${yy}-${mm}-${dd}`;
+                        }
                     }
                 }
+                if (!dataSegura) dataSegura = todayStr();
 
                 const valorCorrigido = Math.abs(parseFloat(l.valor)) || 0;
+                if (valorCorrigido === 0) return; // ignora lançamentos sem valor
+                
                 const categoria = l.cat || 'Outros';
                 const descFormatada = (l.desc || 'Transação') + " (IA ✨)";
 
-                // REGRA 2: Verificador Anti-Duplicidade no Cartão
-                const duplicadoCartao = lancCartao.some(ex => ex.cardId === selCardId && ex.date === dataSegura && ex.valor === valorCorrigido && ex.desc === descFormatada);
+                // REGRA 2: Anti-Duplicidade mais tolerante (usa == para cardId, compara valor com margem de centavos)
+                const duplicadoCartao = lancCartao.some(ex => 
+                    ex.cardId == selCardId && 
+                    ex.date === dataSegura && 
+                    Math.abs(ex.valor - valorCorrigido) < 0.02 &&
+                    ex.desc === descFormatada
+                );
                 
                 if (!duplicadoCartao) {
                     lancCartao.push({
@@ -629,10 +669,16 @@ async function processarExtratoComIA() {
                         cat: categoria
                     });
                     itensSalvos++;
+                } else {
+                    itensIgnorados++;
                 }
 
-                // Verificador Anti-Duplicidade nas Entradas & Saídas
-                const duplicadoFluxo = fluxoEntries.some(ex => ex.contaId === (contas[0]?.id || 1) && ex.date === dataSegura && ex.valor === valorCorrigido && ex.desc === descFormatada);
+                // Anti-Duplicidade no Fluxo
+                const duplicadoFluxo = fluxoEntries.some(ex => 
+                    ex.date === dataSegura && 
+                    Math.abs(ex.valor - valorCorrigido) < 0.02 && 
+                    ex.desc === descFormatada
+                );
 
                 if (!duplicadoFluxo) {
                     fluxoEntries.push({
@@ -642,7 +688,7 @@ async function processarExtratoComIA() {
                         valor: valorCorrigido,
                         date: dataSegura,
                         cat: categoria,
-                        contaId: contas[0]?.id || 1,
+                        contaId: contaVinculada,
                         tags: ['importado-ia'],
                         recorrencia: ''
                     });
@@ -651,14 +697,18 @@ async function processarExtratoComIA() {
 
             saveAll();
             
-            // O texto agora mostra quantos foram realmente novos
-            status.textContent = `Sucesso! ${itensSalvos} novos itens adicionados. Atualizando...`;
-            status.style.color = "#22c55e";
+            const msg = itensSalvos > 0 
+                ? `✅ ${itensSalvos} novos lançamentos importados!${itensIgnorados ? ` (${itensIgnorados} ignorados)` : ''}`
+                : `Nenhum lançamento novo (${itensIgnorados} já existiam ou foram ignorados).`;
+            status.textContent = msg;
+            status.style.color = itensSalvos > 0 ? "#22c55e" : "#f59e0b";
             fileInput.value = ""; 
             
-            setTimeout(() => {
-                location.reload();
-            }, 1500);
+            // Re-render sem recarregar — mantém cartão selecionado e view atual
+            renderCartoes();
+        } else {
+            status.textContent = "A IA não encontrou lançamentos no PDF.";
+            status.style.color = "#f59e0b";
         }
 
     } catch (error) {
