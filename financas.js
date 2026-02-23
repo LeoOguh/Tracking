@@ -135,7 +135,12 @@ function renderCartoes(){ renderCartoesList(); if(selCardId)renderCardDetail(); 
 function renderCartoesList(){
     const el=document.getElementById('cartoesList');
     if(!cartoes.length){el.innerHTML='<div class="empty-state">nenhum cartão</div>';return;}
-    el.innerHTML=cartoes.map(c=>{const u=calcFT(c.id,finYear,finMonth);const p=c.limite?Math.min(100,Math.round(u/c.limite*100)):0;const bc=p>90?'#ef4444':p>70?'#f59e0b':'#22c55e';
+    el.innerHTML=cartoes.map(c=>{
+        // Show the total for the fatura being viewed (current month + fatOff), or current month for sidebar
+        const viewM = ((finMonth+fatOff)%12+12)%12;
+        const viewY = finYear + Math.floor((finMonth+fatOff)/12);
+        const u = calcFT(c.id, viewY, viewM);
+        const p=c.limite?Math.min(100,Math.round(u/c.limite*100)):0;const bc=p>90?'#ef4444':p>70?'#f59e0b':'#22c55e';
     return `<div class="card-item ${selCardId==c.id?'card-item--active':''}" onclick="selectCard(${c.id})"><div class="card-item-top"><div class="card-color-dot" style="background:${c.cor||'#3b82f6'}"></div><span class="card-item-name">${c.name}</span><span class="card-item-bandeira">${c.bandeira||''}</span></div><div class="card-limit-bar"><div class="card-limit-fill" style="width:${p}%;background:${bc}"></div></div><div class="card-limit-info"><span>${fmt(u)}</span><span>${fmt(c.limite)}</span></div></div>`;}).join('');
 }
 function selectCard(id){ selCardId=id;fatOff=0;renderCartoesList();renderCardDetail(); }
@@ -706,7 +711,36 @@ async function processarExtratoComIA() {
             status.style.color = itensSalvos > 0 ? "#22c55e" : "#f59e0b";
             fileInput.value = ""; 
             
-            // Re-render sem recarregar — mantém cartão selecionado e view atual
+            // Auto-navegar para o mês da fatura onde os lançamentos cairam
+            if (itensSalvos > 0 && cartaoAtual) {
+                const fech = parseInt(cartaoAtual.fechamento) || 20;
+                // Contar em qual fatura (mês) cada lançamento importado cai
+                const mesesCount = {};
+                lancCartao.filter(l => l.cardId == selCardId && l.tags && l.tags.includes('importado-ia')).forEach(l => {
+                    if (!l.date) return;
+                    const p = l.date.split('-');
+                    const d = new Date(parseInt(p[0]), parseInt(p[1])-1, parseInt(p[2]), 12, 0, 0);
+                    if (isNaN(d.getTime())) return;
+                    // Se dia >= fechamento, pertence à fatura do mês SEGUINTE
+                    let fatM = d.getMonth(), fatY = d.getFullYear();
+                    if (d.getDate() >= fech) {
+                        fatM++;
+                        if (fatM > 11) { fatM = 0; fatY++; }
+                    }
+                    const key = `${fatY}-${fatM}`;
+                    mesesCount[key] = (mesesCount[key] || 0) + 1;
+                });
+                // Pegar o mês com mais lançamentos
+                const melhorMes = Object.entries(mesesCount).sort((a,b) => b[1] - a[1])[0];
+                if (melhorMes) {
+                    const [ym] = melhorMes;
+                    const [tgtY, tgtM] = ym.split('-').map(Number);
+                    // Calcular fatOff para chegar nesse mês
+                    fatOff = (tgtY - finYear) * 12 + (tgtM - finMonth);
+                    status.textContent += ` Navegando para fatura de ${new Date(tgtY, tgtM).toLocaleDateString('pt-br',{month:'long',year:'numeric'})}.`;
+                }
+            }
+            
             renderCartoes();
         } else {
             status.textContent = "A IA não encontrou lançamentos no PDF.";
