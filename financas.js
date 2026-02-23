@@ -143,22 +143,20 @@ function calcFM(cid, y, m) {
     const c = cartoes.find(x => x.id === cid);
     if (!c) return [];
     
-    // 1. REGRA DO FECHAMENTO: Dia 19. 
-    // Isso faz a fatura ir do dia 20 (mês anterior) até o dia 19 (mês atual).
     const f = c.fechamento || 19; 
-    
-    // Início (s) e Fim (e) do ciclo da fatura
     const s = new Date(y, m - 1, f + 1, 0, 0, 0); 
-    const e = new Date(y, m, f, 23, 59, 59); // Vai até o último segundo do dia 19
+    const e = new Date(y, m, f, 23, 59, 59); 
     
     return lancCartao.filter(l => {
         if (l.cardId !== cid) return false;
         
-        const cd = new Date(l.date + 'T00:00:00');
+        // CORREÇÃO DO FUSO HORÁRIO: Força o meio-dia (12,0,0) para o dia não voltar para trás
+        const [ano, mes, dia] = l.date.split('-');
+        const cd = new Date(ano, mes - 1, dia, 12, 0, 0); 
         
         if (l.parcelas > 1) {
             for (let p = 0; p < l.parcelas; p++) {
-                const pd = new Date(cd.getFullYear(), cd.getMonth() + p, cd.getDate());
+                const pd = new Date(cd.getFullYear(), cd.getMonth() + p, cd.getDate(), 12, 0, 0);
                 if (pd >= s && pd <= e) return true;
             }
             return false;
@@ -166,9 +164,10 @@ function calcFM(cid, y, m) {
         return cd >= s && cd <= e;
     }).map(l => {
         if (l.parcelas > 1) {
-            const cd = new Date(l.date + 'T00:00:00');
+            const [ano, mes, dia] = l.date.split('-');
+            const cd = new Date(ano, mes - 1, dia, 12, 0, 0);
             for (let p = 0; p < l.parcelas; p++) {
-                const pd = new Date(cd.getFullYear(), cd.getMonth() + p, cd.getDate());
+                const pd = new Date(cd.getFullYear(), cd.getMonth() + p, cd.getDate(), 12, 0, 0);
                 if (pd >= s && pd <= e) {
                     return { ...l, pa: p + 1, vp: l.valor / l.parcelas };
                 }
@@ -549,7 +548,6 @@ const toBase64 = file => new Promise((resolve, reject) => {
 });
 
 async function processarExtratoComIA() {
-    // Exige que um cartão esteja selecionado
     if (!selCardId) return alert("Selecione um cartão na lista à esquerda antes de importar a fatura.");
 
     const fileInput = document.getElementById('aiExtratoFile');
@@ -587,10 +585,17 @@ async function processarExtratoComIA() {
         if (!jsonMatch) throw new Error("Formato inválido retornado pela IA.");
         
         const resultado = JSON.parse(jsonMatch[0]);
+        let itensSalvos = 0; // Contador de novos itens
 
         if (resultado.lancamentos && Array.isArray(resultado.lancamentos)) {
             
             resultado.lancamentos.forEach(l => {
+                // REGRA 1: Ignora os "Pagamentos de fatura"
+                const descLower = (l.desc || '').toLowerCase();
+                if (descLower.startsWith('pagamento em') || descLower.includes('pagamento recebido')) {
+                    return; // Abandona e vai para o próximo item
+                }
+
                 let dataSegura = todayStr(); 
                 if (l.date && typeof l.date === 'string') {
                     let dLimpa = l.date.replace(/[\/\.]/g, '-'); 
@@ -605,47 +610,55 @@ async function processarExtratoComIA() {
                 const categoria = l.cat || 'Outros';
                 const descFormatada = (l.desc || 'Transação') + " (IA ✨)";
 
-                // 1. SALVA NA ABA DE CARTÕES
-                lancCartao.push({
-                    id: nid(lancCartao),
-                    cardId: selCardId,
-                    desc: descFormatada,
-                    valor: valorCorrigido,
-                    date: dataSegura,
-                    parcelas: 1,
-                    tags: ['importado-ia'],
-                    pessoa: '',
-                    cat: categoria
-                });
+                // REGRA 2: Verificador Anti-Duplicidade no Cartão
+                const duplicadoCartao = lancCartao.some(ex => ex.cardId === selCardId && ex.date === dataSegura && ex.valor === valorCorrigido && ex.desc === descFormatada);
+                
+                if (!duplicadoCartao) {
+                    lancCartao.push({
+                        id: nid(lancCartao),
+                        cardId: selCardId,
+                        desc: descFormatada,
+                        valor: valorCorrigido,
+                        date: dataSegura,
+                        parcelas: 1,
+                        tags: ['importado-ia'],
+                        pessoa: '',
+                        cat: categoria
+                    });
+                    itensSalvos++;
+                }
 
-                // 2. SALVA NA ABA DE LANÇAMENTOS (Fluxo Geral)
-                fluxoEntries.push({
-                    id: nid(fluxoEntries),
-                    type: l.type || 'despesa',
-                    desc: descFormatada,
-                    valor: valorCorrigido,
-                    date: dataSegura,
-                    cat: categoria,
-                    contaId: contas[0]?.id || 1,
-                    tags: ['importado-ia'],
-                    recorrencia: ''
-                });
+                // Verificador Anti-Duplicidade nas Entradas & Saídas
+                const duplicadoFluxo = fluxoEntries.some(ex => ex.contaId === (contas[0]?.id || 1) && ex.date === dataSegura && ex.valor === valorCorrigido && ex.desc === descFormatada);
+
+                if (!duplicadoFluxo) {
+                    fluxoEntries.push({
+                        id: nid(fluxoEntries),
+                        type: l.type || 'despesa',
+                        desc: descFormatada,
+                        valor: valorCorrigido,
+                        date: dataSegura,
+                        cat: categoria,
+                        contaId: contas[0]?.id || 1,
+                        tags: ['importado-ia'],
+                        recorrencia: ''
+                    });
+                }
             });
 
             saveAll();
             
-            status.textContent = `Sucesso! ${resultado.lancamentos.length} itens salvos. Atualizando...`;
+            // O texto agora mostra quantos foram realmente novos
+            status.textContent = `Sucesso! ${itensSalvos} novos itens adicionados. Atualizando...`;
             status.style.color = "#22c55e";
             fileInput.value = ""; 
             
-            // Força o aplicativo a recarregar tudo para atualizar Gráficos e Contas
             setTimeout(() => {
                 location.reload();
             }, 1500);
         }
 
     } catch (error) {
-        // ... (resto do código de erro)
         console.error("Erro:", error);
         status.textContent = error.message;
         status.style.color = "#ef4444";
