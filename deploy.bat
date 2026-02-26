@@ -9,22 +9,21 @@ setlocal enabledelayedexpansion
 
 set "PROJETO=C:\Users\Leonardo\Documents\GitHub\Tracking"
 set "DOWNLOADS=%USERPROFILE%\Downloads"
+set "VERSOES=C:\Users\Leonardo\Downloads\versões"
 set "TEMP_EXTRACT=%TEMP%\tracking_deploy"
 
 echo.
-echo ╔══════════════════════════════════════════╗
-echo ║      DEPLOY AUTOMÁTICO - TRACKING        ║
-echo ╚══════════════════════════════════════════╝
+echo ============================================
+echo      DEPLOY AUTOMATICO - TRACKING
+echo ============================================
 echo.
 
-:: ── 1. Pede mensagem de commit ──────────────
-set /p MENSAGEM="Mensagem do commit: "
-if "%MENSAGEM%"=="" set "MENSAGEM=update: alteracoes realizadas"
+:: ── 1. Mensagem de commit = nome do ZIP ──────
 
 echo.
-echo ──────────────────────────────────────────
+echo --------------------------------------------
 echo Procurando arquivo ZIP em Downloads...
-echo ──────────────────────────────────────────
+echo --------------------------------------------
 echo.
 
 :: ── 2. Encontra o ZIP mais recente ──────────
@@ -45,6 +44,10 @@ if "!ZIP_ENCONTRADO!"=="" (
     exit /b 1
 )
 
+:: Extrai nome do ZIP sem extensão para usar como mensagem de commit
+for %%Z in ("!ZIP_ENCONTRADO!") do set "MENSAGEM=%%~nZ"
+echo   Commit sera: !MENSAGEM!
+
 echo.
 set /p CONFIRMA="   Usar este arquivo? (S/N): "
 if /i "!CONFIRMA!"=="N" (
@@ -53,9 +56,9 @@ if /i "!CONFIRMA!"=="N" (
 )
 
 echo.
-echo ──────────────────────────────────────────
+echo --------------------------------------------
 echo Extraindo ZIP...
-echo ──────────────────────────────────────────
+echo --------------------------------------------
 echo.
 
 :: ── 3. Extrai ZIP ───────────────────────────
@@ -74,9 +77,9 @@ echo   Extraido com sucesso!
 echo.
 
 :: ── 4. Copia arquivos para o projeto ────────
-echo ──────────────────────────────────────────
+echo --------------------------------------------
 echo Copiando arquivos para o projeto...
-echo ──────────────────────────────────────────
+echo --------------------------------------------
 echo.
 
 set COUNT=0
@@ -87,16 +90,20 @@ for /r "%TEMP_EXTRACT%" %%F in (*.html *.css *.js *.json *.png *.jpg *.svg *.txt
         set "ARQUIVO_FULL=%%F"
         set "REL_PATH=!ARQUIVO_FULL:%TEMP_EXTRACT%\=!"
 
-        for /f "tokens=1* delims=\" %%A in ("!REL_PATH!") do set "REL_PATH=%%B"
-
-        if not "!REL_PATH!"=="" (
-            for %%D in ("!PROJETO!\!REL_PATH!") do (
-                if not exist "%%~dpD" mkdir "%%~dpD"
+        for /f "tokens=1* delims=\" %%A in ("!REL_PATH!") do (
+            if "%%B"=="" (
+                copy /Y "%%F" "%PROJETO%\%%~nxF" >nul
+                echo   OK: %%~nxF
+            ) else (
+                set "REL_PATH=%%B"
+                for %%D in ("%PROJETO%\!REL_PATH!") do (
+                    if not exist "%%~dpD" mkdir "%%~dpD"
+                )
+                copy /Y "%%F" "%PROJETO%\!REL_PATH!" >nul
+                echo   OK: !REL_PATH!
             )
-            copy /Y "%%F" "%PROJETO%\!REL_PATH!" >nul
-            echo   OK: !REL_PATH!
-            set /a COUNT+=1
         )
+        set /a COUNT+=1
     )
 )
 
@@ -113,9 +120,9 @@ echo.
 :: ── 5. Git ──────────────────────────────────
 cd /d "%PROJETO%"
 
-echo ──────────────────────────────────────────
+echo --------------------------------------------
 echo Executando Git...
-echo ──────────────────────────────────────────
+echo --------------------------------------------
 echo.
 
 git add .
@@ -124,24 +131,28 @@ echo.
 git commit -m "%MENSAGEM%"
 
 echo.
-echo ──────────────────────────────────────────
+echo --------------------------------------------
 echo Enviando para o GitHub Pages...
-echo ──────────────────────────────────────────
+echo --------------------------------------------
 echo.
 
 git push
 
 echo.
-echo ==========================================
+echo ============================================
 echo   DEPLOY CONCLUIDO COM SUCESSO!
-echo ==========================================
+echo ============================================
 echo.
 
-:: ── 6. Limpeza ──────────────────────────────
-set /p LIMPAR="Deletar o ZIP de Downloads? (S/N): "
-if /i "!LIMPAR!"=="S" (
-    del /f "!ZIP_ENCONTRADO!"
-    echo   ZIP removido.
+:: ── 6. Move ZIP para pasta versões ──────────
+if not exist "%VERSOES%" mkdir "%VERSOES%"
+
+move /Y "!ZIP_ENCONTRADO!" "%VERSOES%\" >nul
+
+if errorlevel 1 (
+    echo   AVISO: Nao foi possivel mover o ZIP para versoes.
+) else (
+    for %%F in ("!ZIP_ENCONTRADO!") do echo   ZIP movido para versoes: %%~nxF
 )
 
 rmdir /s /q "%TEMP_EXTRACT%"

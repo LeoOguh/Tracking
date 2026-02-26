@@ -18,9 +18,7 @@ echo      DEPLOY AUTOMATICO - TRACKING
 echo ============================================
 echo.
 
-:: ── 1. Pede mensagem de commit ──────────────
-set /p MENSAGEM="Mensagem do commit: "
-if "%MENSAGEM%"=="" set "MENSAGEM=update: alteracoes realizadas"
+:: ── 1. Mensagem de commit = nome do ZIP ──────
 
 echo.
 echo --------------------------------------------
@@ -45,6 +43,10 @@ if "!ZIP_ENCONTRADO!"=="" (
     pause
     exit /b 1
 )
+
+:: Extrai nome do ZIP sem extensão para usar como mensagem de commit
+for %%Z in ("!ZIP_ENCONTRADO!") do set "MENSAGEM=%%~nZ"
+echo   Commit sera: !MENSAGEM!
 
 echo.
 set /p CONFIRMA="   Usar este arquivo? (S/N): "

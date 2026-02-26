@@ -428,7 +428,25 @@ function saveCard(eid){
     saveAll();closeModal();renderCartoes();
 }
 function editCard(id){openCardModal(id);}
-function deleteCard(id){if(!confirm('Apagar cartão e todos os lançamentos vinculados?'))return;cartoes=cartoes.filter(c=>c.id!=id);lancCartao=lancCartao.filter(l=>l.cardId!=id);/* Also remove any fluxo entries that were imported from this card's lancamentos */fluxoEntries=fluxoEntries.filter(e=>!(e.tags&&e.tags.includes('importado-ia')&&e.cardId==id));if(selCardId==id)selCardId=null;saveAll();renderCartoes();document.getElementById('cartoesDetail').innerHTML='<div class="empty-state">selecione um cartão</div>';}
+function deleteCard(id){
+    if(!confirm('Apagar cartão e todos os lançamentos vinculados?'))return;
+    // Collect all lancamentos of this card to match against fluxoEntries
+    const lancsDoCartao=lancCartao.filter(l=>l.cardId==id);
+    // Remove from lancCartao
+    lancCartao=lancCartao.filter(l=>l.cardId!=id);
+    // Remove matching fluxoEntries (same desc+date+valor within margin)
+    if(lancsDoCartao.length){
+        fluxoEntries=fluxoEntries.filter(e=>{
+            return !lancsDoCartao.some(l=>
+                l.desc===e.desc && l.date===e.date && Math.abs(l.valor-e.valor)<0.02
+            );
+        });
+    }
+    cartoes=cartoes.filter(c=>c.id!=id);
+    if(selCardId==id)selCardId=null;
+    saveAll();renderCartoes();
+    document.getElementById('cartoesDetail').innerHTML='<div class="empty-state">selecione um cartão</div>';
+}
 
 function openCardLancModal(eid){
     const l=eid?lancCartao.find(x=>x.id===eid):null;
