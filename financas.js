@@ -61,15 +61,20 @@ function toggleDatePicker() {
         });
     } else { dpOpen=false; }
 }
-function dpPrevMonth() { dpMo--; if(dpMo<0){dpMo=11;dpYear--;} renderDP(); }
-function dpNextMonth() { dpMo++; if(dpMo>11){dpMo=0;dpYear++;} renderDP(); }
+function dpPrevMonth() { dpYear--; renderDP(); }
+function dpNextMonth() { dpYear++; renderDP(); }
 function renderDP() {
     const label=document.getElementById('dpMonthLabel');
     const g=document.getElementById('dpGrid');
     if(!label||!g)return;
-    label.textContent = new Date(dpYear, dpMo).toLocaleDateString('pt-br', { month: 'long', year: 'numeric' });
-    let h='';
-    for(let m=0;m<12;m++){ const a=m===finMonth&&dpYear===finYear; h+=`<button class="dp-day${a?' dp-day--today':''}" onclick="selDP(${dpYear},${m})">${new Date(dpYear,m).toLocaleDateString('pt-br',{month:'short'})}</button>`; }
+    label.textContent = dpYear;
+    let h='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">';
+    for(let m=0;m<12;m++){
+        const isCurrent=m===finMonth&&dpYear===finYear;
+        const mLabel=new Date(dpYear,m).toLocaleDateString('pt-br',{month:'short'}).replace('.','');
+        h+=`<button style="padding:8px 4px;border-radius:8px;border:none;cursor:pointer;font-size:0.78rem;text-transform:capitalize;transition:all 0.15s;${isCurrent?'background:rgba(59,130,246,0.3);color:#60a5fa;font-weight:600;':'background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.6);'}'" onmouseover="this.style.background='rgba(255,255,255,0.12)'" onmouseout="this.style.background='${isCurrent?'rgba(59,130,246,0.3)':'rgba(255,255,255,0.05)'}'" onclick="selDP(${dpYear},${m})">${mLabel}</button>`;
+    }
+    h+='</div>';
     g.innerHTML=h;
 }
 function selDP(y,m){ finYear=y;finMonth=m; updateFinDate();renderCurrentView(); document.getElementById('datePicker').classList.add('hidden');dpOpen=false; }
@@ -174,12 +179,12 @@ function calcFM(cid, y, m) {
     if (!c) return [];
     
     const fech = parseInt(c.fechamento) || 20;
-    // Convenção cartões BR (Nubank etc): fechamento dia X = compras ATÉ dia (X-1) entram na fatura.
-    // Compras A PARTIR do dia X entram na próxima fatura.
-    // Ex: fech=20, fatura de jan: compras de 20/dez até 19/jan
-    // Ex: fech=20, fatura de fev: compras de 20/jan até 18/fev (ou 19/fev em meses com 28+ dias)
-    const inicio = new Date(y, m - 1, fech, 0, 0, 0);     // dia do fechamento do mês ANTERIOR
-    const fim    = new Date(y, m, fech - 1, 23, 59, 59);   // dia anterior ao fechamento DESTE mês
+    // Fechamento dia X = compras ATÉ dia (X-1) entram na fatura do mês.
+    // Compras A PARTIR do dia X entram na fatura do mês SEGUINTE.
+    // Ex: fech=20, fatura de jan: compras de 20/dez até 19/jan (inclusive)
+    // Ex: fech=20, fatura de fev: compras de 20/jan até 19/fev (inclusive)
+    const inicio = new Date(y, m - 1, fech, 0, 0, 0);     // dia do fechamento do mês ANTERIOR (primeiro dia do ciclo)
+    const fim    = new Date(y, m, fech - 1, 23, 59, 59);   // dia anterior ao fechamento DESTE mês (último dia do ciclo)
     
     return lancCartao.filter(l => {
         if (l.cardId != cid) return false;
@@ -214,6 +219,8 @@ function calcFM(cid, y, m) {
     });
 }
 function calcFT(cid,y,m){ return calcFM(cid,y,m).reduce((s,l)=>s+(l.vp||l.valor),0); }
+let cardPessoaFilter = '';
+function setCardPessoaFilter(val) { cardPessoaFilter = val; renderCardDetail(); }
 function renderCardDetail(){
     const c=cartoes.find(x=>x.id==selCardId);
     if(!c){document.getElementById('cartoesDetail').innerHTML='<div class="empty-state">selecione um cartão</div>';return;}
@@ -222,10 +229,19 @@ function renderCardDetail(){
     const fy=finYear+Math.floor((finMonth+fatOff)/12), fm=((finMonth+fatOff)%12+12)%12;
     
     // Chama o nosso motor de data "calcFM"
-    const ls=calcFM(c.id,fy,fm), tot=ls.reduce((s,l)=>s+(l.vp||l.valor),0);
+    let ls=calcFM(c.id,fy,fm);
+    const tot=ls.reduce((s,l)=>s+(l.vp||l.valor),0);
     
     const fl=new Date(fy,fm).toLocaleDateString('pt-br',{month:'long',year:'numeric'});
     const bp={};ls.filter(l=>l.pessoa).forEach(l=>{bp[l.pessoa]=(bp[l.pessoa]||0)+(l.vp||l.valor);});
+    
+    // Collect unique pessoas for filter
+    const pessoas=[...new Set(ls.filter(l=>l.pessoa).map(l=>l.pessoa))].sort();
+    const pessoaFilterHtml = pessoas.length ? `<select class="f-select" style="font-size:0.72rem;padding:4px 8px;min-width:100px" onchange="setCardPessoaFilter(this.value)"><option value="">todos</option>${pessoas.map(p=>`<option value="${p}"${cardPessoaFilter===p?' selected':''}>${p}</option>`).join('')}</select>` : '';
+    
+    // Apply pessoa filter to display list
+    if(cardPessoaFilter) ls=ls.filter(l=>l.pessoa===cardPessoaFilter);
+    const totFiltered=ls.reduce((s,l)=>s+(l.vp||l.valor),0);
     
     // Calculate and show cycle dates
     const fech = parseInt(c.fechamento) || 20;
@@ -236,9 +252,10 @@ function renderCardDetail(){
     document.getElementById('cartoesDetail').innerHTML=`<div class="glass-panel" style="padding:16px 20px;display:flex;flex-direction:column;gap:10px">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
             <span style="font-size:0.9rem;font-weight:700;color:rgba(255,255,255,0.9)">${c.name}</span>
-            <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
                 <button class="btn-sm" onclick="openCardLancModal()">+ lançamento</button>
                 <button class="btn-sm" onclick="openCardRecModal()">+ recorrente</button>
+                ${pessoaFilterHtml}
                 <button class="btn-sm" onclick="editCard(${c.id})" style="background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.1);color:rgba(255,255,255,0.5)">✏️</button>
                 <button class="btn-sm" onclick="deleteCard(${c.id})" style="background:rgba(239,68,68,0.08);border-color:rgba(239,68,68,0.15);color:#ef4444">🗑</button>
             </div>
@@ -249,7 +266,7 @@ function renderCardDetail(){
             <button class="fatura-nav-btn" onclick="fatOff++;renderCardDetail()">›</button>
         </div>
         <div style="text-align:center;font-size:0.62rem;color:rgba(255,255,255,0.25);margin-top:-6px">${cicloStr} · fech. dia ${fech} · venc. dia ${c.vencimento||10}</div>
-        <div class="fatura-total">${fmt(tot)}</div>
+        <div class="fatura-total">${cardPessoaFilter?fmt(totFiltered)+' <span style="font-size:0.7rem;color:rgba(255,255,255,0.35)">('+fmt(tot)+' total)</span>':fmt(tot)}</div>
         ${Object.keys(bp).length?`<div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center">${Object.entries(bp).map(([p,v])=>`<span class="cl-pessoa" style="font-size:0.72rem">👤 ${p}: ${fmt(v)}</span>`).join('')}</div>`:''}
         <div style="display:flex;flex-direction:column">${ls.length?ls.map(l=>{
             const cc=CAT_COLORS[l.cat]||'#64748b';
@@ -270,10 +287,18 @@ function renderCardDetail(){
     </div>`;
 }
 function renderDevedores(){
-    const bp={};lancCartao.forEach(l=>{if(l.pessoa){const v=l.parcelas>1?l.valor/l.parcelas:l.valor;bp[l.pessoa]=(bp[l.pessoa]||0)+v;}});
     const el=document.getElementById('devedoresResumo');
+    // Show devedores across ALL cards and ALL lancamentos (total debt per person)
+    const bp={};
+    lancCartao.forEach(l=>{
+        if(!l.pessoa)return;
+        // Only count if the card still exists
+        if(!cartoes.some(c=>c.id==l.cardId))return;
+        const v=l.parcelas>1?l.valor/l.parcelas:l.valor;
+        bp[l.pessoa]=(bp[l.pessoa]||0)+v;
+    });
     if(!Object.keys(bp).length){el.innerHTML='<div style="font-size:0.75rem;color:rgba(255,255,255,0.25);padding:4px 0">ninguém</div>';return;}
-    el.innerHTML=Object.entries(bp).map(([p,v])=>`<div class="devedor-row"><span>👤 ${p}</span><span>${fmt(v)}</span></div>`).join('');
+    el.innerHTML=Object.entries(bp).sort((a,b)=>b[1]-a[1]).map(([p,v])=>`<div class="devedor-row"><span>👤 ${p}</span><span>${fmt(v)}</span></div>`).join('');
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -489,10 +514,10 @@ function saveCardLanc(eid){
     if(!d||!v||!dt){alert('Preencha descrição, valor e data.');return;}
     if(eid){const l=lancCartao.find(x=>x.id===eid);if(l)Object.assign(l,{desc:d,valor:v,date:dt,parcelas:p,tags,pessoa:ps,cat:ca});}
     else lancCartao.push({id:nid(lancCartao),cardId:selCardId,desc:d,valor:v,date:dt,parcelas:p,tags,pessoa:ps,cat:ca});
-    saveAll();closeModal();renderCardDetail();renderCartoesList();
+    saveAll();closeModal();renderCardDetail();renderCartoesList();renderDevedores();
 }
 function editCardLanc(id){openCardLancModal(id);}
-function delCardLanc(id){lancCartao=lancCartao.filter(l=>l.id!==id);saveAll();renderCardDetail();renderCartoesList();}
+function delCardLanc(id){lancCartao=lancCartao.filter(l=>l.id!==id);saveAll();renderCardDetail();renderCartoesList();renderDevedores();}
 
 function openCardRecModal(){
     openModal('Lançamento Recorrente',`
@@ -701,7 +726,7 @@ async function processarExtratoComIA() {
                 if (valorCorrigido === 0) return; // ignora lançamentos sem valor
                 
                 const categoria = l.cat || 'Outros';
-                const descFormatada = (l.desc || 'Transação') + " (IA ✨)";
+                const descFormatada = (l.desc || 'Transação');
 
                 // REGRA 2: Anti-Duplicidade mais tolerante (usa == para cardId, compara valor com margem de centavos)
                 const duplicadoCartao = lancCartao.some(ex => 
@@ -728,26 +753,6 @@ async function processarExtratoComIA() {
                     itensIgnorados++;
                 }
 
-                // Anti-Duplicidade no Fluxo
-                const duplicadoFluxo = fluxoEntries.some(ex => 
-                    ex.date === dataSegura && 
-                    Math.abs(ex.valor - valorCorrigido) < 0.02 && 
-                    ex.desc === descFormatada
-                );
-
-                if (!duplicadoFluxo) {
-                    fluxoEntries.push({
-                        id: nid(fluxoEntries),
-                        type: l.type || 'despesa',
-                        desc: descFormatada,
-                        valor: valorCorrigido,
-                        date: dataSegura,
-                        cat: categoria,
-                        contaId: contaVinculada,
-                        tags: ['importado-ia'],
-                        recorrencia: ''
-                    });
-                }
             });
 
             saveAll();
@@ -809,14 +814,14 @@ function cleanupOrphans() {
     // 1) Remove lancCartao whose cardId doesn't match any existing card
     lancCartao = lancCartao.filter(l => cardIds.some(cid => cid == l.cardId));
 
-    // 2) Remove fluxoEntries that were imported (tag 'importado-ia') but have
-    //    no matching lancCartao anymore (orphaned by card deletion)
-    fluxoEntries = fluxoEntries.filter(e => {
-        if (!e.tags || !e.tags.includes('importado-ia')) return true; // manual entry, keep
-        // Check if a corresponding lancCartao still exists
-        return lancCartao.some(l =>
-            l.desc === e.desc && l.date === e.date && Math.abs(l.valor - e.valor) < 0.02
-        );
+    // 2) Remove ALL fluxoEntries tagged 'importado-ia' (card entries should not be in fluxo)
+    fluxoEntries = fluxoEntries.filter(e => !e.tags || !e.tags.includes('importado-ia'));
+
+    // 3) Strip "(IA ✨)" suffix from existing lancCartao descriptions
+    lancCartao.forEach(l => {
+        if (l.desc && l.desc.endsWith(' (IA ✨)')) {
+            l.desc = l.desc.replace(' (IA ✨)', '');
+        }
     });
 
     if (lancCartao.length !== antes.lanc || fluxoEntries.length !== antes.fluxo) {
