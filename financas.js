@@ -23,10 +23,12 @@ let ativos       = LS('fin_ativos')       || [];
 let dividendos   = LS('fin_dividendos')   || [];
 let metaAlloc    = LS('fin_meta_alloc')   || { 'Renda Fixa': 60, 'Ações': 25, 'FIIs': 10, 'Cripto': 5 };
 let metasFin     = LS('fin_metas_fin')    || [];
+let faturasPagas = LS('fin_faturas_pagas') || {};  // { "cardId-YYYY-MM": { date: "YYYY-MM-DD", valor: number } }
 function saveAll() {
     SS('fin_cartoes', cartoes); SS('fin_lanc_cartao', lancCartao); SS('fin_contas', contas);
     SS('fin_fluxo', fluxoEntries); SS('fin_metas_gasto', metasGasto); SS('fin_meta_receita', metaReceita);
     SS('fin_ativos', ativos); SS('fin_dividendos', dividendos); SS('fin_meta_alloc', metaAlloc); SS('fin_metas_fin', metasFin);
+    SS('fin_faturas_pagas', faturasPagas);
 }
 
 // ─── DATE NAV ────────────────────────────────────────────────────────────────
@@ -221,6 +223,86 @@ function calcFM(cid, y, m) {
 function calcFT(cid,y,m){ return calcFM(cid,y,m).reduce((s,l)=>s+(l.vp||l.valor),0); }
 let cardPessoaFilter = '';
 function setCardPessoaFilter(val) { cardPessoaFilter = val; renderCardDetail(); }
+
+function faturaKey(cardId, y, m) { return `${cardId}-${y}-${String(m+1).padStart(2,'0')}`; }
+
+function openPagarFaturaModal(cardId, fy, fm, total) {
+    const c = cartoes.find(x => x.id == cardId);
+    if (!c) return;
+    const venc = parseInt(c.vencimento) || 10;
+    const defaultDate = `${fy}-${String(fm+1).padStart(2,'0')}-${String(venc).padStart(2,'0')}`;
+    const contaOpts = contas.map(ct => `<option value="${ct.id}">${ct.name} (${fmt(ct.saldo)})</option>`).join('');
+    const fl = new Date(fy, fm).toLocaleDateString('pt-br', { month: 'long', year: 'numeric' });
+    openModal('Pagar Fatura', `
+        <p style="font-size:0.8rem;color:rgba(255,255,255,0.5);margin-bottom:8px">Fatura de ${fl} — ${c.name}</p>
+        <span class="modal-label">valor da fatura</span>
+        <input type="number" id="mPFV" class="f-input" value="${total.toFixed(2)}" min="0" step="0.01">
+        <span class="modal-label">data do pagamento</span>
+        <input type="date" id="mPFD" class="f-input" value="${defaultDate}">
+        <span class="modal-label">conta de pagamento</span>
+        <select id="mPFC" class="f-select">${contaOpts}</select>
+    `, `<button class="modal-btn modal-btn--cancel" onclick="closeModal()">cancelar</button><button class="modal-btn modal-btn--primary" onclick="confirmarPagarFatura(${cardId},${fy},${fm})">confirmar pagamento</button>`);
+}
+
+function confirmarPagarFatura(cardId, fy, fm) {
+    const valor = parseFloat(document.getElementById('mPFV').value) || 0;
+    const date = document.getElementById('mPFD').value;
+    const contaId = parseInt(document.getElementById('mPFC').value) || null;
+    if (!valor || !date) { alert('Preencha valor e data.'); return; }
+
+    const c = cartoes.find(x => x.id == cardId);
+    const fl = new Date(fy, fm).toLocaleDateString('pt-br', { month: 'long', year: 'numeric' });
+
+    // Mark fatura as paid
+    const fk = faturaKey(cardId, fy, fm);
+    faturasPagas[fk] = { date, valor };
+
+    // Create fluxo entry as despesa
+    fluxoEntries.push({
+        id: nid(fluxoEntries),
+        type: 'despesa',
+        desc: `Pagamento fatura ${c ? c.name : 'cartão'} — ${fl}`,
+        valor,
+        date,
+        cat: 'Outros',
+        contaId,
+        tags: ['fatura-cartao'],
+        recorrencia: ''
+    });
+
+    // Debit from account
+    if (contaId) {
+        const ct = contas.find(x => x.id === contaId);
+        if (ct) ct.saldo -= valor;
+    }
+
+    saveAll(); closeModal(); renderCardDetail(); renderCartoesList();
+}
+
+function desfazerPagamentoFatura(cardId, fy, fm) {
+    if (!confirm('Desfazer o pagamento desta fatura?')) return;
+    const fk = faturaKey(cardId, fy, fm);
+    const pgto = faturasPagas[fk];
+    if (!pgto) return;
+
+    const c = cartoes.find(x => x.id == cardId);
+    const fl = new Date(fy, fm).toLocaleDateString('pt-br', { month: 'long', year: 'numeric' });
+    const descPgto = `Pagamento fatura ${c ? c.name : 'cartão'} — ${fl}`;
+
+    // Remove the fluxo entry
+    const entry = fluxoEntries.find(e => e.desc === descPgto && e.tags && e.tags.includes('fatura-cartao'));
+    if (entry) {
+        if (entry.contaId) {
+            const ct = contas.find(x => x.id === entry.contaId);
+            if (ct) ct.saldo += entry.valor;
+        }
+        fluxoEntries = fluxoEntries.filter(e => e.id !== entry.id);
+    }
+
+    delete faturasPagas[fk];
+    saveAll(); renderCardDetail(); renderCartoesList();
+}
+
 function renderCardDetail(){
     const c=cartoes.find(x=>x.id==selCardId);
     if(!c){document.getElementById('cartoesDetail').innerHTML='<div class="empty-state">selecione um cartão</div>';return;}
@@ -249,6 +331,24 @@ function renderCardDetail(){
     const cicloFim = new Date(fy, fm, fech - 1);
     const cicloStr = `compras de ${cicloInicio.toLocaleDateString('pt-br',{day:'2-digit',month:'2-digit'})} a ${cicloFim.toLocaleDateString('pt-br',{day:'2-digit',month:'2-digit'})}`;
     
+    // Check if fatura is paid
+    const fk = faturaKey(c.id, fy, fm);
+    const pgto = faturasPagas[fk];
+    const isPaid = !!pgto;
+    
+    // Pay button or paid status
+    let payHtml = '';
+    if (tot > 0) {
+        if (isPaid) {
+            payHtml = `<div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 12px;border-radius:10px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2)">
+                <span style="font-size:0.8rem;color:#22c55e;font-weight:600">✓ paga em ${dFull(pgto.date)}</span>
+                <button class="btn-sm" onclick="desfazerPagamentoFatura(${c.id},${fy},${fm})" style="font-size:0.65rem;padding:2px 8px;background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.1);color:rgba(255,255,255,0.4)">desfazer</button>
+            </div>`;
+        } else {
+            payHtml = `<button class="btn-sm" onclick="openPagarFaturaModal(${c.id},${fy},${fm},${tot})" style="background:rgba(34,197,94,0.12);border-color:rgba(34,197,94,0.25);color:#22c55e;padding:6px 14px;font-size:0.78rem">💳 marcar como paga</button>`;
+        }
+    }
+    
     document.getElementById('cartoesDetail').innerHTML=`<div class="glass-panel" style="padding:16px 20px;display:flex;flex-direction:column;gap:10px">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
             <span style="font-size:0.9rem;font-weight:700;color:rgba(255,255,255,0.9)">${c.name}</span>
@@ -266,7 +366,8 @@ function renderCardDetail(){
             <button class="fatura-nav-btn" onclick="fatOff++;renderCardDetail()">›</button>
         </div>
         <div style="text-align:center;font-size:0.62rem;color:rgba(255,255,255,0.25);margin-top:-6px">${cicloStr} · fech. dia ${fech} · venc. dia ${c.vencimento||10}</div>
-        <div class="fatura-total">${cardPessoaFilter?fmt(totFiltered)+' <span style="font-size:0.7rem;color:rgba(255,255,255,0.35)">('+fmt(tot)+' total)</span>':fmt(tot)}</div>
+        <div class="fatura-total" ${isPaid?'style="color:rgba(255,255,255,0.3);text-decoration:line-through"':''}>${cardPessoaFilter?fmt(totFiltered)+' <span style="font-size:0.7rem;color:rgba(255,255,255,0.35)">('+fmt(tot)+' total)</span>':fmt(tot)}</div>
+        <div style="display:flex;justify-content:center">${payHtml}</div>
         ${Object.keys(bp).length?`<div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center">${Object.entries(bp).map(([p,v])=>`<span class="cl-pessoa" style="font-size:0.72rem">👤 ${p}: ${fmt(v)}</span>`).join('')}</div>`:''}
         <div style="display:flex;flex-direction:column">${ls.length?ls.map(l=>{
             const cc=CAT_COLORS[l.cat]||'#64748b';
