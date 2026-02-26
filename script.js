@@ -76,6 +76,28 @@ function exportData() {
     URL.revokeObjectURL(url);
 }
 
+function importData() {
+    const input = document.createElement('input'); input.type = 'file'; input.accept = '.json';
+    input.onchange = e => {
+        const file = e.target.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+            try {
+                const data = JSON.parse(ev.target.result);
+                if (!confirm('Isso substituirá TODOS os dados de hábitos atuais. Continuar?')) return;
+                if (data.habits) { habits = data.habits; localStorage.setItem('my_habits', JSON.stringify(habits)); }
+                if (data.history) { history = data.history; localStorage.setItem('my_history', JSON.stringify(history)); }
+                if (data.moodHistory) { moodHistory = data.moodHistory; localStorage.setItem('my_mood', JSON.stringify(moodHistory)); }
+                if (data.notesHistory) { notesHistory = data.notesHistory; localStorage.setItem('my_notes', JSON.stringify(notesHistory)); }
+                alert('Dados importados com sucesso!');
+                location.reload();
+            } catch (err) { alert('Erro ao ler o arquivo: ' + err.message); }
+        };
+        reader.readAsText(file);
+    };
+    input.click();
+}
+
 // ─── TIPO E DURAÇÃO DO NOVO HÁBITO ────────────────────────────────────────────
 function setHabitType(type) {
     newHabitType = type;

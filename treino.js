@@ -134,6 +134,27 @@ function exportTreino() {
     URL.revokeObjectURL(url);
 }
 
+function importTreino() {
+    const input = document.createElement('input'); input.type = 'file'; input.accept = '.json';
+    input.onchange = e => {
+        const file = e.target.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+            try {
+                const data = JSON.parse(ev.target.result);
+                if (!confirm('Isso substituirá TODOS os dados de treino atuais. Continuar?')) return;
+                if (data.workoutLog) { workoutLog = data.workoutLog; saveLog(); }
+                if (data.workoutPlans) { workoutPlans = data.workoutPlans; savePlans(); }
+                if (data.bodyMeasures) { bodyMeasures = data.bodyMeasures; saveMeasures(); }
+                alert('Dados importados com sucesso!');
+                location.reload();
+            } catch (err) { alert('Erro ao ler o arquivo: ' + err.message); }
+        };
+        reader.readAsText(file);
+    };
+    input.click();
+}
+
 // ─── NAVEGAÇÃO DE DATA ────────────────────────────────────────────────────────
 function changeDate(delta) { currentDate.setDate(currentDate.getDate()+delta); updateTodayBtn(); renderRegistro(); }
 

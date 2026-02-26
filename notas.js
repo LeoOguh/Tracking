@@ -78,6 +78,26 @@ function exportNotas() {
     URL.revokeObjectURL(url);
 }
 
+function importNotas() {
+    const input = document.createElement('input'); input.type = 'file'; input.accept = '.json';
+    input.onchange = e => {
+        const file = e.target.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+            try {
+                const data = JSON.parse(ev.target.result);
+                if (!confirm('Isso substituirá TODOS os dados de notas atuais. Continuar?')) return;
+                if (data.tasks) { tasks = data.tasks; saveTasks(); }
+                if (data.diaryEntries) { diaryEntries = data.diaryEntries; saveDiary(); }
+                alert('Dados importados com sucesso!');
+                location.reload();
+            } catch (err) { alert('Erro ao ler o arquivo: ' + err.message); }
+        };
+        reader.readAsText(file);
+    };
+    input.click();
+}
+
 // ─── TOGGLE DE VISTA (focus mode) ─────────────────────────────────────────────
 let activeView = 'both'; // 'both' | 'tasks' | 'diary'
 function toggleView(view) {

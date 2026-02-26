@@ -101,6 +101,27 @@ function exportStudyData() {
     URL.revokeObjectURL(url);
 }
 
+function importStudyData() {
+    const input = document.createElement('input'); input.type = 'file'; input.accept = '.json';
+    input.onchange = e => {
+        const file = e.target.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+            try {
+                const data = JSON.parse(ev.target.result);
+                if (!confirm('Isso substituirá TODOS os dados de estudos atuais. Continuar?')) return;
+                if (data.studySessions) { studySessions = data.studySessions; localStorage.setItem('study_sessions', JSON.stringify(studySessions)); }
+                if (data.studyGoals) { studyGoals = data.studyGoals; localStorage.setItem('study_daily_goals', JSON.stringify(studyGoals)); }
+                if (data.studySubjects) { studySubjects = data.studySubjects; localStorage.setItem('study_subjects', JSON.stringify(studySubjects)); }
+                alert('Dados importados com sucesso!');
+                location.reload();
+            } catch (err) { alert('Erro ao ler o arquivo: ' + err.message); }
+        };
+        reader.readAsText(file);
+    };
+    input.click();
+}
+
 // ─── DROPDOWN DE MATÉRIAS ─────────────────────────────────────────────────────
 function populateSubjectDropdown() {
     const sel = document.getElementById('fSubjectSelect');

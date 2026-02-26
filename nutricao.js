@@ -468,3 +468,32 @@ document.addEventListener('click', function(e) {
     if (!picker || picker.classList.contains('hidden')) return;
     if (!picker.contains(e.target) && e.target !== title) closeDatePicker();
 });
+
+function exportNutricao() {
+    const data = { nutriLog, hidData, nutriMetas, exportedAt: new Date().toISOString() };
+    const blob = new Blob([JSON.stringify(data,null,2)], { type:'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a'); a.href=url; a.download=`clarity-nutricao-${dateKey(new Date())}.json`; a.click();
+    URL.revokeObjectURL(url);
+}
+
+function importNutricao() {
+    const input = document.createElement('input'); input.type = 'file'; input.accept = '.json';
+    input.onchange = e => {
+        const file = e.target.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+            try {
+                const data = JSON.parse(ev.target.result);
+                if (!confirm('Isso substituirá TODOS os dados de nutrição atuais. Continuar?')) return;
+                if (data.nutriLog) { nutriLog = data.nutriLog; saveLog(); }
+                if (data.hidData) { hidData = data.hidData; saveHid(); }
+                if (data.nutriMetas) { nutriMetas = data.nutriMetas; localStorage.setItem('clarity_nutri_metas', JSON.stringify(nutriMetas)); }
+                alert('Dados importados com sucesso!');
+                location.reload();
+            } catch (err) { alert('Erro ao ler o arquivo: ' + err.message); }
+        };
+        reader.readAsText(file);
+    };
+    input.click();
+}

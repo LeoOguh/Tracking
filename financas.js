@@ -729,9 +729,39 @@ function saveMF(eid){
 function editMetaFin(id){openMetaFinModal(id);}
 
 function exportFinancas(){
-    const data={cartoes,lancCartao,contas,fluxoEntries,metasGasto,metaReceita,ativos,dividendos,metaAlloc,metasFin};
+    const data={cartoes,lancCartao,contas,fluxoEntries,metasGasto,metaReceita,ativos,dividendos,metaAlloc,metasFin,faturasPagas,exportedAt:new Date().toISOString()};
     const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`financas_${todayStr()}.json`;a.click();
+}
+
+function importFinancas(){
+    const input=document.createElement('input');input.type='file';input.accept='.json';
+    input.onchange=e=>{
+        const file=e.target.files[0];if(!file)return;
+        const reader=new FileReader();
+        reader.onload=ev=>{
+            try{
+                const data=JSON.parse(ev.target.result);
+                if(!confirm('Isso substituirá TODOS os dados financeiros atuais. Continuar?'))return;
+                if(data.cartoes)cartoes=data.cartoes;
+                if(data.lancCartao)lancCartao=data.lancCartao;
+                if(data.contas)contas=data.contas;
+                if(data.fluxoEntries)fluxoEntries=data.fluxoEntries;
+                if(data.metasGasto)metasGasto=data.metasGasto;
+                if(data.metaReceita)metaReceita=data.metaReceita;
+                if(data.ativos)ativos=data.ativos;
+                if(data.dividendos)dividendos=data.dividendos;
+                if(data.metaAlloc)metaAlloc=data.metaAlloc;
+                if(data.metasFin)metasFin=data.metasFin;
+                if(data.faturasPagas)faturasPagas=data.faturasPagas;
+                saveAll();
+                alert('Dados importados com sucesso!');
+                renderCurrentView();
+            }catch(err){alert('Erro ao ler o arquivo: '+err.message);}
+        };
+        reader.readAsText(file);
+    };
+    input.click();
 }
 
 // Função para converter arquivo para Base64
