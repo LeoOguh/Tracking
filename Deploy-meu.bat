@@ -9,6 +9,7 @@ setlocal enabledelayedexpansion
 
 set "PROJETO=C:\Users\Leonardo\Documents\GitHub\Tracking"
 set "DOWNLOADS=%USERPROFILE%\Downloads"
+set "VERSOES=C:\Users\Leonardo\Downloads\versões"
 set "TEMP_EXTRACT=%TEMP%\tracking_deploy"
 
 echo.
@@ -81,26 +82,17 @@ echo.
 
 set COUNT=0
 
-:: Percorre todos os arquivos extraídos (incluindo subpastas)
 for /r "%TEMP_EXTRACT%" %%F in (*.html *.css *.js *.json *.png *.jpg *.svg *.txt) do (
-    :: Ignora pasta .git
     echo %%F | findstr /i "\.git" >nul
     if errorlevel 1 (
         set "ARQUIVO_FULL=%%F"
-
-        :: Calcula caminho relativo removendo o prefixo do temp
         set "REL_PATH=!ARQUIVO_FULL:%TEMP_EXTRACT%\=!"
 
-        :: Verifica se tem subpasta (ex: Tracking\arquivo.css)
-        :: Se sim, remove o primeiro segmento
         for /f "tokens=1* delims=\" %%A in ("!REL_PATH!") do (
-            :: %%B é vazio se não há subpasta (arquivo na raiz do ZIP)
             if "%%B"=="" (
-                :: Arquivo na raiz do ZIP — copia direto para a raiz do projeto
                 copy /Y "%%F" "%PROJETO%\%%~nxF" >nul
                 echo   OK: %%~nxF
             ) else (
-                :: Arquivo em subpasta — mantém estrutura
                 set "REL_PATH=%%B"
                 for %%D in ("%PROJETO%\!REL_PATH!") do (
                     if not exist "%%~dpD" mkdir "%%~dpD"
@@ -150,11 +142,15 @@ echo   DEPLOY CONCLUIDO COM SUCESSO!
 echo ============================================
 echo.
 
-:: ── 6. Limpeza ──────────────────────────────
-set /p LIMPAR="Deletar o ZIP de Downloads? (S/N): "
-if /i "!LIMPAR!"=="S" (
-    del /f "!ZIP_ENCONTRADO!"
-    echo   ZIP removido.
+:: ── 6. Move ZIP para pasta versões ──────────
+if not exist "%VERSOES%" mkdir "%VERSOES%"
+
+move /Y "!ZIP_ENCONTRADO!" "%VERSOES%\" >nul
+
+if errorlevel 1 (
+    echo   AVISO: Nao foi possivel mover o ZIP para versoes.
+) else (
+    for %%F in ("!ZIP_ENCONTRADO!") do echo   ZIP movido para versoes: %%~nxF
 )
 
 rmdir /s /q "%TEMP_EXTRACT%"

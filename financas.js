@@ -32,7 +32,7 @@ function saveAll() {
 // ─── DATE NAV ────────────────────────────────────────────────────────────────
 let finMonth = new Date().getMonth(), finYear = new Date().getFullYear();
 function finMonthKey() { return `${finYear}-${String(finMonth+1).padStart(2,'0')}`; }
-function updateFinDate() { document.getElementById('finDateTitle').textContent = new Date(finYear, finMonth).toLocaleDateString('pt-br', { month: 'long', year: 'numeric' }); }
+function updateFinDate() { const el = document.getElementById('finDateTitle'); if(el) el.textContent = new Date(finYear, finMonth).toLocaleDateString('pt-br', { month: 'long', year: 'numeric' }); }
 function finPrevMonth() { finMonth--; if (finMonth<0){finMonth=11;finYear--;} updateFinDate(); renderCurrentView(); }
 function finNextMonth() { finMonth++; if (finMonth>11){finMonth=0;finYear++;} updateFinDate(); renderCurrentView(); }
 updateFinDate();
@@ -62,7 +62,7 @@ function setFinView(v) {
         const d=document.getElementById('dItem'+x.charAt(0).toUpperCase()+x.slice(1));
         if(d)d.classList.toggle('drawer-item--active',x===v);
     });
-    document.getElementById('finViewLabel').textContent=VIEW_LABELS[v]||v;
+    const vl=document.getElementById('finViewLabel'); if(vl) vl.textContent=VIEW_LABELS[v]||v;
     renderCurrentView();
 }
 function renderCurrentView() {
@@ -136,12 +136,12 @@ function renderCartoesList(){
     const el=document.getElementById('cartoesList');
     if(!cartoes.length){el.innerHTML='<div class="empty-state">nenhum cartão</div>';return;}
     el.innerHTML=cartoes.map(c=>{
-        // Show the total for the fatura being viewed (current month + fatOff), or current month for sidebar
-        const viewM = ((finMonth+fatOff)%12+12)%12;
-        const viewY = finYear + Math.floor((finMonth+fatOff)/12);
+        // Show the total for the current viewed month (without fatOff for sidebar overview)
+        const viewM = finMonth;
+        const viewY = finYear;
         const u = calcFT(c.id, viewY, viewM);
         const p=c.limite?Math.min(100,Math.round(u/c.limite*100)):0;const bc=p>90?'#ef4444':p>70?'#f59e0b':'#22c55e';
-    return `<div class="card-item ${selCardId==c.id?'card-item--active':''}" onclick="selectCard(${c.id})"><div class="card-item-top"><div class="card-color-dot" style="background:${c.cor||'#3b82f6'}"></div><span class="card-item-name">${c.name}</span><span class="card-item-bandeira">${c.bandeira||''}</span></div><div class="card-limit-bar"><div class="card-limit-fill" style="width:${p}%;background:${bc}"></div></div><div class="card-limit-info"><span>${fmt(u)}</span><span>${fmt(c.limite)}</span></div></div>`;}).join('');
+    return `<div class="card-item ${selCardId==c.id?'card-item--active':''}" onclick="selectCard(${c.id})"><div class="card-item-top"><div class="card-color-dot" style="background:${c.cor||'#3b82f6'}"></div><span class="card-item-name">${c.name}</span><span class="card-item-bandeira">${c.bandeira||''}</span><button class="fe-btn fe-btn--del" onclick="event.stopPropagation();deleteCard(${c.id})" title="apagar cartão" style="margin-left:auto;font-size:0.7rem;padding:2px 5px">✕</button></div><div class="card-limit-bar"><div class="card-limit-fill" style="width:${p}%;background:${bc}"></div></div><div class="card-limit-info"><span>${fmt(u)}</span><span>${fmt(c.limite)}</span></div></div>`;}).join('');
 }
 function selectCard(id){ selCardId=id;fatOff=0;renderCartoesList();renderCardDetail(); }
 function calcFM(cid, y, m) {
@@ -428,7 +428,7 @@ function saveCard(eid){
     saveAll();closeModal();renderCartoes();
 }
 function editCard(id){openCardModal(id);}
-function deleteCard(id){if(!confirm('Apagar cartão e lançamentos?'))return;cartoes=cartoes.filter(c=>c.id!=id);lancCartao=lancCartao.filter(l=>l.cardId!=id);selCardId=null;saveAll();renderCartoes();document.getElementById('cartoesDetail').innerHTML='<div class="empty-state">selecione um cartão</div>';}
+function deleteCard(id){if(!confirm('Apagar cartão e todos os lançamentos vinculados?'))return;cartoes=cartoes.filter(c=>c.id!=id);lancCartao=lancCartao.filter(l=>l.cardId!=id);/* Also remove any fluxo entries that were imported from this card's lancamentos */fluxoEntries=fluxoEntries.filter(e=>!(e.tags&&e.tags.includes('importado-ia')&&e.cardId==id));if(selCardId==id)selCardId=null;saveAll();renderCartoes();document.getElementById('cartoesDetail').innerHTML='<div class="empty-state">selecione um cartão</div>';}
 
 function openCardLancModal(eid){
     const l=eid?lancCartao.find(x=>x.id===eid):null;
@@ -754,4 +754,13 @@ async function processarExtratoComIA() {
     }
 }
 // ─── INIT ────────────────────────────────────────────────────────────────────
-setFinView('dash');
+function initFinancas() {
+    updateFinDate();
+    setFinView('dash');
+}
+// Ensure Chart.js and DOM are fully ready before rendering
+if (document.readyState === 'complete') {
+    initFinancas();
+} else {
+    window.addEventListener('load', initFinancas);
+}
