@@ -772,7 +772,31 @@ async function processarExtratoComIA() {
     }
 }
 // ─── INIT ────────────────────────────────────────────────────────────────────
+function cleanupOrphans() {
+    const cardIds = cartoes.map(c => c.id);
+    const antes = { lanc: lancCartao.length, fluxo: fluxoEntries.length };
+
+    // 1) Remove lancCartao whose cardId doesn't match any existing card
+    lancCartao = lancCartao.filter(l => cardIds.some(cid => cid == l.cardId));
+
+    // 2) Remove fluxoEntries that were imported (tag 'importado-ia') but have
+    //    no matching lancCartao anymore (orphaned by card deletion)
+    fluxoEntries = fluxoEntries.filter(e => {
+        if (!e.tags || !e.tags.includes('importado-ia')) return true; // manual entry, keep
+        // Check if a corresponding lancCartao still exists
+        return lancCartao.some(l =>
+            l.desc === e.desc && l.date === e.date && Math.abs(l.valor - e.valor) < 0.02
+        );
+    });
+
+    if (lancCartao.length !== antes.lanc || fluxoEntries.length !== antes.fluxo) {
+        console.log(`Cleanup: removidos ${antes.lanc - lancCartao.length} lanc órfãos, ${antes.fluxo - fluxoEntries.length} fluxo órfãos`);
+        saveAll();
+    }
+}
+
 function initFinancas() {
+    cleanupOrphans();
     updateFinDate();
     setFinView('dash');
 }
