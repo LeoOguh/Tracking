@@ -39,12 +39,36 @@ updateFinDate();
 
 // ─── DATE PICKER ─────────────────────────────────────────────────────────────
 let dpOpen=false, dpYear, dpMo;
-function toggleDatePicker() { const el=document.getElementById('datePicker'); dpOpen=!dpOpen; el.classList.toggle('hidden',!dpOpen); if(dpOpen){dpYear=finYear;dpMo=finMonth;renderDP();} }
+function toggleDatePicker() {
+    const el=document.getElementById('datePicker');
+    if(!el)return;
+    const wasHidden=el.classList.contains('hidden');
+    el.classList.add('hidden');
+    if(wasHidden){
+        dpYear=finYear;dpMo=finMonth;
+        const title=document.getElementById('finDateTitle');
+        const rect=title.getBoundingClientRect();
+        el.style.top=(rect.bottom+8)+'px';
+        el.style.left=(rect.left+rect.width/2)+'px';
+        el.style.transform='translateX(-50%)';
+        renderDP();
+        el.classList.remove('hidden');
+        dpOpen=true;
+        requestAnimationFrame(()=>{
+            const pr=el.getBoundingClientRect();
+            if(pr.right>window.innerWidth-8){el.style.left=(window.innerWidth-pr.width-8)+'px';el.style.transform='none';}
+            if(pr.left<8){el.style.left='8px';el.style.transform='none';}
+        });
+    } else { dpOpen=false; }
+}
 function dpPrevMonth() { dpMo--; if(dpMo<0){dpMo=11;dpYear--;} renderDP(); }
 function dpNextMonth() { dpMo++; if(dpMo>11){dpMo=0;dpYear++;} renderDP(); }
 function renderDP() {
-    document.getElementById('dpMonthLabel').textContent = new Date(dpYear, dpMo).toLocaleDateString('pt-br', { month: 'long', year: 'numeric' });
-    const g=document.getElementById('dpGrid'); let h='';
+    const label=document.getElementById('dpMonthLabel');
+    const g=document.getElementById('dpGrid');
+    if(!label||!g)return;
+    label.textContent = new Date(dpYear, dpMo).toLocaleDateString('pt-br', { month: 'long', year: 'numeric' });
+    let h='';
     for(let m=0;m<12;m++){ const a=m===finMonth&&dpYear===finYear; h+=`<button class="dp-day${a?' dp-day--today':''}" onclick="selDP(${dpYear},${m})">${new Date(dpYear,m).toLocaleDateString('pt-br',{month:'short'})}</button>`; }
     g.innerHTML=h;
 }
@@ -658,6 +682,12 @@ async function processarExtratoComIA() {
                         else if (partes[2].length === 4) { yy=partes[2]; mm=partes[1]; dd=partes[0]; }
                         else { yy='20'+partes[2]; mm=partes[1]; dd=partes[0]; } // dd-mm-yy
                         mm = mm.padStart(2,'0'); dd = dd.padStart(2,'0');
+                        // Sanidade do ano: se a IA retornou um ano muito diferente do atual, corrige
+                        const anoAtual = new Date().getFullYear();
+                        const anoNum = parseInt(yy);
+                        if (Math.abs(anoNum - anoAtual) > 1) {
+                            yy = String(anoAtual);
+                        }
                         // Validar a data
                         const testDate = new Date(parseInt(yy), parseInt(mm)-1, parseInt(dd));
                         if (!isNaN(testDate.getTime()) && testDate.getFullYear() == yy) {
