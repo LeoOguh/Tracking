@@ -2,7 +2,7 @@
    TOPBAR
    ═══════════════════════════════════════════════════════════ */
 .study-topbar {
-    display: flex; align-items: center; justify-content: center;
+    display: flex; align-items: center; justify-content: flex-start;
     gap: 12px; margin-bottom: 28px; flex-wrap: wrap;
     padding: 14px 32px 0; box-sizing: border-box;
 }

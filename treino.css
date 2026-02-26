@@ -59,7 +59,7 @@ body.light .drawer-footer { border-color: rgba(0,0,0,0.08); }
     margin-left: 260px; padding: 6px 32px 0; box-sizing: border-box;
 }
 .treino-topbar-center {
-    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
+    flex: 1; display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
 }
 .drawer-trigger { display: none; } /* Remove botão hambúrguer */
 
