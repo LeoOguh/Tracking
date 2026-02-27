@@ -11,7 +11,9 @@
     padding: 10px 30px; border-radius: 50px;
     background: var(--glass); backdrop-filter: blur(15px);
     border: 1px solid var(--glass-border);
-    width: 500px; justify-content: space-between;
+    width: 100%; /* ← Alterado aqui */
+    max-width: 500px; /* ← Alterado aqui */
+    justify-content: space-between;
 }
 #cronoMonthLabelTopbar {
     font-size: 1.15rem; font-weight: 300; letter-spacing: 1.5px;

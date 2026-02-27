@@ -1770,38 +1770,38 @@ let currentStudyView = 'sessoes';
 function setStudyView(view) {
     currentStudyView = view;
     
-    // 1. Oculta TODAS as views forçando display: none (mata o gap fantasma)
+    // Oculta todas as views
     document.querySelectorAll('.study-view').forEach(v => {
         v.classList.add('hidden');
         v.style.display = 'none'; 
     });
     
-    // Exibe apenas a view ativa
+    // Exibe apenas a ativa
     const activeView = document.getElementById('view' + view.charAt(0).toUpperCase() + view.slice(1));
     if (activeView) {
         activeView.classList.remove('hidden');
         activeView.style.display = 'flex';
     }
     
-    // 2. Atualiza o menu lateral
+    // Atualiza menu lateral
     document.querySelectorAll('.study-drawer .drawer-item').forEach(item => {
         item.classList.remove('drawer-item--active');
     });
     const activeMenuItem = document.getElementById('sdItem' + view.charAt(0).toUpperCase() + view.slice(1));
-    if (activeMenuItem) {
-        activeMenuItem.classList.add('drawer-item--active');
-    }
+    if (activeMenuItem) activeMenuItem.classList.add('drawer-item--active');
 
-    // 3. Pega os elementos da Topbar
+    // Elementos da Topbar
     const dayNav = document.getElementById('studyDateNav');
     const cronoNav = document.getElementById('cronoMonthNavTopbar');
     const goalBox = document.querySelector('.daily-goal-box');
     const reviewBadge = document.getElementById('reviewBadgeWrap');
     const topActionsSessoes = document.getElementById('topActionsSessoes');
     const topActionsCronograma = document.getElementById('topActionsCronograma');
+    const topbar = document.querySelector('.study-topbar'); // Pegamos a barra principal
 
-    // 4. Controle rigoroso de exibição da Topbar
     if (view === 'cronograma') {
+        if (topbar) topbar.style.flexWrap = 'nowrap'; // ← Impede que a barra quebre a linha e crie o buraco
+        
         if (dayNav) dayNav.style.display = 'none';
         if (cronoNav) {
             cronoNav.classList.remove('hidden');
@@ -1815,9 +1815,11 @@ function setStudyView(view) {
         if (topActionsCronograma) {
             topActionsCronograma.classList.remove('hidden');
             topActionsCronograma.style.display = 'flex';
-            topActionsCronograma.style.marginLeft = 'auto'; // Empurra os botões pra direita
+            topActionsCronograma.style.marginLeft = 'auto'; 
         }
     } else {
+        if (topbar) topbar.style.flexWrap = 'wrap'; // ← Devolve o comportamento normal nas outras abas
+        
         if (dayNav) {
             dayNav.classList.remove('hidden');
             dayNav.style.display = 'flex';
