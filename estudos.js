@@ -1795,8 +1795,15 @@ function setStudyView(view) {
         if (reviewBadge) reviewBadge.style.display = 'none';
         
         // Esconde botão de sessões, mostra botões de cronograma
-        if (topActionsSessoes) topActionsSessoes.style.display = 'none';
-        if (topActionsCronograma) topActionsCronograma.style.display = 'flex';
+        if (topActionsSessoes) {
+            topActionsSessoes.classList.add('hidden');
+            topActionsSessoes.style.display = 'none';
+        }
+        if (topActionsCronograma) {
+            topActionsCronograma.classList.remove('hidden'); // <-- Remove o bloqueio do CSS
+            topActionsCronograma.style.display = 'flex';
+            topActionsCronograma.style.marginLeft = 'auto'; // <-- Empurra os botões para a direita, balanceando o espaço vazio
+        }
     } else {
         if (dayNav) dayNav.classList.remove('hidden');
         if (cronoNav) cronoNav.classList.add('hidden');
@@ -1804,8 +1811,14 @@ function setStudyView(view) {
         if (reviewBadge) reviewBadge.style.display = '';
         
         // Esconde botões de cronograma, mostra botão de sessões
-        if (topActionsSessoes) topActionsSessoes.style.display = 'flex';
-        if (topActionsCronograma) topActionsCronograma.style.display = 'none';
+        if (topActionsSessoes) {
+            topActionsSessoes.classList.remove('hidden');
+            topActionsSessoes.style.display = 'flex';
+        }
+        if (topActionsCronograma) {
+            topActionsCronograma.classList.add('hidden');
+            topActionsCronograma.style.display = 'none';
+        }
     }
 
     if (view === 'erros') {
