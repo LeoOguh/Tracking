@@ -1003,16 +1003,26 @@ function openCronoSubjectsPanel(type) {
 
     if (type === 'manual') {
         title.textContent = 'matérias cadastradas';
+        let actionsHtml = `<div class="crono-subj-panel-actions">
+            <button class="btn-topbar-action btn-topbar-action--text" onclick="openAddManualSubjectInCrono()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                adicionar matéria
+            </button>
+        </div>`;
         if (!studySubjects.length) {
-            body.innerHTML = '<div class="crono-subj-panel-empty">Nenhuma matéria cadastrada.<br>Cadastre matérias na aba Sessões.</div>';
+            body.innerHTML = actionsHtml + '<div class="crono-subj-panel-empty">Nenhuma matéria cadastrada.</div>';
         } else {
-            body.innerHTML = studySubjects.map((s, i) => {
+            body.innerHTML = actionsHtml + studySubjects.map((s, i) => {
                 const impClass = s.importance >= 4 ? 'imp-high' : s.importance >= 3 ? 'imp-medium' : 'imp-low';
-                return `<div class="crono-subj-item">
+                return `<div class="crono-subj-item" id="manualSubj${i}">
                     <div class="crono-subj-header" style="cursor:default">
                         <div class="crono-subj-dot" style="background:${s.color || '#7f8c8d'}"></div>
                         <span class="crono-subj-name">${s.name}</span>
-                        <span class="crono-subj-imp ${impClass}">${'★'.repeat(s.importance || 3)}</span>
+                        <div class="crono-subj-imp-wrap">
+                            <span class="crono-subj-imp ${impClass}">${'★'.repeat(s.importance || 3)}</span>
+                            <button class="crono-subj-imp-btn" onclick="event.stopPropagation();openManualSubjectEditor(${i})">editar</button>
+                            <button class="crono-subj-imp-btn" onclick="event.stopPropagation();deleteManualSubject(${i})" style="color:#ff7675">✕</button>
+                        </div>
                     </div>
                 </div>`;
             }).join('');
@@ -1039,19 +1049,23 @@ function openCronoSubjectsPanel(type) {
                 let topicsHtml = '';
                 if (hasTopics) {
                     topicsHtml = '<div class="crono-subj-topics">' + s.topics.map((t, ti) => {
-                        let html = `<div class="crono-topic-item"><strong>${ti + 1}. ${typeof t === 'string' ? t : t.name}</strong></div>`;
+                        const tName = typeof t === 'string' ? t : t.name;
+                        let html = `<div class="crono-topic-item"><strong>${ti + 1}. ${tName}</strong> <button class="crono-subj-imp-btn" onclick="event.stopPropagation();editEditalTopic(${i},${ti})" style="font-size:0.6rem;padding:1px 5px">✎</button> <button class="crono-subj-imp-btn" onclick="event.stopPropagation();deleteEditalTopic(${i},${ti})" style="font-size:0.6rem;padding:1px 5px;color:#ff7675">✕</button></div>`;
                         if (t.subtopics && t.subtopics.length) {
-                            html += t.subtopics.map((st, si) => `<div class="crono-subtopic">${ti + 1}.${si + 1} ${st}</div>`).join('');
+                            html += t.subtopics.map((st, si) => `<div class="crono-subtopic">${ti + 1}.${si + 1} ${st} <button class="crono-subj-imp-btn" onclick="event.stopPropagation();editEditalSubtopic(${i},${ti},${si})" style="font-size:0.55rem;padding:0 4px">✎</button> <button class="crono-subj-imp-btn" onclick="event.stopPropagation();deleteEditalSubtopic(${i},${ti},${si})" style="font-size:0.55rem;padding:0 4px;color:#ff7675">✕</button></div>`).join('');
                         }
                         return html;
-                    }).join('') + '</div>';
+                    }).join('') +
+                    `<button class="crono-add-subject-btn" onclick="event.stopPropagation();addEditalTopic(${i})" style="margin-top:6px;padding:6px;font-size:0.72rem">+ adicionar tópico</button>` +
+                    '</div>';
                 }
                 return `<div class="crono-subj-item" id="editalSubj${i}">
                     <div class="crono-subj-header" onclick="${hasTopics ? `toggleEditalSubject(${i})` : ''}">
                         <span class="crono-subj-name">${s.name}</span>
-                        <div class="crono-subj-imp-wrap">
-                            <span class="crono-subj-imp ${impClass}">${'★'.repeat(s.importance || 3)}</span>
-                            <button class="crono-subj-imp-btn" onclick="event.stopPropagation();openEditalImportanceEditor(${i})">editar</button>
+                        <div class="crono-subj-imp-wrap" id="editalImpWrap${i}">
+                            <div class="crono-star-editor">${[1,2,3,4,5].map(n =>
+                                `<button class="star-btn ${n <= (s.importance||3) ? 'active' : ''}" onclick="event.stopPropagation();setEditalImportance(${i},${n})">★</button>`
+                            ).join('')}</div>
                         </div>
                         ${hasTopics ? '<span class="crono-subj-chevron">▾</span>' : ''}
                     </div>
@@ -1074,22 +1088,68 @@ function toggleEditalSubject(idx) {
     if (el) el.classList.toggle('open');
 }
 
-function openEditalImportanceEditor(idx) {
-    const s = editalSubjects[idx];
-    if (!s) return;
-    const current = s.importance || 3;
-    // Create inline star editor
-    const impEl = document.querySelector(`#editalSubj${idx} .crono-subj-imp-wrap`);
-    if (!impEl) return;
-    impEl.innerHTML = `<div class="crono-star-editor">${[1,2,3,4,5].map(n =>
-        `<button class="star-btn ${n <= current ? 'active' : ''}" onclick="setEditalImportance(${idx},${n})">★</button>`
-    ).join('')}</div>`;
-}
-
 function setEditalImportance(idx, val) {
     editalSubjects[idx].importance = val;
     saveEditalSubjects();
+    // Update stars inline without full re-render
+    const wrap = document.getElementById('editalImpWrap' + idx);
+    if (wrap) {
+        wrap.innerHTML = `<div class="crono-star-editor">${[1,2,3,4,5].map(n =>
+            `<button class="star-btn ${n <= val ? 'active' : ''}" onclick="event.stopPropagation();setEditalImportance(${idx},${n})">★</button>`
+        ).join('')}</div>`;
+    }
+}
+
+// ─── EDITAL TOPIC EDITING ───────────────────────────────────────────────────
+function editEditalTopic(subjIdx, topicIdx) {
+    const t = editalSubjects[subjIdx].topics[topicIdx];
+    const name = typeof t === 'string' ? t : t.name;
+    const newName = prompt('Editar nome do tópico:', name);
+    if (newName === null) return;
+    if (newName.trim() === '') { deleteEditalTopic(subjIdx, topicIdx); return; }
+    if (typeof t === 'string') { editalSubjects[subjIdx].topics[topicIdx] = newName.trim(); }
+    else { editalSubjects[subjIdx].topics[topicIdx].name = newName.trim(); }
+    saveEditalSubjects();
     openCronoSubjectsPanel('edital');
+    // Re-open the subject
+    setTimeout(() => toggleEditalSubject(subjIdx), 50);
+}
+
+function deleteEditalTopic(subjIdx, topicIdx) {
+    if (!confirm('Remover este tópico?')) return;
+    editalSubjects[subjIdx].topics.splice(topicIdx, 1);
+    saveEditalSubjects();
+    openCronoSubjectsPanel('edital');
+    setTimeout(() => toggleEditalSubject(subjIdx), 50);
+}
+
+function addEditalTopic(subjIdx) {
+    const name = prompt('Nome do novo tópico:');
+    if (!name || !name.trim()) return;
+    if (!editalSubjects[subjIdx].topics) editalSubjects[subjIdx].topics = [];
+    editalSubjects[subjIdx].topics.push({ name: name.trim(), subtopics: [] });
+    saveEditalSubjects();
+    openCronoSubjectsPanel('edital');
+    setTimeout(() => toggleEditalSubject(subjIdx), 50);
+}
+
+function editEditalSubtopic(subjIdx, topicIdx, subIdx) {
+    const t = editalSubjects[subjIdx].topics[topicIdx];
+    const st = t.subtopics[subIdx];
+    const newName = prompt('Editar subtópico:', st);
+    if (newName === null) return;
+    if (newName.trim() === '') { deleteEditalSubtopic(subjIdx, topicIdx, subIdx); return; }
+    editalSubjects[subjIdx].topics[topicIdx].subtopics[subIdx] = newName.trim();
+    saveEditalSubjects();
+    openCronoSubjectsPanel('edital');
+    setTimeout(() => toggleEditalSubject(subjIdx), 50);
+}
+
+function deleteEditalSubtopic(subjIdx, topicIdx, subIdx) {
+    editalSubjects[subjIdx].topics[topicIdx].subtopics.splice(subIdx, 1);
+    saveEditalSubjects();
+    openCronoSubjectsPanel('edital');
+    setTimeout(() => toggleEditalSubject(subjIdx), 50);
 }
 
 function clearEditalSubjects() {
@@ -1097,6 +1157,41 @@ function clearEditalSubjects() {
     editalSubjects = [];
     saveEditalSubjects();
     openCronoSubjectsPanel('edital');
+}
+
+// ─── MANUAL SUBJECT MANAGEMENT IN CRONOGRAMA ───────────────────────────────
+function openAddManualSubjectInCrono() {
+    const name = prompt('Nome da nova matéria:');
+    if (!name || !name.trim()) return;
+    const impStr = prompt('Importância (1 a 5):', '3');
+    const importance = Math.max(1, Math.min(5, parseInt(impStr) || 3));
+    const COLORS = ['#3498db','#9b59b6','#e67e22','#2ecc71','#e74c3c','#1abc9c','#f39c12','#d35400','#8e44ad','#27ae60'];
+    const usedColors = studySubjects.map(s => s.color);
+    const color = COLORS.find(c => !usedColors.includes(c)) || COLORS[studySubjects.length % COLORS.length];
+
+    studySubjects.push({ name: name.trim(), importance, color });
+    localStorage.setItem('study_subjects', JSON.stringify(studySubjects));
+    openCronoSubjectsPanel('manual');
+}
+
+function openManualSubjectEditor(idx) {
+    const s = studySubjects[idx];
+    const newName = prompt('Editar nome da matéria:', s.name);
+    if (newName === null) return;
+    if (!newName.trim()) return;
+    const impStr = prompt('Importância (1 a 5):', String(s.importance || 3));
+    const importance = Math.max(1, Math.min(5, parseInt(impStr) || 3));
+    studySubjects[idx].name = newName.trim();
+    studySubjects[idx].importance = importance;
+    localStorage.setItem('study_subjects', JSON.stringify(studySubjects));
+    openCronoSubjectsPanel('manual');
+}
+
+function deleteManualSubject(idx) {
+    if (!confirm(`Remover a matéria "${studySubjects[idx].name}"?`)) return;
+    studySubjects.splice(idx, 1);
+    localStorage.setItem('study_subjects', JSON.stringify(studySubjects));
+    openCronoSubjectsPanel('manual');
 }
 
 // ─── CRONOGRAMA STATE ────────────────────────────────────────────────────────
@@ -1126,12 +1221,10 @@ function renderCronoCalendar() {
     const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
 
     let html = '';
-    // Previous month filler
     for (let i = firstDay - 1; i >= 0; i--) {
         const d = prevDays - i;
         html += `<div class="crono-day-cell other-month"><span class="crono-day-num">${d}</span></div>`;
     }
-    // Current month
     for (let d = 1; d <= daysInMonth; d++) {
         const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
         const isToday = dateStr === todayStr;
@@ -1141,13 +1234,18 @@ function renderCronoCalendar() {
         if (isToday) classes += ' today';
         if (hasSchedule) classes += ' has-schedule';
 
-        let inner = `<span class="crono-day-num">${d}</span>`;
+        let inner = `<span class="crono-day-num">${d}${isToday ? ' <span style="font-size:0.55rem;opacity:0.6">hoje</span>' : ''}</span>`;
         if (hasSchedule) {
+            // Get session hours for this date
+            const sessionsForDate = studySessions[dateStr] || [];
             inner += '<div class="crono-day-subjects">';
             const maxTags = 3;
             dayData.subjects.slice(0, maxTags).forEach(s => {
                 const color = getSubjectColorResolved(s.name) || '#7f8c8d';
-                inner += `<div class="crono-day-tag" style="background:${color}22;border-left:2px solid ${color}">${s.name}</div>`;
+                const status = getSubjectCompletionStatus(s, sessionsForDate);
+                const statusIcon = status === 'done' ? '✅' : status === 'progress' ? '🔶' : '';
+                const doneClass = status === 'done' ? ' completed' : '';
+                inner += `<div class="crono-day-tag${doneClass}" style="background:${color}22;border-left:2px solid ${color}">${s.name}${statusIcon ? `<span class="crono-status-icon">${statusIcon}</span>` : ''}</div>`;
             });
             if (dayData.subjects.length > maxTags) {
                 inner += `<span class="crono-day-more">+${dayData.subjects.length - maxTags} mais</span>`;
@@ -1159,7 +1257,6 @@ function renderCronoCalendar() {
 
         html += `<div class="${classes}" onclick="openCronoDayModal('${dateStr}')">${inner}</div>`;
     }
-    // Next month filler
     const totalCells = firstDay + daysInMonth;
     const remaining = (7 - (totalCells % 7)) % 7;
     for (let i = 1; i <= remaining; i++) {
@@ -1167,6 +1264,30 @@ function renderCronoCalendar() {
     }
     grid.innerHTML = html;
     renderCronoLegend();
+}
+
+// 5) Check completion status of a schedule subject against actual sessions
+function getSubjectCompletionStatus(schedSubject, sessions) {
+    if (!sessions || !sessions.length) return '';
+    const subjectName = (schedSubject.name || '').toLowerCase().trim();
+    const requiredMin = (schedSubject.hours || 0) * 60;
+    if (requiredMin <= 0) return '';
+
+    let totalMin = 0;
+    sessions.forEach(sess => {
+        const sessName = (sess.subject || '').toLowerCase().trim();
+        if (sessName === subjectName) {
+            if (sess.start && sess.end) {
+                const startMin = timeToMin(sess.start);
+                const endMin = timeToMin(sess.end);
+                if (endMin > startMin) totalMin += (endMin - startMin);
+            }
+        }
+    });
+
+    if (totalMin >= requiredMin) return 'done';
+    if (totalMin > 0) return 'progress';
+    return '';
 }
 
 function renderCronoLegend() {
@@ -1199,6 +1320,8 @@ function openCronoDayModal(dateStr) {
     dateEl.textContent = `${weekDays[dt.getDay()]}, ${dt.getDate()} de ${monthNames[dt.getMonth()]} de ${dt.getFullYear()}`;
 
     const dayData = scheduleData[dateStr];
+    const sessionsForDate = studySessions[dateStr] || [];
+
     if (!dayData || !dayData.subjects || dayData.subjects.length === 0) {
         totalEl.textContent = '';
         body.innerHTML = '<div class="crono-modal-empty">nenhum estudo programado para este dia</div>';
@@ -1209,15 +1332,32 @@ function openCronoDayModal(dateStr) {
 
         body.innerHTML = dayData.subjects.map((s, idx) => {
             const color = getSubjectColorResolved(s.name) || '#7f8c8d';
+            const status = getSubjectCompletionStatus(s, sessionsForDate);
+            const statusLabel = status === 'done' ? '✅ concluído' : status === 'progress' ? '🔶 em andamento' : '';
+
+            // Calculate studied minutes
+            let studiedMin = 0;
+            sessionsForDate.forEach(sess => {
+                if ((sess.subject||'').toLowerCase().trim() === (s.name||'').toLowerCase().trim()) {
+                    if (sess.start && sess.end) {
+                        const sm = timeToMin(sess.start), em = timeToMin(sess.end);
+                        if (em > sm) studiedMin += (em - sm);
+                    }
+                }
+            });
+            const studiedH = (studiedMin / 60).toFixed(1);
+
             let details = '';
-            if (s.hours) details += `<strong>Duração:</strong> ${s.hours}h`;
+            if (s.hours) details += `<strong>Meta:</strong> ${s.hours}h`;
+            if (studiedMin > 0) details += ` · <strong>Estudado:</strong> ${studiedH}h`;
+            if (statusLabel) details += ` · ${statusLabel}`;
             if (s.sessions) details += ` · <strong>Sessões:</strong> ${s.sessions}x ${s.sessionTime || 25}min`;
             if (s.importance) details += ` · <strong>Importância:</strong> ${'★'.repeat(s.importance)}${'☆'.repeat(5 - s.importance)}`;
             if (s.topics && s.topics.length) details += `<br><strong>Conteúdo:</strong> ${s.topics.join(', ')}`;
             if (s.questions) details += `<br><strong>Questões sugeridas:</strong> ${s.questions}`;
             if (s.notes) details += `<br><strong>Obs:</strong> ${s.notes}`;
 
-            return `<div class="crono-modal-subject" style="border-color:${color}">
+            return `<div class="crono-modal-subject" style="border-color:${color}${status === 'done' ? ';opacity:0.6' : ''}">
                 <div class="crono-modal-subject-header">
                     <span class="crono-modal-subject-name">${s.name}</span>
                     <div class="crono-modal-subject-actions">
