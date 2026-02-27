@@ -1883,6 +1883,9 @@ function setStudyView(view) {
         if (reviewBadge) reviewBadge.style.display = 'none';
         if (actionsSessoes) actionsSessoes.classList.add('hidden');
         if (actionsCrono) actionsCrono.classList.remove('hidden');
+        // Ensure topbar is visible with reduced margin
+        const topbar = document.querySelector('.study-topbar');
+        if (topbar) { topbar.style.display = 'flex'; topbar.style.marginBottom = '8px'; }
     } else {
         if (container) container.style.display = '';
         if (dayNav) dayNav.classList.remove('hidden');
@@ -1891,6 +1894,8 @@ function setStudyView(view) {
         if (reviewBadge) reviewBadge.style.display = '';
         if (actionsSessoes) actionsSessoes.classList.remove('hidden');
         if (actionsCrono) actionsCrono.classList.add('hidden');
+        const topbar = document.querySelector('.study-topbar');
+        if (topbar) { topbar.style.display = ''; topbar.style.marginBottom = ''; }
     }
 
     if (view === 'erros') {
