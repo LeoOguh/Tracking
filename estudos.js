@@ -1790,50 +1790,23 @@ function setStudyView(view) {
     const activeMenuItem = document.getElementById('sdItem' + view.charAt(0).toUpperCase() + view.slice(1));
     if (activeMenuItem) activeMenuItem.classList.add('drawer-item--active');
 
-    // 4. Elementos da Topbar
-    const dayNav = document.getElementById('studyDateNav');
-    const cronoNav = document.getElementById('cronoMonthNavTopbar');
-    const goalBox = document.querySelector('.daily-goal-box');
-    const reviewBadge = document.getElementById('reviewBadgeWrap');
-    const topActionsSessoes = document.getElementById('topActionsSessoes');
-    const topActionsCronograma = document.getElementById('topActionsCronograma');
-    const topbar = document.querySelector('.study-topbar');
-
-    // 5. CONTROLE RIGOROSO: O QUE APARECE EM CADA ABA
-    if (view === 'sessoes') {
-        if (topbar) topbar.style.flexWrap = 'wrap';
-        if (dayNav) { dayNav.classList.remove('hidden'); dayNav.style.display = 'flex'; }
-        if (cronoNav) { cronoNav.classList.add('hidden'); cronoNav.style.display = 'none'; }
-        if (goalBox) goalBox.style.display = 'flex';
-        if (reviewBadge) reviewBadge.style.display = 'block';
-        if (topActionsSessoes) { topActionsSessoes.classList.remove('hidden'); topActionsSessoes.style.display = 'flex'; }
-        if (topActionsCronograma) { topActionsCronograma.classList.add('hidden'); topActionsCronograma.style.display = 'none'; }
-    } 
-    else if (view === 'cronograma') {
-        if (topbar) topbar.style.flexWrap = 'nowrap';
-        if (dayNav) { dayNav.classList.add('hidden'); dayNav.style.display = 'none'; }
-        if (cronoNav) { cronoNav.classList.remove('hidden'); cronoNav.style.display = 'flex'; }
-        if (goalBox) goalBox.style.display = 'none';
-        if (reviewBadge) reviewBadge.style.display = 'none';
-        if (topActionsSessoes) { topActionsSessoes.classList.add('hidden'); topActionsSessoes.style.display = 'none'; }
-        if (topActionsCronograma) { 
-            topActionsCronograma.classList.remove('hidden');
-            topActionsCronograma.style.display = 'flex';
-            topActionsCronograma.style.marginLeft = 'auto'; 
+    // 4. Mostra a Topbar APENAS na aba de Sessões
+    const topbar = document.getElementById('mainTopbar');
+    if (topbar) {
+        if (view === 'sessoes') {
+            topbar.style.display = 'flex';
+        } else {
+            topbar.style.display = 'none';
         }
-        renderCronoCalendar();
-    } 
-    else if (view === 'erros') {
-        if (topbar) topbar.style.flexWrap = 'wrap';
-        if (dayNav) { dayNav.classList.add('hidden'); dayNav.style.display = 'none'; }
-        if (cronoNav) { cronoNav.classList.add('hidden'); cronoNav.style.display = 'none'; }
-        if (goalBox) goalBox.style.display = 'none'; // Esconde a barra de progresso!
-        if (reviewBadge) reviewBadge.style.display = 'none';
-        if (topActionsSessoes) { topActionsSessoes.classList.add('hidden'); topActionsSessoes.style.display = 'none'; }
-        if (topActionsCronograma) { topActionsCronograma.classList.add('hidden'); topActionsCronograma.style.display = 'none'; }
+    }
 
+    // 5. Renderiza dados específicos das abas
+    if (view === 'erros') {
         populateErrosSelects();
         renderErrosList();
+    }
+    if (view === 'cronograma') {
+        renderCronoCalendar();
     }
 }
 
