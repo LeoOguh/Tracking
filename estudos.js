@@ -130,9 +130,18 @@ function populateSubjectDropdown() {
     if (!sel) return;
     const sorted = [...studySubjects].sort((a,b) => b.importance - a.importance);
     const stars  = n => '★'.repeat(n) + '☆'.repeat(5-n);
-    sel.innerHTML = `<option value="">— matéria —</option>` +
-        sorted.map(s => `<option value="${s.name}">${stars(s.importance)} ${s.name}</option>`).join('') +
-        `<option value="__custom__">digitar manualmente…</option>`;
+    let html = `<option value="">— matéria —</option>`;
+    if (sorted.length) {
+        html += sorted.map(s => `<option value="${s.name}">${stars(s.importance)} ${s.name}</option>`).join('');
+    }
+    if (editalSubjects.length) {
+        html += `<optgroup label="Matérias do edital">`;
+        const sortedEdital = [...editalSubjects].sort((a,b) => (b.importance||3) - (a.importance||3));
+        html += sortedEdital.map(s => `<option value="${s.name}">${stars(s.importance||3)} ${s.name}</option>`).join('');
+        html += `</optgroup>`;
+    }
+    html += `<option value="__custom__">digitar manualmente…</option>`;
+    sel.innerHTML = html;
 }
 function onSubjectSelectChange() {
     const sel    = document.getElementById('fSubjectSelect');
@@ -1857,33 +1866,31 @@ function setStudyView(view) {
     });
     document.getElementById('sdItem' + view.charAt(0).toUpperCase() + view.slice(1)).classList.add('drawer-item--active');
 
-    // Toggle topbar elements and container based on view
-    const topbar = document.querySelector('.study-topbar');
+    // Toggle topbar elements based on view
     const container = document.querySelector('.study-container');
     const dayNav = document.getElementById('studyDateNav');
     const cronoNav = document.getElementById('cronoMonthNavTopbar');
     const goalBox = document.querySelector('.daily-goal-box');
     const reviewBadge = document.getElementById('reviewBadgeWrap');
-    const topActions = document.querySelector('.topbar-actions');
-    const themeBtn = document.getElementById('themeToggleBtn');
+    const actionsSessoes = document.getElementById('topbarActionsSessoes');
+    const actionsCrono = document.getElementById('topbarActionsCrono');
 
     if (view === 'cronograma') {
-        // Show topbar but only with month nav and theme toggle
-        if (topbar) { topbar.style.display = ''; topbar.style.marginBottom = '8px'; }
         if (container) container.style.display = 'none';
         if (dayNav) dayNav.classList.add('hidden');
         if (cronoNav) cronoNav.classList.remove('hidden');
         if (goalBox) goalBox.style.display = 'none';
         if (reviewBadge) reviewBadge.style.display = 'none';
-        if (topActions) topActions.style.display = 'none';
+        if (actionsSessoes) actionsSessoes.classList.add('hidden');
+        if (actionsCrono) actionsCrono.classList.remove('hidden');
     } else {
-        if (topbar) { topbar.style.display = ''; topbar.style.marginBottom = ''; }
         if (container) container.style.display = '';
         if (dayNav) dayNav.classList.remove('hidden');
         if (cronoNav) cronoNav.classList.add('hidden');
         if (goalBox) goalBox.style.display = '';
         if (reviewBadge) reviewBadge.style.display = '';
-        if (topActions) topActions.style.display = '';
+        if (actionsSessoes) actionsSessoes.classList.remove('hidden');
+        if (actionsCrono) actionsCrono.classList.add('hidden');
     }
 
     if (view === 'erros') {
@@ -1915,6 +1922,16 @@ function populateErrosSelects() {
         mat.innerHTML += `<option>${s.name}</option>`;
         mf.innerHTML += `<option>${s.name}</option>`;
     });
+    if (editalSubjects.length) {
+        mat.innerHTML += '<optgroup label="Matérias do edital">';
+        mf.innerHTML += '<optgroup label="Matérias do edital">';
+        editalSubjects.forEach(s => {
+            mat.innerHTML += `<option>${s.name}</option>`;
+            mf.innerHTML += `<option>${s.name}</option>`;
+        });
+        mat.innerHTML += '</optgroup>';
+        mf.innerHTML += '</optgroup>';
+    }
 }
 
 // Update saveErro to hide form after save
