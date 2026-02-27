@@ -27,33 +27,35 @@
             <button class="nav-btn" onclick="changeMonth(1)">›</button>
         </div>
 
-        <div class="today-progress-widget" id="todayProgressWidget">
-            <div class="tpw-ring-wrap">
-                <svg class="tpw-ring" viewBox="0 0 44 44">
-                    <circle class="tpw-ring-bg" cx="22" cy="22" r="18" fill="none" stroke-width="4"/>
-                    <circle class="tpw-ring-fill" id="tpwRing" cx="22" cy="22" r="18" fill="none" stroke-width="4"
-                        stroke-dasharray="113.1" stroke-dashoffset="113.1" transform="rotate(-90 22 22)"/>
-                </svg>
-                <span class="tpw-pct" id="tpwPct">0%</span>
+        <div class="habits-topbar-right">
+            <div class="today-progress-widget" id="todayProgressWidget">
+                <div class="tpw-ring-wrap">
+                    <svg class="tpw-ring" viewBox="0 0 44 44">
+                        <circle class="tpw-ring-bg" cx="22" cy="22" r="18" fill="none" stroke-width="4"/>
+                        <circle class="tpw-ring-fill" id="tpwRing" cx="22" cy="22" r="18" fill="none" stroke-width="4"
+                            stroke-dasharray="113.1" stroke-dashoffset="113.1" transform="rotate(-90 22 22)"/>
+                    </svg>
+                    <span class="tpw-pct" id="tpwPct">0%</span>
+                </div>
+                <div class="tpw-info">
+                    <div class="tpw-title">hoje</div>
+                    <div class="tpw-detail" id="tpwDetail">carregando…</div>
+                </div>
+                <button class="tpw-compact-btn" onclick="toggleCompactMode()" id="tpwCompactBtn" title="Modo compacto">⊞</button>
             </div>
-            <div class="tpw-info">
-                <div class="tpw-title">hoje</div>
-                <div class="tpw-detail" id="tpwDetail">carregando…</div>
+            <div style="display:flex;gap:4px;align-items:center">
+                <button class="btn-topbar-action btn-topbar-action--icon" onclick="importData()" title="Importar dados">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                </button>
+                <button class="btn-topbar-action btn-topbar-action--icon" onclick="exportData()" title="Exportar dados">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                </button>
+                <button class="theme-toggle" onclick="toggleTheme()" id="themeToggleBtn">☀ claro</button>
             </div>
-            <button class="tpw-compact-btn" onclick="toggleCompactMode()" id="tpwCompactBtn" title="Modo compacto">⊞</button>
-        </div>
-        <div style="display:flex;gap:4px;align-items:center">
-            <button class="btn-topbar-action btn-topbar-action--icon" onclick="importData()" title="Importar dados">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-                </svg>
-            </button>
-            <button class="btn-topbar-action btn-topbar-action--icon" onclick="exportData()" title="Exportar dados">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-                </svg>
-            </button>
-            <button class="theme-toggle" onclick="toggleTheme()" id="themeToggleBtn">☀ claro</button>
         </div>
     </div>
 
