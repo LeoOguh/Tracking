@@ -816,8 +816,45 @@ function showReviewTip(e,dateStr,tooltip){
 function hideReviewTip(){document.getElementById('reviewTooltip').classList.remove('visible');}
 
 // ─── CRONOGRAMA IA ────────────────────────────────────────────────────────────
-function openAIModal()  { document.getElementById('aiModalOverlay').classList.add('open'); document.getElementById('aiResult').style.display='none'; }
+function openAIModal()  {
+    document.getElementById('aiModalOverlay').classList.add('open');
+    document.getElementById('aiResult').style.display='none';
+    buildAIWeekdaysToggle();
+    buildAIWeekdaysToggle2();
+}
 function closeAIModal(e){ if(e) return; document.getElementById('aiModalOverlay').classList.remove('open'); }
+
+// ─── WEEKDAY SELECTOR FOR AI MODAL ──────────────────────────────────────────
+const AI_DAY_LABELS = ['D','S','T','Q','Q','S','S'];
+let aiSelectedDays = [1,2,3,4,5]; // seg a sex por padrão
+let aiSelectedDays2 = [1,2,3,4,5];
+
+function buildAIWeekdaysToggle() {
+    const el = document.getElementById('aiWeekdaysToggle');
+    if (!el) return;
+    el.innerHTML = AI_DAY_LABELS.map((lbl, i) =>
+        `<button type="button" class="wd-btn ${aiSelectedDays.includes(i) ? 'active' : ''}" onclick="toggleAIDay(${i})">${lbl}</button>`
+    ).join('');
+}
+function toggleAIDay(i) {
+    if (aiSelectedDays.includes(i)) {
+        if (aiSelectedDays.length > 1) aiSelectedDays = aiSelectedDays.filter(d => d !== i);
+    } else { aiSelectedDays.push(i); }
+    buildAIWeekdaysToggle();
+}
+function buildAIWeekdaysToggle2() {
+    const el = document.getElementById('aiWeekdaysToggle2');
+    if (!el) return;
+    el.innerHTML = AI_DAY_LABELS.map((lbl, i) =>
+        `<button type="button" class="wd-btn ${aiSelectedDays2.includes(i) ? 'active' : ''}" onclick="toggleAIDay2(${i})">${lbl}</button>`
+    ).join('');
+}
+function toggleAIDay2(i) {
+    if (aiSelectedDays2.includes(i)) {
+        if (aiSelectedDays2.length > 1) aiSelectedDays2 = aiSelectedDays2.filter(d => d !== i);
+    } else { aiSelectedDays2.push(i); }
+    buildAIWeekdaysToggle2();
+}
 function setAIMode(mode){
     aiMode=mode;
     document.getElementById('aiModeSubjects').classList.toggle('type-btn--active',mode==='subjects');
@@ -840,11 +877,11 @@ function changeCronoMonth(delta) {
 
 function renderCronoCalendar() {
     const grid = document.getElementById('cronoCalendarGrid');
-    const label = document.getElementById('cronoMonthLabel');
-    if (!grid || !label) return;
+    const label = document.getElementById('cronoMonthLabelTopbar');
+    if (!grid) return;
 
     const y = cronoMonth.getFullYear(), m = cronoMonth.getMonth();
-    label.textContent = monthNames[m] + ' ' + y;
+    if (label) label.textContent = monthNames[m] + ' ' + y;
 
     const firstDay = new Date(y, m, 1).getDay();
     const daysInMonth = new Date(y, m + 1, 0).getDate();
@@ -910,11 +947,15 @@ function renderCronoLegend() {
     }).join('');
 }
 
+let cronoDayModalDateStr = ''; // Track which day is being viewed
+
 function openCronoDayModal(dateStr) {
+    cronoDayModalDateStr = dateStr;
     const overlay = document.getElementById('cronoDayModalOverlay');
     const dateEl = document.getElementById('cronoDayModalDate');
     const totalEl = document.getElementById('cronoDayModalTotal');
     const body = document.getElementById('cronoDayModalBody');
+    const editBtn = document.getElementById('cronoDayEditBtn');
 
     const parts = dateStr.split('-');
     const dt = new Date(+parts[0], +parts[1]-1, +parts[2]);
@@ -925,12 +966,14 @@ function openCronoDayModal(dateStr) {
     if (!dayData || !dayData.subjects || dayData.subjects.length === 0) {
         totalEl.textContent = '';
         body.innerHTML = '<div class="crono-modal-empty">nenhum estudo programado para este dia</div>';
+        // Show edit btn to allow adding subjects even on empty days
+        if (editBtn) editBtn.style.display = 'inline-flex';
     } else {
         const totalH = dayData.subjects.reduce((acc, s) => acc + (s.hours || 0), 0);
         const totalSessions = dayData.subjects.reduce((acc, s) => acc + (s.sessions || 0), 0);
         totalEl.textContent = `${totalH}h total · ${totalSessions} sessão(ões)`;
 
-        body.innerHTML = dayData.subjects.map(s => {
+        body.innerHTML = dayData.subjects.map((s, idx) => {
             const color = getSubjectColorResolved(s.name) || '#7f8c8d';
             let details = '';
             if (s.hours) details += `<strong>Duração:</strong> ${s.hours}h`;
@@ -943,12 +986,20 @@ function openCronoDayModal(dateStr) {
             return `<div class="crono-modal-subject" style="border-color:${color}">
                 <div class="crono-modal-subject-header">
                     <span class="crono-modal-subject-name">${s.name}</span>
-                    <span class="crono-modal-subject-hours">${s.hours || 0}h</span>
+                    <div class="crono-modal-subject-actions">
+                        <span class="crono-modal-subject-hours">${s.hours || 0}h</span>
+                        <button class="crono-edit-btn" onclick="openCronoEditSubject('${dateStr}', ${idx})">editar</button>
+                    </div>
                 </div>
                 <div class="crono-modal-detail">${details}</div>
             </div>`;
         }).join('');
+        if (editBtn) editBtn.style.display = 'inline-flex';
     }
+
+    // Add "add subject" button at the bottom
+    body.innerHTML += `<button class="crono-add-subject-btn" onclick="openCronoEditSubject('${dateStr}', -1)">+ adicionar matéria</button>`;
+
     overlay.classList.add('open');
 }
 
@@ -996,13 +1047,11 @@ async function generateSchedule() {
     document.getElementById('aiLoading').style.display = 'flex';
     document.getElementById('aiResult').style.display = 'none';
 
-    let hoursPerDay, days;
+    let hoursPerDay, totalDays, activeDays;
     const startDate = new Date();
-    // Força o fuso horário para garantir que começa "hoje"
     const startStr = `${startDate.getFullYear()}-${String(startDate.getMonth()+1).padStart(2,'0')}-${String(startDate.getDate()).padStart(2,'0')}`;
-    const stars = n => '★'.repeat(n) + '☆'.repeat(5-n);
+    const dayNames = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
 
-    // Prepara os dados que vão para a Vercel
     let payload = {
         tipoGeracao: aiMode,
         dataInicio: startStr
@@ -1010,18 +1059,25 @@ async function generateSchedule() {
 
     if (aiMode === 'subjects') {
         hoursPerDay = parseFloat(document.getElementById('aiHoursPerDay').value) || 4;
-        days = parseInt(document.getElementById('aiDays').value) || 30;
+        totalDays = parseInt(document.getElementById('aiTotalDays').value) || 30;
+        activeDays = [...aiSelectedDays].sort();
         
         if (!studySubjects.length) {
             alert('Cadastre ao menos uma matéria na aba Sessões primeiro.');
             btn.disabled = false; document.getElementById('aiLoading').style.display = 'none'; return;
         }
         
+        // Calcula peso proporcional baseado na importância
+        const totalImportance = studySubjects.reduce((acc, s) => acc + (s.importance || 3), 0);
         payload.materias = studySubjects.sort((a,b)=>b.importance-a.importance)
-                           .map(s=>`- ${s.name} (importância: ${s.importance}/5)`).join('\n');
+                           .map(s => {
+                               const pct = Math.round(((s.importance || 3) / totalImportance) * 100);
+                               return `- ${s.name} (importância: ${s.importance}/5, peso: ${pct}% do tempo)`;
+                           }).join('\n');
     } else {
         hoursPerDay = parseFloat(document.getElementById('aiHoursPerDay2').value) || 4;
-        days = parseInt(document.getElementById('aiDays2').value) || 30;
+        totalDays = parseInt(document.getElementById('aiTotalDays2').value) || 30;
+        activeDays = [...aiSelectedDays2].sort();
         let text = document.getElementById('aiTextarea').value.trim();
         if (aiPdfText) text = aiPdfText + '\n\n' + text;
 
@@ -1030,14 +1086,15 @@ async function generateSchedule() {
             btn.disabled = false; document.getElementById('aiLoading').style.display = 'none'; return;
         }
         payload.texto = text;
-        payload.pdfBase64 = aiPdfBase64; // Envia o PDF limpo
+        payload.pdfBase64 = aiPdfBase64;
     }
 
     payload.horasDia = hoursPerDay;
-    payload.dias = days;
+    payload.dias = totalDays;
+    payload.diasSemana = activeDays.map(d => dayNames[d]);
+    payload.diasSemanaIdx = activeDays;
 
     try {
-        // Chama a nossa API na Vercel
         const response = await fetch('/api/gerar-cronograma', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1056,7 +1113,6 @@ async function generateSchedule() {
         const parsed = JSON.parse(jsonMatch[0]);
 
         if (parsed && parsed.schedule) {
-            // Salva os dados no seu calendário
             Object.entries(parsed.schedule).forEach(([date, dayInfo]) => {
                 if (dayInfo.subjects && Array.isArray(dayInfo.subjects)) {
                     scheduleData[date] = dayInfo;
@@ -1065,14 +1121,18 @@ async function generateSchedule() {
             saveScheduleData();
             renderCronoCalendar();
 
-            const totalDays = Object.keys(parsed.schedule).length;
+            const totalGeneratedDays = Object.keys(parsed.schedule).length;
             const totalSubjects = new Set();
             Object.values(parsed.schedule).forEach(d => d.subjects?.forEach(s => totalSubjects.add(s.name)));
             
-            document.getElementById('aiResult').innerHTML = `<div style="color:#2ecc71;font-weight:600">✓ Cronograma gerado com sucesso!</div><div style="margin-top:6px;font-size:0.82rem;color:rgba(255,255,255,0.6)">${totalDays} dias programados · ${totalSubjects.size} matérias · Feche este modal para ver o calendário.</div>`;
+            document.getElementById('aiResult').innerHTML = `<div style="color:#2ecc71;font-weight:600">✓ Cronograma gerado com sucesso!</div><div style="margin-top:6px;font-size:0.82rem;color:rgba(255,255,255,0.6)">${totalGeneratedDays} dias programados · ${totalSubjects.size} matérias</div>`;
             document.getElementById('aiResult').style.display = 'block';
 
-            setTimeout(() => { setStudyView('cronograma'); }, 500);
+            // 3) Fechar modal automaticamente após geração
+            setTimeout(() => {
+                closeAIModal();
+                setStudyView('cronograma');
+            }, 1200);
         }
     } catch(err) {
         console.error(err);
@@ -1082,6 +1142,136 @@ async function generateSchedule() {
         document.getElementById('aiLoading').style.display = 'none';
         btn.disabled = false;
     }
+}
+
+// ─── EDITAR MATÉRIA DO CRONOGRAMA ─────────────────────────────────────────────
+let cronoEditDateStr = '';
+let cronoEditSubjectIdx = -1; // -1 means adding new
+
+function openCronoEditSubject(dateStr, idx) {
+    cronoEditDateStr = dateStr;
+    cronoEditSubjectIdx = idx;
+    const overlay = document.getElementById('cronoEditSubjectOverlay');
+    const select = document.getElementById('ceSubjectSelect');
+    const customInput = document.getElementById('ceSubjectCustom');
+    const hoursInput = document.getElementById('ceHours');
+    const topicsInput = document.getElementById('ceTopics');
+    const notesInput = document.getElementById('ceNotes');
+    const deleteBtn = document.getElementById('ceDeleteBtn');
+
+    // Populate subject select
+    select.innerHTML = '<option value="">— selecione —</option>';
+    studySubjects.forEach(s => {
+        select.innerHTML += `<option value="${s.name}">${s.name}</option>`;
+    });
+    select.innerHTML += '<option value="__custom__">digitar manualmente…</option>';
+    select.onchange = function() {
+        customInput.classList.toggle('hidden', select.value !== '__custom__');
+    };
+
+    if (idx >= 0) {
+        // Editing existing
+        const dayData = scheduleData[dateStr];
+        if (dayData && dayData.subjects && dayData.subjects[idx]) {
+            const s = dayData.subjects[idx];
+            const matchOption = [...select.options].find(o => o.value.toLowerCase() === (s.name||'').toLowerCase());
+            if (matchOption) {
+                select.value = matchOption.value;
+                customInput.classList.add('hidden');
+            } else {
+                select.value = '__custom__';
+                customInput.classList.remove('hidden');
+                customInput.value = s.name;
+            }
+            hoursInput.value = s.hours || '';
+            topicsInput.value = (s.topics || []).join(', ');
+            notesInput.value = s.notes || '';
+        }
+        deleteBtn.style.display = 'inline-flex';
+    } else {
+        // Adding new
+        select.value = '';
+        customInput.classList.add('hidden');
+        customInput.value = '';
+        hoursInput.value = '';
+        topicsInput.value = '';
+        notesInput.value = '';
+        deleteBtn.style.display = 'none';
+    }
+
+    overlay.classList.add('open');
+}
+
+function closeCronoEditSubject(e) {
+    if (e) return;
+    document.getElementById('cronoEditSubjectOverlay').classList.remove('open');
+}
+
+function saveCronoSubjectEdit() {
+    const select = document.getElementById('ceSubjectSelect');
+    const customInput = document.getElementById('ceSubjectCustom');
+    const hoursInput = document.getElementById('ceHours');
+    const topicsInput = document.getElementById('ceTopics');
+    const notesInput = document.getElementById('ceNotes');
+
+    const name = select.value === '__custom__' ? customInput.value.trim() : select.value;
+    if (!name) { alert('Selecione ou digite uma matéria.'); return; }
+
+    const hours = parseFloat(hoursInput.value) || 1;
+    const topics = topicsInput.value.trim() ? topicsInput.value.split(',').map(t => t.trim()).filter(Boolean) : [];
+    const notes = notesInput.value.trim();
+
+    // Ensure dayData exists
+    if (!scheduleData[cronoEditDateStr]) {
+        scheduleData[cronoEditDateStr] = { subjects: [] };
+    }
+    if (!scheduleData[cronoEditDateStr].subjects) {
+        scheduleData[cronoEditDateStr].subjects = [];
+    }
+
+    const subjectEntry = {
+        name,
+        hours,
+        sessions: Math.ceil(hours * 2), // ~30min sessions
+        sessionTime: 30,
+        importance: (studySubjects.find(s => s.name.toLowerCase() === name.toLowerCase()) || {}).importance || 3,
+        topics,
+        notes
+    };
+
+    if (cronoEditSubjectIdx >= 0) {
+        // Update existing - preserve questions if present
+        const existing = scheduleData[cronoEditDateStr].subjects[cronoEditSubjectIdx];
+        if (existing && existing.questions) subjectEntry.questions = existing.questions;
+        scheduleData[cronoEditDateStr].subjects[cronoEditSubjectIdx] = subjectEntry;
+    } else {
+        // Add new
+        scheduleData[cronoEditDateStr].subjects.push(subjectEntry);
+    }
+
+    saveScheduleData();
+    renderCronoCalendar();
+    closeCronoEditSubject();
+    // Refresh the day modal
+    openCronoDayModal(cronoEditDateStr);
+}
+
+function deleteCronoSubjectEntry() {
+    if (!confirm('Remover esta matéria do dia?')) return;
+    if (scheduleData[cronoEditDateStr] && scheduleData[cronoEditDateStr].subjects) {
+        scheduleData[cronoEditDateStr].subjects.splice(cronoEditSubjectIdx, 1);
+        if (scheduleData[cronoEditDateStr].subjects.length === 0) {
+            delete scheduleData[cronoEditDateStr];
+        }
+    }
+    saveScheduleData();
+    renderCronoCalendar();
+    closeCronoEditSubject();
+    openCronoDayModal(cronoEditDateStr);
+}
+
+function toggleCronoDayEdit() {
+    // Not used - edit is now per-subject inline
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
@@ -1270,6 +1460,28 @@ function setStudyView(view) {
         item.classList.remove('drawer-item--active');
     });
     document.getElementById('sdItem' + view.charAt(0).toUpperCase() + view.slice(1)).classList.add('drawer-item--active');
+
+    // Toggle topbar elements based on view
+    const dayNav = document.getElementById('studyDateNav');
+    const cronoNav = document.getElementById('cronoMonthNavTopbar');
+    const goalBox = document.querySelector('.daily-goal-box');
+    const reviewBadge = document.getElementById('reviewBadgeWrap');
+    const topActions = document.querySelector('.topbar-actions');
+
+    if (view === 'cronograma') {
+        if (dayNav) dayNav.classList.add('hidden');
+        if (cronoNav) cronoNav.classList.remove('hidden');
+        if (goalBox) goalBox.style.display = 'none';
+        if (reviewBadge) reviewBadge.style.display = 'none';
+        if (topActions) topActions.style.display = 'none';
+    } else {
+        if (dayNav) dayNav.classList.remove('hidden');
+        if (cronoNav) cronoNav.classList.add('hidden');
+        if (goalBox) goalBox.style.display = '';
+        if (reviewBadge) reviewBadge.style.display = '';
+        if (topActions) topActions.style.display = '';
+    }
+
     if (view === 'erros') {
         populateErrosSelects();
         renderErrosList();

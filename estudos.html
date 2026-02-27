@@ -63,11 +63,17 @@
     <div class="estudos-main">
     <div class="study-topbar">
         <!-- Navegação de data com largura fixa para botões não se moverem -->
-        <div class="study-date-nav">
+        <div class="study-date-nav" id="studyDateNav">
             <button class="nav-btn" onclick="changeDate(-1)">‹</button>
             <div id="dateTitle" onclick="toggleDatePicker()" style="cursor:pointer" title="clique para escolher data">...</div>
             <button class="today-btn hidden" id="todayBtn" onclick="goToToday()">hoje</button>
             <button class="nav-btn" onclick="changeDate(1)">›</button>
+        </div>
+        <!-- Navegação por mês (cronograma) - fica no topbar -->
+        <div class="study-date-nav hidden" id="cronoMonthNavTopbar">
+            <button class="nav-btn" onclick="changeCronoMonth(-1)">‹</button>
+            <span class="crono-month-label" id="cronoMonthLabelTopbar">—</span>
+            <button class="nav-btn" onclick="changeCronoMonth(1)">›</button>
         </div>
 
         <!-- Meta diária -->
@@ -362,11 +368,6 @@
     <!-- VIEW: CRONOGRAMA -->
     <div class="study-view hidden" id="viewCronograma">
         <div class="crono-top-row">
-            <div class="crono-month-nav">
-                <button class="nav-btn" onclick="changeCronoMonth(-1)">‹</button>
-                <span class="crono-month-label" id="cronoMonthLabel">—</span>
-                <button class="nav-btn" onclick="changeCronoMonth(1)">›</button>
-            </div>
             <div class="crono-actions">
                 <button class="btn-topbar-action btn-topbar-action--text" onclick="openAIModal()">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -415,7 +416,11 @@
                 <p class="ai-hint">O cronograma será gerado com base nas suas matérias cadastradas e seus graus de importância.</p>
                 <div class="ai-extra-row">
                     <input type="number" id="aiHoursPerDay"  class="f-input" placeholder="horas disponíveis/dia" min="1" max="16" style="width:200px">
-                    <input type="number" id="aiDays"         class="f-input" placeholder="quantos dias" min="1" max="365" style="width:160px">
+                    <input type="number" id="aiTotalDays"    class="f-input" placeholder="duração (dias)" min="1" max="365" style="width:160px" title="Quantos dias de duração terá o cronograma">
+                </div>
+                <div class="ai-weekdays-wrap">
+                    <span class="ai-weekdays-label">dias de estudo:</span>
+                    <div class="weekdays-toggle" id="aiWeekdaysToggle"></div>
                 </div>
             </div>
             <div id="aiPanelText" style="display:none">
@@ -431,7 +436,11 @@
                 <textarea id="aiTextarea" class="ai-textarea" placeholder="cole aqui o edital, ementa ou lista de matérias/tópicos que serão cobrados…"></textarea>
                 <div class="ai-extra-row">
                     <input type="number" id="aiHoursPerDay2" class="f-input" placeholder="horas disponíveis/dia" min="1" max="16" style="width:200px">
-                    <input type="number" id="aiDays2"        class="f-input" placeholder="quantos dias" min="1" max="365" style="width:160px">
+                    <input type="number" id="aiTotalDays2"   class="f-input" placeholder="duração (dias)" min="1" max="365" style="width:160px" title="Quantos dias de duração terá o cronograma">
+                </div>
+                <div class="ai-weekdays-wrap">
+                    <span class="ai-weekdays-label">dias de estudo:</span>
+                    <div class="weekdays-toggle" id="aiWeekdaysToggle2"></div>
                 </div>
             </div>
             <div class="ai-loading" id="aiLoading" style="display:none">
@@ -456,6 +465,32 @@
             <div class="crono-day-modal-body" id="cronoDayModalBody"></div>
             <div class="edit-modal-actions">
                 <button class="btn-note-cancel" onclick="closeCronoDayModal()">fechar</button>
+                <button class="btn-note-save" id="cronoDayEditBtn" onclick="toggleCronoDayEdit()" style="display:none">editar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EDITAR MATÉRIA DO CRONOGRAMA -->
+    <div class="edit-modal-overlay" id="cronoEditSubjectOverlay" onclick="closeCronoEditSubject(event)">
+        <div class="edit-modal" style="max-width:480px">
+            <div class="edit-modal-title">editar matéria do dia</div>
+            <div class="edit-modal-fields">
+                <label style="font-size:0.75rem;color:rgba(255,255,255,0.4)">matéria</label>
+                <select id="ceSubjectSelect" class="f-select">
+                    <option value="">— selecione —</option>
+                </select>
+                <input type="text" id="ceSubjectCustom" class="f-input hidden" placeholder="nome da matéria">
+                <label style="font-size:0.75rem;color:rgba(255,255,255,0.4);margin-top:8px">horas</label>
+                <input type="number" id="ceHours" class="f-input" placeholder="horas" min="0.5" max="16" step="0.5">
+                <label style="font-size:0.75rem;color:rgba(255,255,255,0.4);margin-top:8px">tópicos (opcional, separados por vírgula)</label>
+                <input type="text" id="ceTopics" class="f-input" placeholder="tópico 1, tópico 2...">
+                <label style="font-size:0.75rem;color:rgba(255,255,255,0.4);margin-top:8px">observações (opcional)</label>
+                <input type="text" id="ceNotes" class="f-input" placeholder="observações">
+            </div>
+            <div class="edit-modal-actions">
+                <button class="btn-note-cancel" style="color:#ff7675" id="ceDeleteBtn" onclick="deleteCronoSubjectEntry()">excluir</button>
+                <button class="btn-note-cancel" onclick="closeCronoEditSubject()">cancelar</button>
+                <button class="btn-note-save" onclick="saveCronoSubjectEdit()">salvar</button>
             </div>
         </div>
     </div>

@@ -13,6 +13,12 @@
     border: 1px solid var(--glass-border);
     width: 500px; justify-content: space-between;
 }
+#cronoMonthLabelTopbar {
+    font-size: 1.15rem; font-weight: 300; letter-spacing: 1.5px;
+    text-transform: lowercase; font-variant: small-caps; color: #fff;
+    flex: 1; text-align: center; padding: 0 12px;
+}
+body.light #cronoMonthLabelTopbar { color: #1a1a1a; }
 #dateTitle {
     font-size: 1.15rem; font-weight: 300; letter-spacing: 1.5px;
     text-transform: lowercase; font-variant: small-caps; color: #fff;
@@ -690,7 +696,7 @@ body.light .today-btn:hover { color: #000; background: rgba(0,0,0,0.1); }
 /* ═══════════════════════════════════════════════════════════
    CRONOGRAMA
    ═══════════════════════════════════════════════════════════ */
-.crono-top-row { display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:16px; flex-wrap:wrap; padding:0 16px; }
+.crono-top-row { display:flex; align-items:center; justify-content:flex-end; gap:14px; margin-bottom:16px; flex-wrap:wrap; padding:0 16px; }
 .crono-month-nav { display:flex; align-items:center; gap:0; padding:8px 22px; border-radius:50px; background:var(--glass); backdrop-filter:blur(15px); border:1px solid var(--glass-border); min-width:260px; justify-content:space-between; }
 .crono-month-label { font-size:1rem; font-weight:300; letter-spacing:1.5px; text-transform:lowercase; font-variant:small-caps; color:#fff; flex:1; text-align:center; padding:0 10px; }
 body.light .crono-month-label { color:#1a1a1a; }
@@ -776,3 +782,36 @@ body.light .crono-modal-empty { color:rgba(0,0,0,0.2); }
 body.light .ai-pdf-label { background:rgba(59,130,246,0.05); color:#2563eb; }
 .ai-pdf-or { font-size:0.72rem; color:rgba(255,255,255,0.3); }
 body.light .ai-pdf-or { color:rgba(0,0,0,0.3); }
+
+/* WEEKDAY SELECTOR NO MODAL IA */
+.ai-weekdays-wrap { display:flex; align-items:center; gap:10px; margin-top:10px; flex-wrap:wrap; }
+.ai-weekdays-label { font-size:0.78rem; color:rgba(255,255,255,0.5); white-space:nowrap; }
+body.light .ai-weekdays-label { color:rgba(0,0,0,0.5); }
+.ai-weekdays-wrap .weekdays-toggle { display:flex; gap:4px; }
+.ai-weekdays-wrap .wd-btn {
+    width:34px; height:34px; border-radius:8px; border:1px solid rgba(255,255,255,0.12);
+    background:rgba(255,255,255,0.04); color:rgba(255,255,255,0.35); font-size:0.68rem;
+    cursor:pointer; transition:all 0.15s; display:flex; align-items:center; justify-content:center;
+    text-transform:uppercase; font-weight:600; letter-spacing:0.5px;
+}
+.ai-weekdays-wrap .wd-btn.active { background:rgba(59,130,246,0.2); border-color:rgba(59,130,246,0.5); color:#3b82f6; }
+body.light .ai-weekdays-wrap .wd-btn { background:rgba(0,0,0,0.04); border-color:rgba(0,0,0,0.1); color:rgba(0,0,0,0.35); }
+body.light .ai-weekdays-wrap .wd-btn.active { background:rgba(59,130,246,0.12); border-color:rgba(59,130,246,0.4); color:#2563eb; }
+
+/* CRONO EDIT BUTTONS */
+.crono-modal-subject-actions { display:flex; gap:6px; margin-left:auto; }
+.crono-edit-btn {
+    background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.5);
+    border-radius:6px; padding:3px 8px; font-size:0.68rem; cursor:pointer; transition:all 0.15s;
+}
+.crono-edit-btn:hover { background:rgba(59,130,246,0.15); border-color:rgba(59,130,246,0.4); color:#3b82f6; }
+body.light .crono-edit-btn { background:rgba(0,0,0,0.04); border-color:rgba(0,0,0,0.1); color:rgba(0,0,0,0.4); }
+body.light .crono-edit-btn:hover { background:rgba(59,130,246,0.1); color:#2563eb; }
+.crono-add-subject-btn {
+    width:100%; padding:10px; border:1px dashed rgba(255,255,255,0.15); border-radius:10px;
+    background:transparent; color:rgba(255,255,255,0.35); font-size:0.8rem; cursor:pointer;
+    transition:all 0.15s; margin-top:4px;
+}
+.crono-add-subject-btn:hover { border-color:rgba(46,204,113,0.4); color:#2ecc71; background:rgba(46,204,113,0.05); }
+body.light .crono-add-subject-btn { border-color:rgba(0,0,0,0.12); color:rgba(0,0,0,0.3); }
+body.light .crono-add-subject-btn:hover { border-color:rgba(46,204,113,0.4); color:#2ecc71; }
