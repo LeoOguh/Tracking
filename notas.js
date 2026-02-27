@@ -117,9 +117,8 @@ function openEntry(id) {
 }
 
 function closeDiaryModal(e) {
-    if (!e || e.target === document.getElementById('diaryModalOverlay')) {
-        document.getElementById('diaryModalOverlay').classList.remove('open');
-    }
+    if (e) return;
+    document.getElementById('diaryModalOverlay').classList.remove('open');
 }
 
 function saveEntry() {

@@ -395,8 +395,8 @@ function openMetasModal() {
     document.getElementById('metasModalOverlay').classList.add('open');
 }
 function closeMetasModal(e) {
-    if (!e || e.target === document.getElementById('metasModalOverlay'))
-        document.getElementById('metasModalOverlay').classList.remove('open');
+    if (e) return;
+    document.getElementById('metasModalOverlay').classList.remove('open');
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────

@@ -288,10 +288,9 @@ function openMoodModal(dStr) {
     document.getElementById('moodModalOverlay').classList.add('open');
 }
 function closeMoodModal(e) {
-    if (!e || e.target === document.getElementById('moodModalOverlay')) {
-        document.getElementById('moodModalOverlay').classList.remove('open');
-        moodModalDate = null;
-    }
+    if (e) return;
+    document.getElementById('moodModalOverlay').classList.remove('open');
+    moodModalDate = null;
 }
 function selectMood(value) {
     if (!moodModalDate) return;
@@ -319,10 +318,9 @@ function openNoteModal(dStr) {
     setTimeout(() => document.getElementById('noteTextarea').focus(), 50);
 }
 function closeNoteModal(e) {
-    if (!e || e.target === document.getElementById('noteModalOverlay')) {
-        document.getElementById('noteModalOverlay').classList.remove('open');
-        noteModalDate = null;
-    }
+    if (e) return;
+    document.getElementById('noteModalOverlay').classList.remove('open');
+    noteModalDate = null;
 }
 function saveNote() {
     if (!noteModalDate) return;
@@ -467,9 +465,8 @@ function buildStatsHeatmap(habit, hColor, today) {
 }
 
 function closeStatsModal(e) {
-    if (!e || e.target === document.getElementById('statsModalOverlay')) {
-        document.getElementById('statsModalOverlay').classList.remove('open');
-    }
+    if (e) return;
+    document.getElementById('statsModalOverlay').classList.remove('open');
 }
 
 // ─── MODAL EDITAR HÁBITO ─────────────────────────────────────────────────────
@@ -498,10 +495,9 @@ function openEditHabit(i) {
     document.getElementById('editHabitOverlay').classList.add('open');
 }
 function closeEditHabit(e) {
-    if (!e || e.target === document.getElementById('editHabitOverlay')) {
-        document.getElementById('editHabitOverlay').classList.remove('open');
-        editHabitIndex = null;
-    }
+    if (e) return;
+    document.getElementById('editHabitOverlay').classList.remove('open');
+    editHabitIndex = null;
 }
 function setEditType(type) {
     editHabitType = type;
@@ -1153,8 +1149,8 @@ function openSonoModal(dateKey = null) {
 }
 
 function closeSonoModal(e) {
-    if (!e || e.target === document.getElementById('sonoModalOverlay'))
-        document.getElementById('sonoModalOverlay').classList.remove('open');
+    if (e) return;
+    document.getElementById('sonoModalOverlay').classList.remove('open');
 }
 
 function selectSonoQuality(v) { sonoQuality = v; renderSonoQualitySelect(); }
@@ -1558,10 +1554,9 @@ function openMetaMensalForm(id) {
 }
 
 function closeMetaMensalModal(e) {
-    if (!e || e.target === document.getElementById('metaMensalModalOverlay')) {
-        document.getElementById('metaMensalModalOverlay').classList.remove('open');
-        editingMetaId = null;
-    }
+    if (e) return;
+    document.getElementById('metaMensalModalOverlay').classList.remove('open');
+    editingMetaId = null;
 }
 
 function saveMetaMensal() {

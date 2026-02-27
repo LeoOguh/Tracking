@@ -142,10 +142,9 @@ function onSubjectSelectChange() {
 // ─── GERENCIAR MATÉRIAS ───────────────────────────────────────────────────────
 function openSubjectsModal() { renderSubjectsList(); document.getElementById('subjectsModalOverlay').classList.add('open'); }
 function closeSubjectsModal(e) {
-    if (!e || e.target === document.getElementById('subjectsModalOverlay')) {
-        document.getElementById('subjectsModalOverlay').classList.remove('open');
-        populateSubjectDropdown();
-    }
+    if (e) return;
+    document.getElementById('subjectsModalOverlay').classList.remove('open');
+    populateSubjectDropdown();
 }
 function addSubject() {
     const name       = document.getElementById('sNewName').value.trim();
@@ -528,9 +527,8 @@ function openEditModal(dateStr, id) {
     document.getElementById('editModalOverlay').classList.add('open');
 }
 function closeEditModal(e) {
-    if (!e || e.target === document.getElementById('editModalOverlay')) {
-        document.getElementById('editModalOverlay').classList.remove('open'); editingId = null;
-    }
+    if (e) return;
+    document.getElementById('editModalOverlay').classList.remove('open'); editingId = null;
 }
 function saveEdit() {
     if (!editingId) return;
@@ -818,7 +816,7 @@ function hideReviewTip(){document.getElementById('reviewTooltip').classList.remo
 
 // ─── CRONOGRAMA IA ────────────────────────────────────────────────────────────
 function openAIModal()  { document.getElementById('aiModalOverlay').classList.add('open'); document.getElementById('aiResult').style.display='none'; }
-function closeAIModal(e){ if(!e||e.target===document.getElementById('aiModalOverlay')) document.getElementById('aiModalOverlay').classList.remove('open'); }
+function closeAIModal(e){ if(e) return; document.getElementById('aiModalOverlay').classList.remove('open'); }
 function setAIMode(mode){
     aiMode=mode;
     document.getElementById('aiModeSubjects').classList.toggle('type-btn--active',mode==='subjects');

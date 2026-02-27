@@ -967,8 +967,8 @@ function openCalDayModal(key) {
 }
 
 function closeCalDayModal(e) {
-    if (!e || e.target===document.getElementById('calDayOverlay'))
-        document.getElementById('calDayOverlay').classList.remove('open');
+    if (e) return;
+    document.getElementById('calDayOverlay').classList.remove('open');
 }
 
 function renderStatsSummary() {
