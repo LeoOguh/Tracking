@@ -7,17 +7,9 @@ export default async function handler(req, res) {
   if (!API_KEY) return res.status(500).json({ error: 'Chave GEMINI_API_KEY não configurada na Vercel.' });
 
   try {
-    const anoAtual = new Date().getFullYear();
-    
     // Usamos uma variável dedicada para o prompt ficar limpo e fácil de editar
     const promptIA = `
-      Analise este extrato/fatura de cartão de crédito em PDF e extraia todos os lançamentos.
-      
-      REGRAS CRÍTICAS SOBRE DATAS:
-      - Extraia o ANO exatamente como aparece no documento PDF. NÃO invente ou assuma anos.
-      - Se o PDF não mostrar o ano explicitamente em cada lançamento, deduza pelo contexto do documento (cabeçalho, período de referência, mês/ano da fatura).
-      - Se mesmo assim não for possível determinar o ano, use ${anoAtual} como padrão.
-      - A data deve ser retornada no formato YYYY-MM-DD.
+      Analise este extrato bancário em PDF e extraia todos os lançamentos.
       
       REGRAS DE CATEGORIZAÇÃO (Seja inteligente ao deduzir a categoria pelo nome do estabelecimento):
       - Supermercados, mercadinhos, padarias e apps de entrega (ex: Center Box, Assaí, iFood, Cometa) DEBEM ser 'Alimentação'.

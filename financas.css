@@ -1,6 +1,7 @@
 /* ═══════════════════════════════════════════════════════════
    FINANÇAS — Clarity CSS
    ═══════════════════════════════════════════════════════════ */
+html, body { overflow-x: hidden; max-width: 100vw; }
 .fin-drawer{position:fixed;top:0;left:0;width:240px;height:100vh;background:rgba(10,22,40,0.95);border-right:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;z-index:400;backdrop-filter:blur(12px)}
 body.light .fin-drawer{background:rgba(240,237,232,0.95);border-color:rgba(0,0,0,0.1)}
 .fin-drawer .drawer-header{display:flex;align-items:center;justify-content:space-between;padding:20px 18px;border-bottom:1px solid rgba(255,255,255,0.08)}
@@ -17,7 +18,7 @@ body.light .fin-drawer .drawer-item--active{background:rgba(59,130,246,0.12);col
 .fin-drawer .drawer-footer{padding:12px 10px;border-top:1px solid rgba(255,255,255,0.06)}
 body.light .fin-drawer .drawer-footer{border-color:rgba(0,0,0,0.08)}
 
-.fin-topbar{display:flex;align-items:center;gap:14px;margin-bottom:6px;width:calc(100vw - 260px);margin-left:260px;padding:8px 32px 0;box-sizing:border-box}
+.fin-topbar{display:flex;align-items:center;gap:14px;margin-bottom:6px;width:calc(100vw - 260px);margin-left:260px;padding:8px 32px 0;box-sizing:border-box;overflow-x:hidden}
 .fin-topbar-center{flex:1;display:flex;flex-direction:column;align-items:flex-start;gap:2px}
 .fin-view-label{font-size:0.62rem;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.3);margin-bottom:-2px}
 body.light .fin-view-label{color:rgba(0,0,0,0.35)}

@@ -3,7 +3,8 @@
    ═══════════════════════════════════════════════════════════ */
 .notas-topbar {
     display: flex; align-items: center; justify-content: space-between;
-    width: 100%; max-width: 98%; margin-bottom: 28px; flex-wrap: wrap; gap: 12px;
+    width: 100%; max-width: 100%; margin-bottom: 28px; flex-wrap: wrap; gap: 12px;
+    padding: 0 16px; box-sizing: border-box;
 }
 .notas-title-area { display: flex; flex-direction: column; gap: 2px; }
 .notas-page-title {
@@ -36,8 +37,9 @@ body.light .focus-btn.active { background: rgba(0,0,0,0.1); color: #1a1a1a; }
    LAYOUT 2 COLUNAS
    ═══════════════════════════════════════════════════════════ */
 .notas-container {
-    width: 100%; max-width: 98%;
-    display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start;
+    width: 100%; max-width: 100%;
+    display: grid; grid-template-columns: 1fr; gap: 20px; align-items: start;
+    padding: 0 16px; box-sizing: border-box;
 }
 .notas-col { display: flex; flex-direction: column; gap: 14px; }
 .notas-col.hidden { display: none; }

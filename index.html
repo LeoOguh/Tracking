@@ -60,9 +60,9 @@
     <div class="container" id="habitsContainer">
         <div class="draggable-section" data-section="chart">
             <div class="glass-panel chart-container-wrapper" id="chartWrapper">
+                <span class="drag-handle section-drag-handle" draggable="true" onclick="event.stopPropagation()" title="arraste para reordenar">⠿</span>
                 <div class="chart-header-row" onclick="toggleChart()" style="cursor:pointer">
                     <div style="display:flex;align-items:center;gap:8px">
-                        <span class="drag-handle" draggable="true" onclick="event.stopPropagation()" title="arraste para reordenar">⠿</span>
                         <span class="chart-header-label">visão mensal</span>
                     </div>
                     <div class="chart-collapse-btn" id="chartCollapseBtn">
@@ -100,9 +100,7 @@
 
         <div class="draggable-section" data-section="grid">
             <div class="glass-panel module-grid">
-                <div style="display:flex;align-items:center;gap:8px;padding:4px 8px 0">
-                    <span class="drag-handle" draggable="true" title="arraste para reordenar">⠿</span>
-                </div>
+                <span class="drag-handle section-drag-handle" draggable="true" title="arraste para reordenar">⠿</span>
                 <div class="habits-sidebar">
                     <div class="row-header"><span class="week-title">hábitos</span></div>
                     <div class="row-mood-sidebar">
@@ -122,9 +120,9 @@
 
         <div class="draggable-section" data-section="tasks">
             <div class="glass-panel tasks-panel" id="tasksSection">
+                <span class="drag-handle section-drag-handle" draggable="true" onclick="event.stopPropagation()" title="arraste para reordenar">⠿</span>
                 <div class="tasks-panel-header" onclick="toggleTasksPanel()">
                     <div class="tasks-panel-left">
-                        <span class="drag-handle" draggable="true" onclick="event.stopPropagation()" title="arraste para reordenar">⠿</span>
                         <span class="tasks-panel-icon">☑</span>
                         <span class="tasks-panel-title">tarefas do dia</span>
                         <span class="tasks-panel-count" id="tasksPanelCount"></span>
@@ -155,9 +153,9 @@
 
         <div class="draggable-section" data-section="summary">
             <div class="summary-panel">
+                <span class="drag-handle section-drag-handle" draggable="true" onclick="event.stopPropagation()" title="arraste para reordenar">⠿</span>
                 <div class="summary-header" id="summaryHeader" onclick="toggleSummary()">
                     <div style="display:flex;align-items:center;gap:8px">
-                        <span class="drag-handle" draggable="true" onclick="event.stopPropagation()" title="arraste para reordenar">⠿</span>
                         <span class="summary-header-title">resumo do mês</span>
                     </div>
                     <span class="summary-chevron" id="summaryChevron">▾</span>
@@ -192,11 +190,9 @@
         <!-- SONO & HIDRATAÇÃO -->
         <div class="draggable-section" data-section="wellness">
             <div class="wellness-row">
-                <div style="display:flex;align-items:center;gap:8px;padding:0 0 4px 4px;width:100%">
-                    <span class="drag-handle" draggable="true" title="arraste para reordenar">⠿</span>
-                </div>
             <!-- Sono — card compacto com gráfico clicável -->
             <div class="glass-panel wellness-card" id="sonoCardTrigger">
+                <span class="drag-handle section-drag-handle" draggable="true" title="arraste para reordenar">⠿</span>
                 <div class="wellness-card-header">
                     <span class="wellness-icon">🌙</span>
                     <span class="wellness-title">sono</span>
@@ -208,7 +204,8 @@
                 <div class="sono-week-chart" id="sonoWeekChart" style="cursor:pointer" title="Clique em um dia para editar"></div>
             </div>
             <!-- Hidratação movida para Nutrição -->
-            <div class="glass-panel wellness-card" id="hidratacaoCard" style="cursor:pointer;justify-content:center;align-items:center;gap:10px" onclick="window.location.href='nutricao.html?view=agua'">
+            <div class="glass-panel wellness-card" id="hidratacaoCard" style="cursor:pointer" onclick="window.location.href='nutricao.html?view=agua'">
+                <span class="drag-handle section-drag-handle" draggable="true" onclick="event.stopPropagation()" title="arraste para reordenar">⠿</span>
                 <div class="wellness-card-header">
                     <span class="wellness-icon">💧</span>
                     <span class="wellness-title">hidratação</span>

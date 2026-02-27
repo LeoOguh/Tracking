@@ -38,6 +38,20 @@
                 caderno de erros
             </button>
         </nav>
+        <div class="drawer-footer" style="padding:12px 10px;border-top:1px solid rgba(255,255,255,0.06)">
+            <button class="btn-topbar-action" onclick="exportStudyData()" style="width:100%;justify-content:center;gap:8px;border-radius:12px">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                exportar dados
+            </button>
+            <button class="btn-topbar-action" onclick="importStudyData()" style="width:100%;justify-content:center;gap:8px;border-radius:12px;margin-top:6px">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                importar dados
+            </button>
+        </div>
     </aside>
 
     <div class="estudos-main">
@@ -82,16 +96,6 @@
                     <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
                 </svg>
                 cronograma IA
-            </button>
-            <button class="btn-topbar-action btn-topbar-action--icon" onclick="importStudyData()" title="Importar dados">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-                </svg>
-            </button>
-            <button class="btn-topbar-action btn-topbar-action--icon" onclick="exportStudyData()" title="Exportar dados">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-                </svg>
             </button>
         </div>
         <button class="theme-toggle" onclick="toggleTheme()" id="themeToggleBtn">☀ claro</button>
@@ -356,6 +360,7 @@
 
     <!-- VIEW: CADERNO DE ERROS -->
     <div class="study-view hidden" id="viewErros">
+        <div class="glass-panel erros-container">
         <div class="erros-header">
             <div class="erros-filters">
                 <select id="errosFilterMateria" class="f-select" style="flex:1;max-width:240px" onchange="renderErrosList()">
@@ -390,6 +395,7 @@
 
         <!-- Lista de erros -->
         <div id="errosListContent"></div>
+        </div>
     </div> <!-- end viewErros -->
 
     </div> <!-- end study-container -->

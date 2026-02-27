@@ -623,10 +623,14 @@ body.light .study-drawer .drawer-title { color: rgba(0,0,0,0.4); }
 body.light .study-drawer .drawer-item { color: rgba(0,0,0,0.45); }
 body.light .study-drawer .drawer-item:hover { background: rgba(0,0,0,0.05); color: rgba(0,0,0,0.7); }
 body.light .study-drawer .drawer-item--active { background: rgba(59,130,246,0.12); color: #2563eb; border-left-color: #3b82f6; }
+
+.study-drawer .drawer-footer { padding: 12px 10px; border-top: 1px solid rgba(255,255,255,0.06); }
+body.light .study-drawer .drawer-footer { border-color: rgba(0,0,0,0.08); }
 .study-with-sidebar { padding: 0 32px 80px; box-sizing: border-box; width: 100%; }
 .study-view { display: flex; flex-direction: column; gap: 20px; }
 .study-view.hidden { display: none; }
 #viewErros { width: 100%; }
+.erros-container { padding: 24px 28px; margin: 0 16px; }
 .erros-header { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 16px; }
 .erros-filters { display: flex; gap: 10px; flex: 1; }
 
