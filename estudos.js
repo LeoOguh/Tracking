@@ -1769,56 +1769,68 @@ let currentStudyView = 'sessoes';
 
 function setStudyView(view) {
     currentStudyView = view;
-    document.querySelectorAll('.study-view').forEach(v => v.classList.add('hidden'));
-    document.getElementById('view' + view.charAt(0).toUpperCase() + view.slice(1)).classList.remove('hidden');
     
-    // Atualiza o item ativo no menu lateral
+    // 1. Oculta TODAS as views forçando display: none (mata o gap fantasma)
+    document.querySelectorAll('.study-view').forEach(v => {
+        v.classList.add('hidden');
+        v.style.display = 'none'; 
+    });
+    
+    // Exibe apenas a view ativa
+    const activeView = document.getElementById('view' + view.charAt(0).toUpperCase() + view.slice(1));
+    if (activeView) {
+        activeView.classList.remove('hidden');
+        activeView.style.display = 'flex';
+    }
+    
+    // 2. Atualiza o menu lateral
     document.querySelectorAll('.study-drawer .drawer-item').forEach(item => {
         item.classList.remove('drawer-item--active');
     });
-    document.getElementById('sdItem' + view.charAt(0).toUpperCase() + view.slice(1)).classList.add('drawer-item--active');
+    const activeMenuItem = document.getElementById('sdItem' + view.charAt(0).toUpperCase() + view.slice(1));
+    if (activeMenuItem) {
+        activeMenuItem.classList.add('drawer-item--active');
+    }
 
-    // Pega os elementos da Topbar
+    // 3. Pega os elementos da Topbar
     const dayNav = document.getElementById('studyDateNav');
     const cronoNav = document.getElementById('cronoMonthNavTopbar');
     const goalBox = document.querySelector('.daily-goal-box');
     const reviewBadge = document.getElementById('reviewBadgeWrap');
-    
-    // Nossos novos grupos de botões
     const topActionsSessoes = document.getElementById('topActionsSessoes');
     const topActionsCronograma = document.getElementById('topActionsCronograma');
 
+    // 4. Controle rigoroso de exibição da Topbar
     if (view === 'cronograma') {
-        if (dayNav) dayNav.classList.add('hidden');
-        if (cronoNav) cronoNav.classList.remove('hidden');
+        if (dayNav) dayNav.style.display = 'none';
+        if (cronoNav) {
+            cronoNav.classList.remove('hidden');
+            cronoNav.style.display = 'flex';
+        }
         if (goalBox) goalBox.style.display = 'none';
         if (reviewBadge) reviewBadge.style.display = 'none';
         
-        // Esconde botão de sessões, mostra botões de cronograma
-        if (topActionsSessoes) {
-            topActionsSessoes.classList.add('hidden');
-            topActionsSessoes.style.display = 'none';
-        }
+        if (topActionsSessoes) topActionsSessoes.style.display = 'none';
+        
         if (topActionsCronograma) {
-            topActionsCronograma.classList.remove('hidden'); // <-- Remove o bloqueio do CSS
+            topActionsCronograma.classList.remove('hidden');
             topActionsCronograma.style.display = 'flex';
-            topActionsCronograma.style.marginLeft = 'auto'; // <-- Empurra os botões para a direita, balanceando o espaço vazio
+            topActionsCronograma.style.marginLeft = 'auto'; // Empurra os botões pra direita
         }
     } else {
-        if (dayNav) dayNav.classList.remove('hidden');
-        if (cronoNav) cronoNav.classList.add('hidden');
-        if (goalBox) goalBox.style.display = '';
-        if (reviewBadge) reviewBadge.style.display = '';
+        if (dayNav) {
+            dayNav.classList.remove('hidden');
+            dayNav.style.display = 'flex';
+        }
+        if (cronoNav) cronoNav.style.display = 'none';
+        if (goalBox) goalBox.style.display = 'flex';
+        if (reviewBadge) reviewBadge.style.display = 'block';
         
-        // Esconde botões de cronograma, mostra botão de sessões
         if (topActionsSessoes) {
             topActionsSessoes.classList.remove('hidden');
             topActionsSessoes.style.display = 'flex';
         }
-        if (topActionsCronograma) {
-            topActionsCronograma.classList.add('hidden');
-            topActionsCronograma.style.display = 'none';
-        }
+        if (topActionsCronograma) topActionsCronograma.style.display = 'none';
     }
 
     if (view === 'erros') {
