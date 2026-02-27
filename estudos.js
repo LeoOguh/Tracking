@@ -1770,77 +1770,70 @@ let currentStudyView = 'sessoes';
 function setStudyView(view) {
     currentStudyView = view;
     
-    // Oculta todas as views
+    // 1. Oculta TODAS as views do container principal
     document.querySelectorAll('.study-view').forEach(v => {
         v.classList.add('hidden');
         v.style.display = 'none'; 
     });
     
-    // Exibe apenas a ativa
+    // 2. Exibe apenas a view ativa
     const activeView = document.getElementById('view' + view.charAt(0).toUpperCase() + view.slice(1));
     if (activeView) {
         activeView.classList.remove('hidden');
         activeView.style.display = 'flex';
     }
     
-    // Atualiza menu lateral
+    // 3. Atualiza o item azul no menu lateral
     document.querySelectorAll('.study-drawer .drawer-item').forEach(item => {
         item.classList.remove('drawer-item--active');
     });
     const activeMenuItem = document.getElementById('sdItem' + view.charAt(0).toUpperCase() + view.slice(1));
     if (activeMenuItem) activeMenuItem.classList.add('drawer-item--active');
 
-    // Elementos da Topbar
+    // 4. Elementos da Topbar
     const dayNav = document.getElementById('studyDateNav');
     const cronoNav = document.getElementById('cronoMonthNavTopbar');
     const goalBox = document.querySelector('.daily-goal-box');
     const reviewBadge = document.getElementById('reviewBadgeWrap');
     const topActionsSessoes = document.getElementById('topActionsSessoes');
     const topActionsCronograma = document.getElementById('topActionsCronograma');
-    const topbar = document.querySelector('.study-topbar'); // Pegamos a barra principal
+    const topbar = document.querySelector('.study-topbar');
 
-    if (view === 'cronograma') {
-        if (topbar) topbar.style.flexWrap = 'nowrap'; // ← Impede que a barra quebre a linha e crie o buraco
-        
-        if (dayNav) dayNav.style.display = 'none';
-        if (cronoNav) {
-            cronoNav.classList.remove('hidden');
-            cronoNav.style.display = 'flex';
-        }
+    // 5. CONTROLE RIGOROSO: O QUE APARECE EM CADA ABA
+    if (view === 'sessoes') {
+        if (topbar) topbar.style.flexWrap = 'wrap';
+        if (dayNav) { dayNav.classList.remove('hidden'); dayNav.style.display = 'flex'; }
+        if (cronoNav) { cronoNav.classList.add('hidden'); cronoNav.style.display = 'none'; }
+        if (goalBox) goalBox.style.display = 'flex';
+        if (reviewBadge) reviewBadge.style.display = 'block';
+        if (topActionsSessoes) { topActionsSessoes.classList.remove('hidden'); topActionsSessoes.style.display = 'flex'; }
+        if (topActionsCronograma) { topActionsCronograma.classList.add('hidden'); topActionsCronograma.style.display = 'none'; }
+    } 
+    else if (view === 'cronograma') {
+        if (topbar) topbar.style.flexWrap = 'nowrap';
+        if (dayNav) { dayNav.classList.add('hidden'); dayNav.style.display = 'none'; }
+        if (cronoNav) { cronoNav.classList.remove('hidden'); cronoNav.style.display = 'flex'; }
         if (goalBox) goalBox.style.display = 'none';
         if (reviewBadge) reviewBadge.style.display = 'none';
-        
-        if (topActionsSessoes) topActionsSessoes.style.display = 'none';
-        
-        if (topActionsCronograma) {
+        if (topActionsSessoes) { topActionsSessoes.classList.add('hidden'); topActionsSessoes.style.display = 'none'; }
+        if (topActionsCronograma) { 
             topActionsCronograma.classList.remove('hidden');
             topActionsCronograma.style.display = 'flex';
             topActionsCronograma.style.marginLeft = 'auto'; 
         }
-    } else {
-        if (topbar) topbar.style.flexWrap = 'wrap'; // ← Devolve o comportamento normal nas outras abas
-        
-        if (dayNav) {
-            dayNav.classList.remove('hidden');
-            dayNav.style.display = 'flex';
-        }
-        if (cronoNav) cronoNav.style.display = 'none';
-        if (goalBox) goalBox.style.display = 'flex';
-        if (reviewBadge) reviewBadge.style.display = 'block';
-        
-        if (topActionsSessoes) {
-            topActionsSessoes.classList.remove('hidden');
-            topActionsSessoes.style.display = 'flex';
-        }
-        if (topActionsCronograma) topActionsCronograma.style.display = 'none';
-    }
+        renderCronoCalendar();
+    } 
+    else if (view === 'erros') {
+        if (topbar) topbar.style.flexWrap = 'wrap';
+        if (dayNav) { dayNav.classList.add('hidden'); dayNav.style.display = 'none'; }
+        if (cronoNav) { cronoNav.classList.add('hidden'); cronoNav.style.display = 'none'; }
+        if (goalBox) goalBox.style.display = 'none'; // Esconde a barra de progresso!
+        if (reviewBadge) reviewBadge.style.display = 'none';
+        if (topActionsSessoes) { topActionsSessoes.classList.add('hidden'); topActionsSessoes.style.display = 'none'; }
+        if (topActionsCronograma) { topActionsCronograma.classList.add('hidden'); topActionsCronograma.style.display = 'none'; }
 
-    if (view === 'erros') {
         populateErrosSelects();
         renderErrosList();
-    }
-    if (view === 'cronograma') {
-        renderCronoCalendar();
     }
 }
 
