@@ -42,24 +42,7 @@
             </div>
             <button class="tpw-compact-btn" onclick="toggleCompactMode()" id="tpwCompactBtn" title="Modo compacto">⊞</button>
         </div>
-        <button class="theme-toggle" onclick="toggleTheme()" id="themeToggleBtn">☀ claro</button>
-    </div>
-
-    <div class="container">
-        <div class="glass-panel chart-container-wrapper" id="chartWrapper">
-            <div class="chart-header-row" onclick="toggleChart()" style="cursor:pointer">
-                <span class="chart-header-label">visão mensal</span>
-                <div class="chart-collapse-btn" id="chartCollapseBtn">
-                    <svg id="chartCollapseIcon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
-                    <span id="chartCollapseLabel">recolher</span>
-                </div>
-            </div>
-            <div id="weeksHeaderChart" class="weeks-chart-header"></div>
-            <div class="module-chart"><canvas id="habitsChart"></canvas></div>
-        </div>
-
-        <div class="module-input">
-            <button class="btn-reset" onclick="resetAllData()">Limpar Tudo</button>
+        <div style="display:flex;gap:4px;align-items:center">
             <button class="btn-topbar-action btn-topbar-action--icon" onclick="importData()" title="Importar dados">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
@@ -70,52 +53,122 @@
                     <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
                 </svg>
             </button>
-            <input type="color"  id="habitColor"  class="color-picker" value="#2ecc71">
-            <input type="text"   id="habitInput"   placeholder="novo hábito" onkeydown="if(event.key==='Enter') addHabit()">
-            <input type="number" id="habitGoal"    class="goal-input" placeholder="meta/sem" min="1" max="7">
+            <button class="theme-toggle" onclick="toggleTheme()" id="themeToggleBtn">☀ claro</button>
+        </div>
+    </div>
 
-            <div class="type-toggle" title="Tipo: meta ou limite">
-                <button class="type-btn type-btn--active" id="btnTypeMeta"  onclick="setHabitType('meta')">meta</button>
-                <button class="type-btn"                  id="btnTypeLimit" onclick="setHabitType('limite')">limite</button>
+    <div class="container" id="habitsContainer">
+        <div class="draggable-section" data-section="chart">
+            <div class="glass-panel chart-container-wrapper" id="chartWrapper">
+                <div class="chart-header-row" onclick="toggleChart()" style="cursor:pointer">
+                    <div style="display:flex;align-items:center;gap:8px">
+                        <span class="drag-handle" draggable="true" onclick="event.stopPropagation()" title="arraste para reordenar">⠿</span>
+                        <span class="chart-header-label">visão mensal</span>
+                    </div>
+                    <div class="chart-collapse-btn" id="chartCollapseBtn">
+                        <svg id="chartCollapseIcon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+                        <span id="chartCollapseLabel">recolher</span>
+                    </div>
+                </div>
+                <div id="weeksHeaderChart" class="weeks-chart-header"></div>
+                <div class="module-chart"><canvas id="habitsChart"></canvas></div>
             </div>
-
-            <div class="type-toggle" title="Duração">
-                <button class="type-btn type-btn--active" id="btnDurRec" onclick="setHabitDuration('recorrente')">∞</button>
-                <button class="type-btn"                  id="btnDurPer" onclick="setHabitDuration('periodo')">N dias</button>
-            </div>
-            <input type="number" id="habitPeriod" class="goal-input period-input hidden" placeholder="dias" min="1" max="365">
-
-            <div class="weekdays-toggle" id="weekdaysToggle"></div>
-            <button class="btn-add" onclick="addHabit()">+</button>
         </div>
 
-        <div class="glass-panel module-grid">
-            <div class="habits-sidebar">
-                <div class="row-header"><span class="week-title">hábitos</span></div>
-                <div class="row-mood-sidebar">
-                    <span style="font-size:1rem; margin-right:8px; opacity:0.7;">✦</span>
-                    <span class="mood-sidebar-label">humor</span>
+        <div class="draggable-section" data-section="input">
+            <div class="module-input">
+                <button class="btn-reset" onclick="resetAllData()">Limpar Tudo</button>
+                <input type="color"  id="habitColor"  class="color-picker" value="#2ecc71">
+                <input type="text"   id="habitInput"   placeholder="novo hábito" onkeydown="if(event.key==='Enter') addHabit()">
+                <input type="number" id="habitGoal"    class="goal-input" placeholder="meta/sem" min="1" max="7">
+
+                <div class="type-toggle" title="Tipo: meta ou limite">
+                    <button class="type-btn type-btn--active" id="btnTypeMeta"  onclick="setHabitType('meta')">meta</button>
+                    <button class="type-btn"                  id="btnTypeLimit" onclick="setHabitType('limite')">limite</button>
                 </div>
-                <div class="row-notes-sidebar">
-                    <span style="font-size:0.85rem; margin-right:8px; opacity:0.5;">✎</span>
-                    <span class="notes-sidebar-label">notas</span>
+
+                <div class="type-toggle" title="Duração">
+                    <button class="type-btn type-btn--active" id="btnDurRec" onclick="setHabitDuration('recorrente')">∞</button>
+                    <button class="type-btn"                  id="btnDurPer" onclick="setHabitDuration('periodo')">N dias</button>
                 </div>
-                <div id="habitsList"></div>
-                <div class="row-footer"></div>
+                <input type="number" id="habitPeriod" class="goal-input period-input hidden" placeholder="dias" min="1" max="365">
+
+                <div class="weekdays-toggle" id="weekdaysToggle"></div>
+                <button class="btn-add" onclick="addHabit()">+</button>
             </div>
-            <div class="weeks-container" id="weeksWrapper"></div>
         </div>
 
-        <div class="summary-panel">
-            <div class="summary-header" id="summaryHeader" onclick="toggleSummary()">
-                <span class="summary-header-title">resumo do mês</span>
-                <span class="summary-chevron" id="summaryChevron">▾</span>
+        <div class="draggable-section" data-section="grid">
+            <div class="glass-panel module-grid">
+                <div style="display:flex;align-items:center;gap:8px;padding:4px 8px 0">
+                    <span class="drag-handle" draggable="true" title="arraste para reordenar">⠿</span>
+                </div>
+                <div class="habits-sidebar">
+                    <div class="row-header"><span class="week-title">hábitos</span></div>
+                    <div class="row-mood-sidebar">
+                        <span style="font-size:1rem; margin-right:8px; opacity:0.7;">✦</span>
+                        <span class="mood-sidebar-label">humor</span>
+                    </div>
+                    <div class="row-notes-sidebar">
+                        <span style="font-size:0.85rem; margin-right:8px; opacity:0.5;">✎</span>
+                        <span class="notes-sidebar-label">notas</span>
+                    </div>
+                    <div id="habitsList"></div>
+                    <div class="row-footer"></div>
+                </div>
+                <div class="weeks-container" id="weeksWrapper"></div>
             </div>
-            <div class="summary-body" id="summaryBody"></div>
+        </div>
+
+        <div class="draggable-section" data-section="tasks">
+            <div class="glass-panel tasks-panel" id="tasksSection">
+                <div class="tasks-panel-header" onclick="toggleTasksPanel()">
+                    <div class="tasks-panel-left">
+                        <span class="drag-handle" draggable="true" onclick="event.stopPropagation()" title="arraste para reordenar">⠿</span>
+                        <span class="tasks-panel-icon">☑</span>
+                        <span class="tasks-panel-title">tarefas do dia</span>
+                        <span class="tasks-panel-count" id="tasksPanelCount"></span>
+                    </div>
+                    <span class="tasks-panel-chevron" id="tasksChevron">▾</span>
+                </div>
+                <div class="tasks-panel-body" id="tasksPanelBody">
+                    <div class="task-form-inline">
+                        <input type="text" id="taskInput" class="f-input task-input" placeholder="nova tarefa…" onkeydown="if(event.key==='Enter')addTask()">
+                        <select id="taskPriority" class="f-select task-priority-sel">
+                            <option value="normal">normal</option>
+                            <option value="high">🔴 alta</option>
+                            <option value="low">🔵 baixa</option>
+                        </select>
+                        <button class="btn-add-task" onclick="addTask()">+</button>
+                    </div>
+                    <div class="tasks-list" id="tasksList"></div>
+                    <div class="tasks-progress-bar-wrap" id="tasksProgressWrap" style="display:none">
+                        <div class="tasks-progress-bar-track">
+                            <div class="tasks-progress-bar-fill" id="tasksProgressFill"></div>
+                        </div>
+                        <span class="tasks-progress-label" id="tasksProgressLabel">0 / 0</span>
+                    </div>
+                    <div class="tasks-stats-row" id="tasksStatsRow"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="draggable-section" data-section="summary">
+            <div class="summary-panel">
+                <div class="summary-header" id="summaryHeader" onclick="toggleSummary()">
+                    <div style="display:flex;align-items:center;gap:8px">
+                        <span class="drag-handle" draggable="true" onclick="event.stopPropagation()" title="arraste para reordenar">⠿</span>
+                        <span class="summary-header-title">resumo do mês</span>
+                    </div>
+                    <span class="summary-chevron" id="summaryChevron">▾</span>
+                </div>
+                <div class="summary-body" id="summaryBody"></div>
+            </div>
         </div>
 
         <!-- METAS MENSAIS — painel colapsável integrado -->
-        <div class="glass-panel metas-mensais-panel" id="metasMensaisSection">
+        <div class="draggable-section" data-section="metas">
+            <div class="glass-panel metas-mensais-panel" id="metasMensaisSection">
             <div class="metas-panel-header" onclick="toggleMetasMensais()">
                 <div class="metas-panel-left">
                     <span class="metas-panel-icon">🎯</span>
@@ -133,10 +186,15 @@
             <div class="metas-panel-body" id="metasPanelBody">
                 <div id="metasMensaisList" class="metas-list"></div>
             </div>
+            </div>
         </div>
 
         <!-- SONO & HIDRATAÇÃO -->
-        <div class="wellness-row">
+        <div class="draggable-section" data-section="wellness">
+            <div class="wellness-row">
+                <div style="display:flex;align-items:center;gap:8px;padding:0 0 4px 4px;width:100%">
+                    <span class="drag-handle" draggable="true" title="arraste para reordenar">⠿</span>
+                </div>
             <!-- Sono — card compacto com gráfico clicável -->
             <div class="glass-panel wellness-card" id="sonoCardTrigger">
                 <div class="wellness-card-header">
@@ -163,6 +221,7 @@
                     <button class="hid-btn hid-btn--add" onclick="event.stopPropagation();addWater(1)">+ copo</button>
                 </div>
                 <div style="font-size:0.6rem;color:rgba(255,255,255,0.2);letter-spacing:1px;text-align:center">ver detalhes em nutrição →</div>
+            </div>
             </div>
         </div>
     </div>

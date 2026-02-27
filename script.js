@@ -66,7 +66,7 @@ function toggleTheme() {
 
 // ─── EXPORTAR DADOS ───────────────────────────────────────────────────────────
 function exportData() {
-    const data = { habits, history, moodHistory, notesHistory, exportedAt: new Date().toISOString() };
+    const data = { habits, history, moodHistory, notesHistory, tasks, exportedAt: new Date().toISOString() };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a');
@@ -89,6 +89,7 @@ function importData() {
                 if (data.history) { history = data.history; localStorage.setItem('my_history', JSON.stringify(history)); }
                 if (data.moodHistory) { moodHistory = data.moodHistory; localStorage.setItem('my_mood', JSON.stringify(moodHistory)); }
                 if (data.notesHistory) { notesHistory = data.notesHistory; localStorage.setItem('my_notes', JSON.stringify(notesHistory)); }
+                if (data.tasks) { tasks = data.tasks; saveTasks(); }
                 alert('Dados importados com sucesso!');
                 location.reload();
             } catch (err) { alert('Erro ao ler o arquivo: ' + err.message); }
@@ -1735,4 +1736,213 @@ document.addEventListener('click', function(e) {
     const title  = document.getElementById('monthTitle');
     if (!picker || picker.classList.contains('hidden')) return;
     if (!picker.contains(e.target) && e.target !== title) closeDatePicker();
+});
+// ═══════════════════════════════════════════════════════════
+// TAREFAS (movido de notas)
+// ═══════════════════════════════════════════════════════════
+let tasks = JSON.parse(localStorage.getItem('clarity_tasks')) || {};
+let tasksPanelCollapsed = localStorage.getItem('clarity_tasks_collapsed') === 'true';
+
+function saveTasks() { localStorage.setItem('clarity_tasks', JSON.stringify(tasks)); }
+
+function escapeHtml(str) {
+    return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function toggleTasksPanel() {
+    tasksPanelCollapsed = !tasksPanelCollapsed;
+    localStorage.setItem('clarity_tasks_collapsed', tasksPanelCollapsed);
+    const body = document.getElementById('tasksPanelBody');
+    const chev = document.getElementById('tasksChevron');
+    if (tasksPanelCollapsed) {
+        body.classList.add('collapsed');
+        chev.classList.add('collapsed');
+    } else {
+        body.classList.remove('collapsed');
+        chev.classList.remove('collapsed');
+    }
+}
+
+function addTask() {
+    const input = document.getElementById('taskInput');
+    const priSel = document.getElementById('taskPriority');
+    const text = input.value.trim();
+    if (!text) return;
+    const key = todayKey();
+    if (!tasks[key]) tasks[key] = [];
+    tasks[key].push({ id: Date.now(), text, done: false, priority: priSel.value, createdAt: new Date().toISOString() });
+    saveTasks();
+    input.value = ''; priSel.value = 'normal';
+    renderTasks();
+}
+
+function toggleTask(id) {
+    const key = todayKey();
+    const t = tasks[key]?.find(t => t.id === id);
+    if (t) { t.done = !t.done; saveTasks(); renderTasks(); }
+}
+
+function deleteTask(id) {
+    const key = todayKey();
+    if (!tasks[key]) return;
+    tasks[key] = tasks[key].filter(t => t.id !== id);
+    saveTasks(); renderTasks();
+}
+
+function renderTasks() {
+    const key = todayKey();
+    const list = tasks[key] || [];
+
+    // Update count in header
+    const done = list.filter(t => t.done).length;
+    const total = list.length;
+    const countEl = document.getElementById('tasksPanelCount');
+    if (countEl) countEl.textContent = total > 0 ? `${done}/${total}` : '';
+
+    // Progress bar
+    const pct = total > 0 ? Math.round((done/total)*100) : 0;
+    const fill = document.getElementById('tasksProgressFill');
+    const wrap = document.getElementById('tasksProgressWrap');
+    if (fill && wrap) {
+        fill.style.width = pct + '%';
+        fill.style.background = pct === 100 ? '#2ecc71' : pct >= 60 ? '#f9ca24' : '#3498db';
+        document.getElementById('tasksProgressLabel').textContent = `${done} / ${total}`;
+        wrap.style.display = total > 0 ? 'flex' : 'none';
+    }
+
+    // List
+    const el = document.getElementById('tasksList');
+    if (!el) return;
+    if (!list.length) {
+        el.innerHTML = '<div class="tasks-empty">nenhuma tarefa para hoje</div>';
+    } else {
+        const sorted = [...list].sort((a,b) => {
+            const pOrder = { high:0, normal:1, low:2 };
+            if (a.done !== b.done) return a.done ? 1 : -1;
+            return (pOrder[a.priority]||1) - (pOrder[b.priority]||1);
+        });
+        el.innerHTML = sorted.map(t => {
+            const timeStr = t.createdAt ? (() => {
+                const d = new Date(t.createdAt);
+                return d.toLocaleTimeString('pt-br', { hour:'2-digit', minute:'2-digit' });
+            })() : '';
+            return `
+            <div class="task-item ${t.done?'done':''}" id="task-${t.id}">
+                <div class="task-checkbox ${t.done?'checked':''}" onclick="toggleTask(${t.id})"></div>
+                <div class="task-priority-dot priority-${t.priority}"></div>
+                <div class="task-body">
+                    <span class="task-text">${escapeHtml(t.text)}</span>
+                    ${timeStr ? `<span class="task-time">criado às ${timeStr}</span>` : ''}
+                </div>
+                <button class="task-del" onclick="deleteTask(${t.id})">✕</button>
+            </div>`;
+        }).join('');
+    }
+
+    // Stats
+    const statsEl = document.getElementById('tasksStatsRow');
+    if (!statsEl) return;
+    if (!list.length) { statsEl.innerHTML = ''; return; }
+    const highPending = list.filter(t=>!t.done&&t.priority==='high').length;
+    statsEl.innerHTML = `
+        <div class="task-stat-chip"><strong>${done}</strong> concluída${done!==1?'s':''}</div>
+        <div class="task-stat-chip"><strong>${total-done}</strong> pendente${total-done!==1?'s':''}</div>
+        ${highPending?`<div class="task-stat-chip" style="color:#e74c3c"><strong>${highPending}</strong> alta prioridade</div>`:''}
+        <div class="task-stat-chip"><strong>${pct}%</strong> do dia</div>`;
+
+    // Apply collapsed state
+    if (tasksPanelCollapsed) {
+        document.getElementById('tasksPanelBody')?.classList.add('collapsed');
+        document.getElementById('tasksChevron')?.classList.add('collapsed');
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+// DRAG AND DROP REORDERING
+// ═══════════════════════════════════════════════════════════
+let sectionOrder = JSON.parse(localStorage.getItem('clarity_section_order')) || null;
+
+function saveSectionOrder() {
+    const container = document.getElementById('habitsContainer');
+    const sections = [...container.querySelectorAll('.draggable-section')];
+    sectionOrder = sections.map(s => s.dataset.section);
+    localStorage.setItem('clarity_section_order', JSON.stringify(sectionOrder));
+}
+
+function applySectionOrder() {
+    if (!sectionOrder) return;
+    const container = document.getElementById('habitsContainer');
+    if (!container) return;
+    const sections = {};
+    [...container.querySelectorAll('.draggable-section')].forEach(s => {
+        sections[s.dataset.section] = s;
+    });
+    sectionOrder.forEach(name => {
+        if (sections[name]) container.appendChild(sections[name]);
+    });
+}
+
+function initDragDrop() {
+    const container = document.getElementById('habitsContainer');
+    if (!container) return;
+    let draggedEl = null;
+
+    container.addEventListener('dragstart', e => {
+        const handle = e.target.closest('.drag-handle');
+        if (!handle) { e.preventDefault(); return; }
+        draggedEl = handle.closest('.draggable-section');
+        if (!draggedEl) { e.preventDefault(); return; }
+        draggedEl.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', '');
+    });
+
+    container.addEventListener('dragend', e => {
+        if (draggedEl) {
+            draggedEl.classList.remove('dragging');
+            draggedEl = null;
+        }
+        container.querySelectorAll('.drag-over-top,.drag-over-bottom').forEach(el => {
+            el.classList.remove('drag-over-top','drag-over-bottom');
+        });
+        saveSectionOrder();
+    });
+
+    container.addEventListener('dragover', e => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        const target = e.target.closest('.draggable-section');
+        if (!target || target === draggedEl) return;
+        container.querySelectorAll('.drag-over-top,.drag-over-bottom').forEach(el => {
+            el.classList.remove('drag-over-top','drag-over-bottom');
+        });
+        const rect = target.getBoundingClientRect();
+        const midY = rect.top + rect.height / 2;
+        if (e.clientY < midY) {
+            target.classList.add('drag-over-top');
+        } else {
+            target.classList.add('drag-over-bottom');
+        }
+    });
+
+    container.addEventListener('drop', e => {
+        e.preventDefault();
+        const target = e.target.closest('.draggable-section');
+        if (!target || !draggedEl || target === draggedEl) return;
+        const rect = target.getBoundingClientRect();
+        const midY = rect.top + rect.height / 2;
+        if (e.clientY < midY) {
+            container.insertBefore(draggedEl, target);
+        } else {
+            container.insertBefore(draggedEl, target.nextSibling);
+        }
+    });
+
+    applySectionOrder();
+}
+
+// Init tasks and drag-drop when DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+    renderTasks();
+    initDragDrop();
 });

@@ -9,21 +9,11 @@
 </head>
 <body>
 
-    <!-- CALENDÁRIO POPUP -->
-    <div class="date-picker-popup hidden" id="datePicker">
-        <div class="dp-header">
-            <button class="dp-nav" onclick="dpPrevMonth()">‹</button>
-            <span id="dpMonthLabel"></span>
-            <button class="dp-nav" onclick="dpNextMonth()">›</button>
-        </div>
-        <div class="dp-grid" id="dpGrid"></div>
-    </div>
-
     <!-- TOPBAR -->
     <div class="notas-topbar">
         <!-- Título + sub à esquerda -->
         <div class="notas-title-area">
-            <h1 class="notas-page-title">notas & tarefas</h1>
+            <h1 class="notas-page-title">diário de ideias</h1>
             <p class="notas-page-sub" id="notasSub">carregando…</p>
         </div>
 
@@ -43,73 +33,29 @@
         <button class="theme-toggle" onclick="toggleTheme()" id="themeToggleBtn">☀ claro</button>
     </div>
 
-    <div class="notas-container" id="notasContainer">
+    <div class="notas-container" id="notasContainer" style="display:block;max-width:720px;margin:0 auto">
 
-        <!-- ═══════════ COLUNA ESQUERDA: TAREFAS ═══════════ -->
-        <div class="notas-col" id="colTasks">
-
-            <!-- Header da coluna com navegação de data integrada -->
-            <div class="notas-col-header">
-                <span class="notas-col-title">tarefas</span>
-                <!-- Navegação de data no estilo padrão do app -->
-                <div class="notas-date-nav">
-                    <button class="nav-btn" onclick="changeTaskDate(-1)">‹</button>
-                    <span id="taskDateLabel" onclick="toggleDatePicker()" style="cursor:pointer" title="clique para escolher data">hoje</span>
-                    <button class="nav-btn" onclick="changeTaskDate(1)">›</button>
-                </div>
-            </div>
-
-            <!-- Formulário nova tarefa -->
-            <div class="task-form glass-panel">
-                <input type="text" id="taskInput" class="f-input task-input" placeholder="nova tarefa…" onkeydown="if(event.key==='Enter')addTask()">
-                <select id="taskPriority" class="f-select task-priority-sel">
-                    <option value="normal">normal</option>
-                    <option value="high">🔴 alta</option>
-                    <option value="low">🔵 baixa</option>
-                </select>
-                <button class="btn-add-task" onclick="addTask()">+</button>
-            </div>
-
-            <!-- Lista de tarefas -->
-            <div class="tasks-list" id="tasksList"></div>
-
-            <!-- Progresso das tarefas -->
-            <div class="tasks-progress-bar-wrap" id="tasksProgressWrap" style="display:none">
-                <div class="tasks-progress-bar-track">
-                    <div class="tasks-progress-bar-fill" id="tasksProgressFill"></div>
-                </div>
-                <span class="tasks-progress-label" id="tasksProgressLabel">0 / 0</span>
-            </div>
-
-            <!-- Stats das tarefas -->
-            <div class="tasks-stats-row" id="tasksStatsRow"></div>
-        </div>
-
-        <!-- ═══════════ COLUNA DIREITA: DIÁRIO ═══════════ -->
-        <div class="notas-col" id="colDiary">
-
-            <!-- Header da coluna -->
-            <div class="notas-col-header">
-                <span class="notas-col-title">diário de ideias</span>
-                <button class="btn-new-entry" onclick="openNewEntry()">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-                    </svg>
-                    nova entrada
-                </button>
-            </div>
-
-            <!-- Busca -->
-            <div class="task-form glass-panel diary-search-wrap">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="diary-search-icon">
-                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        <!-- Header da coluna -->
+        <div class="notas-col-header">
+            <span class="notas-col-title">entradas</span>
+            <button class="btn-new-entry" onclick="openNewEntry()">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
                 </svg>
-                <input type="text" id="diarySearch" class="diary-search-input" placeholder="buscar entradas…" oninput="renderDiary()">
-            </div>
-
-            <!-- Lista de entradas -->
-            <div class="diary-entries-list" id="diaryEntriesList"></div>
+                nova entrada
+            </button>
         </div>
+
+        <!-- Busca -->
+        <div class="task-form glass-panel diary-search-wrap">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="diary-search-icon">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" id="diarySearch" class="diary-search-input" placeholder="buscar entradas…" oninput="renderDiary()">
+        </div>
+
+        <!-- Lista de entradas -->
+        <div class="diary-entries-list" id="diaryEntriesList"></div>
 
     </div>
 
