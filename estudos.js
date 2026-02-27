@@ -232,6 +232,87 @@ document.addEventListener('DOMContentLoaded', () => {
     setSessionMode('timer');
 });
 
+// ─── ADICIONAR SESSÃO (MODO MANUAL) ──────────────────────────────────────────
+function addSession() {
+    const sel      = document.getElementById('fSubjectSelect');
+    const custom   = document.getElementById('fSubjectCustom');
+    const subject  = sel.value === '__custom__' ? custom.value.trim() : sel.value;
+    const content  = document.getElementById('fContent').value.trim();
+    const start    = document.getElementById('fStart').value;
+    const end      = document.getElementById('fEnd').value;
+    const reviewDays = document.getElementById('fReviewDays').value;
+
+    if (!subject) { alert('Selecione ou digite a matéria.'); return; }
+    if (!start || !end) { alert('Preencha o horário de início e de término.'); return; }
+
+    // Suporte a virada de dia: se end < start, considera +24h
+    const startMin = timeToMin(start);
+    const endMin   = timeToMin(end);
+    const minutes  = endMin >= startMin ? endMin - startMin : (1440 - startMin + endMin);
+
+    if (minutes <= 0) { alert('O horário de término deve ser diferente do início.'); return; }
+
+    // Sessão criada no dia navegado atual (permite dias anteriores)
+    const key = dateKey(currentDate);
+    if (!studySessions[key]) studySessions[key] = [];
+    studySessions[key].push({
+        id: Date.now(), subject, content, start, end, minutes,
+        reviewDays:  reviewDays ? parseInt(reviewDays) : null,
+        reviewDate:  reviewDays ? addDays(key, parseInt(reviewDays)) : null,
+        reviewDone:  false,
+    });
+    studySessions[key].sort((a,b) => timeToMin(a.start)-timeToMin(b.start));
+    save();
+
+    // Limpa apenas campos que variam por sessão
+    document.getElementById('fContent').value    = '';
+    document.getElementById('fEnd').value        = '';
+    document.getElementById('fDuration').textContent = '—';
+    document.getElementById('fDuration').style.color = '';
+    document.getElementById('fReviewDays').value  = '';
+    // Avança fStart para o término
+    document.getElementById('fStart').value = end;
+    render();
+}
+
+// ─── PAINEL DE REVISÕES DE HOJE ───────────────────────────────────────────────
+function renderTodayReviews() {
+    const today     = todayKey();
+    const reviewMap = getReviewMap();
+    // Revisões que caem hoje ou estão atrasadas e não concluídas
+    const pending   = [];
+    Object.keys(reviewMap).sort().forEach(dateStr => {
+        if (dateStr > today) return;
+        reviewMap[dateStr].forEach(r => {
+            if (!r.reviewDone) {
+                const daysLate = Math.floor((new Date(today+'T00:00:00') - new Date(dateStr+'T00:00:00')) / 86400000);
+                pending.push({ ...r, reviewDate: dateStr, daysLate });
+            }
+        });
+    });
+
+    const panel = document.getElementById('todayReviewsPanel');
+    const list  = document.getElementById('todayReviewsItems');
+    if (!pending.length) { panel.classList.remove('visible'); return; }
+    panel.classList.add('visible');
+
+    list.innerHTML = pending.map(r => {
+        const lateTag = r.daysLate > 0
+            ? `<span class="today-review-late">+${r.daysLate}d atrasado</span>`
+            : '';
+        const sessionFmt = r.sessionDate.slice(5).replace('-','/');
+        return `
+            <div class="today-review-row">
+                <div class="today-review-dot" style="background:${r.color}"></div>
+                <span class="today-review-subject">${r.subject}</span>
+                <span class="today-review-session-date">sessão: ${sessionFmt}</span>
+                ${lateTag}
+                <button class="btn-complete-review" onclick="completeReviewFromPanel('${r.sessionDate}',${r.id})">
+                    ✓ feita
+                </button>
+            </div>`;
+    }).join('');
+}
 function completeReviewFromPanel(sessionDate, id) {
     const s = studySessions[sessionDate]?.find(s => s.id === id);
     if (s) { s.reviewDone = true; save(); render(); }
@@ -1769,38 +1850,35 @@ let currentStudyView = 'sessoes';
 
 function setStudyView(view) {
     currentStudyView = view;
-    
-    // 1. Oculta TODAS as views do container principal
-    document.querySelectorAll('.study-view').forEach(v => {
-        v.classList.add('hidden');
-        v.style.display = 'none'; 
-    });
-    
-    // 2. Exibe apenas a view ativa
-    const activeView = document.getElementById('view' + view.charAt(0).toUpperCase() + view.slice(1));
-    if (activeView) {
-        activeView.classList.remove('hidden');
-        activeView.style.display = 'flex';
-    }
-    
-    // 3. Atualiza o item azul no menu lateral
+    document.querySelectorAll('.study-view').forEach(v => v.classList.add('hidden'));
+    document.getElementById('view' + view.charAt(0).toUpperCase() + view.slice(1)).classList.remove('hidden');
+    // Update active drawer item
     document.querySelectorAll('.study-drawer .drawer-item').forEach(item => {
         item.classList.remove('drawer-item--active');
     });
-    const activeMenuItem = document.getElementById('sdItem' + view.charAt(0).toUpperCase() + view.slice(1));
-    if (activeMenuItem) activeMenuItem.classList.add('drawer-item--active');
+    document.getElementById('sdItem' + view.charAt(0).toUpperCase() + view.slice(1)).classList.add('drawer-item--active');
 
-    // 4. Mostra a Topbar APENAS na aba de Sessões
-    const topbar = document.getElementById('mainTopbar');
-    if (topbar) {
-        if (view === 'sessoes') {
-            topbar.style.display = 'flex';
-        } else {
-            topbar.style.display = 'none';
-        }
+    // Toggle topbar elements based on view
+    const dayNav = document.getElementById('studyDateNav');
+    const cronoNav = document.getElementById('cronoMonthNavTopbar');
+    const goalBox = document.querySelector('.daily-goal-box');
+    const reviewBadge = document.getElementById('reviewBadgeWrap');
+    const topActions = document.querySelector('.topbar-actions');
+
+    if (view === 'cronograma') {
+        if (dayNav) dayNav.classList.add('hidden');
+        if (cronoNav) cronoNav.classList.remove('hidden');
+        if (goalBox) goalBox.style.display = 'none';
+        if (reviewBadge) reviewBadge.style.display = 'none';
+        if (topActions) topActions.style.display = 'none';
+    } else {
+        if (dayNav) dayNav.classList.remove('hidden');
+        if (cronoNav) cronoNav.classList.add('hidden');
+        if (goalBox) goalBox.style.display = '';
+        if (reviewBadge) reviewBadge.style.display = '';
+        if (topActions) topActions.style.display = '';
     }
 
-    // 5. Renderiza dados específicos das abas
     if (view === 'erros') {
         populateErrosSelects();
         renderErrosList();

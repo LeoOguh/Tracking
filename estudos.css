@@ -11,9 +11,7 @@
     padding: 10px 30px; border-radius: 50px;
     background: var(--glass); backdrop-filter: blur(15px);
     border: 1px solid var(--glass-border);
-    width: 100%; /* ← Alterado aqui */
-    max-width: 500px; /* ← Alterado aqui */
-    justify-content: space-between;
+    width: 500px; justify-content: space-between;
 }
 #cronoMonthLabelTopbar {
     font-size: 1.15rem; font-weight: 300; letter-spacing: 1.5px;
@@ -698,7 +696,7 @@ body.light .today-btn:hover { color: #000; background: rgba(0,0,0,0.1); }
 /* ═══════════════════════════════════════════════════════════
    CRONOGRAMA
    ═══════════════════════════════════════════════════════════ */
-.crono-top-row { display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:16px; flex-wrap:wrap; padding:0 16px; }
+.crono-top-row { display:flex; align-items:center; justify-content:flex-end; gap:14px; margin-bottom:16px; flex-wrap:wrap; padding:0 16px; }
 .crono-month-nav { display:flex; align-items:center; gap:0; padding:8px 22px; border-radius:50px; background:var(--glass); backdrop-filter:blur(15px); border:1px solid var(--glass-border); min-width:260px; justify-content:space-between; }
 .crono-month-label { font-size:1rem; font-weight:300; letter-spacing:1.5px; text-transform:lowercase; font-variant:small-caps; color:#fff; flex:1; text-align:center; padding:0 10px; }
 body.light .crono-month-label { color:#1a1a1a; }
