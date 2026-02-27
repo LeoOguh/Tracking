@@ -94,7 +94,7 @@ function formatHHMMSS(seconds) {
 
 // ─── EXPORTAR ─────────────────────────────────────────────────────────────────
 function exportStudyData() {
-    const data = { studySessions, studyGoals, studySubjects, exportedAt: new Date().toISOString() };
+    const data = { studySessions, studyGoals, studySubjects, scheduleData, exportedAt: new Date().toISOString() };
     const blob = new Blob([JSON.stringify(data,null,2)], { type:'application/json' });
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a'); a.href=url; a.download=`clarity-estudos-${todayKey()}.json`; a.click();
@@ -113,6 +113,7 @@ function importStudyData() {
                 if (data.studySessions) { studySessions = data.studySessions; localStorage.setItem('study_sessions', JSON.stringify(studySessions)); }
                 if (data.studyGoals) { studyGoals = data.studyGoals; localStorage.setItem('study_daily_goals', JSON.stringify(studyGoals)); }
                 if (data.studySubjects) { studySubjects = data.studySubjects; localStorage.setItem('study_subjects', JSON.stringify(studySubjects)); }
+                if (data.scheduleData) { scheduleData = data.scheduleData; localStorage.setItem('study_schedule_data', JSON.stringify(scheduleData)); }
                 alert('Dados importados com sucesso!');
                 location.reload();
             } catch (err) { alert('Erro ao ler o arquivo: ' + err.message); }
@@ -825,6 +826,165 @@ function setAIMode(mode){
     document.getElementById('aiPanelText').style.display=mode==='text'?'':'none';
 }
 
+// ─── CRONOGRAMA STATE ────────────────────────────────────────────────────────
+let scheduleData = JSON.parse(localStorage.getItem('study_schedule_data')) || {};
+let cronoMonth = new Date();
+let aiPdfText = '';
+
+function saveScheduleData() { localStorage.setItem('study_schedule_data', JSON.stringify(scheduleData)); }
+
+function changeCronoMonth(delta) {
+    cronoMonth.setMonth(cronoMonth.getMonth() + delta);
+    renderCronoCalendar();
+}
+
+function renderCronoCalendar() {
+    const grid = document.getElementById('cronoCalendarGrid');
+    const label = document.getElementById('cronoMonthLabel');
+    if (!grid || !label) return;
+
+    const y = cronoMonth.getFullYear(), m = cronoMonth.getMonth();
+    label.textContent = monthNames[m] + ' ' + y;
+
+    const firstDay = new Date(y, m, 1).getDay();
+    const daysInMonth = new Date(y, m + 1, 0).getDate();
+    const prevDays = new Date(y, m, 0).getDate();
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+
+    let html = '';
+    // Previous month filler
+    for (let i = firstDay - 1; i >= 0; i--) {
+        const d = prevDays - i;
+        html += `<div class="crono-day-cell other-month"><span class="crono-day-num">${d}</span></div>`;
+    }
+    // Current month
+    for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const isToday = dateStr === todayStr;
+        const dayData = scheduleData[dateStr];
+        const hasSchedule = dayData && dayData.subjects && dayData.subjects.length > 0;
+        let classes = 'crono-day-cell';
+        if (isToday) classes += ' today';
+        if (hasSchedule) classes += ' has-schedule';
+
+        let inner = `<span class="crono-day-num">${d}</span>`;
+        if (hasSchedule) {
+            inner += '<div class="crono-day-subjects">';
+            const maxTags = 3;
+            dayData.subjects.slice(0, maxTags).forEach(s => {
+                const color = getSubjectColorResolved(s.name) || '#7f8c8d';
+                inner += `<div class="crono-day-tag" style="background:${color}22;border-left:2px solid ${color}">${s.name}</div>`;
+            });
+            if (dayData.subjects.length > maxTags) {
+                inner += `<span class="crono-day-more">+${dayData.subjects.length - maxTags} mais</span>`;
+            }
+            inner += '</div>';
+            const totalH = dayData.subjects.reduce((acc, s) => acc + (s.hours || 0), 0);
+            if (totalH > 0) inner += `<span class="crono-day-hours">${totalH}h</span>`;
+        }
+
+        html += `<div class="${classes}" onclick="openCronoDayModal('${dateStr}')">${inner}</div>`;
+    }
+    // Next month filler
+    const totalCells = firstDay + daysInMonth;
+    const remaining = (7 - (totalCells % 7)) % 7;
+    for (let i = 1; i <= remaining; i++) {
+        html += `<div class="crono-day-cell other-month"><span class="crono-day-num">${i}</span></div>`;
+    }
+    grid.innerHTML = html;
+    renderCronoLegend();
+}
+
+function renderCronoLegend() {
+    const legend = document.getElementById('cronoLegend');
+    if (!legend) return;
+    const subjects = new Set();
+    Object.values(scheduleData).forEach(day => {
+        if (day.subjects) day.subjects.forEach(s => subjects.add(s.name));
+    });
+    if (subjects.size === 0) { legend.innerHTML = ''; return; }
+    legend.innerHTML = [...subjects].map(name => {
+        const color = getSubjectColorResolved(name) || '#7f8c8d';
+        return `<div class="crono-legend-item"><div class="crono-legend-dot" style="background:${color}"></div>${name}</div>`;
+    }).join('');
+}
+
+function openCronoDayModal(dateStr) {
+    const overlay = document.getElementById('cronoDayModalOverlay');
+    const dateEl = document.getElementById('cronoDayModalDate');
+    const totalEl = document.getElementById('cronoDayModalTotal');
+    const body = document.getElementById('cronoDayModalBody');
+
+    const parts = dateStr.split('-');
+    const dt = new Date(+parts[0], +parts[1]-1, +parts[2]);
+    const weekDays = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+    dateEl.textContent = `${weekDays[dt.getDay()]}, ${dt.getDate()} de ${monthNames[dt.getMonth()]} de ${dt.getFullYear()}`;
+
+    const dayData = scheduleData[dateStr];
+    if (!dayData || !dayData.subjects || dayData.subjects.length === 0) {
+        totalEl.textContent = '';
+        body.innerHTML = '<div class="crono-modal-empty">nenhum estudo programado para este dia</div>';
+    } else {
+        const totalH = dayData.subjects.reduce((acc, s) => acc + (s.hours || 0), 0);
+        const totalSessions = dayData.subjects.reduce((acc, s) => acc + (s.sessions || 0), 0);
+        totalEl.textContent = `${totalH}h total · ${totalSessions} sessão(ões)`;
+
+        body.innerHTML = dayData.subjects.map(s => {
+            const color = getSubjectColorResolved(s.name) || '#7f8c8d';
+            let details = '';
+            if (s.hours) details += `<strong>Duração:</strong> ${s.hours}h`;
+            if (s.sessions) details += ` · <strong>Sessões:</strong> ${s.sessions}x ${s.sessionTime || 25}min`;
+            if (s.importance) details += ` · <strong>Importância:</strong> ${'★'.repeat(s.importance)}${'☆'.repeat(5 - s.importance)}`;
+            if (s.topics && s.topics.length) details += `<br><strong>Conteúdo:</strong> ${s.topics.join(', ')}`;
+            if (s.questions) details += `<br><strong>Questões sugeridas:</strong> ${s.questions}`;
+            if (s.notes) details += `<br><strong>Obs:</strong> ${s.notes}`;
+
+            return `<div class="crono-modal-subject" style="border-color:${color}">
+                <div class="crono-modal-subject-header">
+                    <span class="crono-modal-subject-name">${s.name}</span>
+                    <span class="crono-modal-subject-hours">${s.hours || 0}h</span>
+                </div>
+                <div class="crono-modal-detail">${details}</div>
+            </div>`;
+        }).join('');
+    }
+    overlay.classList.add('open');
+}
+
+function closeCronoDayModal(e) { if(e) return; document.getElementById('cronoDayModalOverlay').classList.remove('open'); }
+
+function clearScheduleData() {
+    if (!confirm('Tem certeza que deseja limpar todo o cronograma?')) return;
+    scheduleData = {};
+    saveScheduleData();
+    renderCronoCalendar();
+}
+
+// ─── PDF HANDLING ────────────────────────────────────────────────────────────
+function handlePdfSelect(input) {
+    const file = input.files[0];
+    const label = document.getElementById('aiPdfLabel');
+    const nameEl = document.getElementById('aiPdfName');
+    if (!file) return;
+    nameEl.textContent = file.name;
+    label.classList.add('has-file');
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        // For txt files, read directly
+        if (file.name.endsWith('.txt')) {
+            aiPdfText = e.target.result;
+            return;
+        }
+        // For PDFs, extract text using pdf.js-like basic extraction
+        aiPdfText = atob(e.target.result.split(',')[1]).replace(/[^\x20-\x7E\xC0-\xFF\n]/g, ' ').replace(/ {3,}/g, '\n').substring(0, 8000);
+    };
+    if (file.name.endsWith('.txt')) reader.readAsText(file);
+    else reader.readAsDataURL(file);
+}
+
+// ─── AI SCHEDULE GENERATION ──────────────────────────────────────────────────
 async function generateSchedule(){
     const btn=document.getElementById('aiBtnGenerate');
     btn.disabled=true;
@@ -834,31 +994,150 @@ async function generateSchedule(){
     let hoursPerDay,days,prompt;
     const impLabel=['','baixa','média','alta','muito alta','máxima'];
     const stars=n=>'★'.repeat(n)+'☆'.repeat(5-n);
+    const startDate = new Date();
+    const startStr = startDate.toLocaleDateString('pt-br');
+
+    const jsonInstructions = `
+
+IMPORTANTE: Responda EXCLUSIVAMENTE com um JSON válido, sem nenhum texto antes ou depois, sem backticks, sem markdown.
+O JSON deve seguir EXATAMENTE esta estrutura:
+{
+  "schedule": {
+    "YYYY-MM-DD": {
+      "subjects": [
+        {
+          "name": "Nome da Matéria",
+          "hours": 2,
+          "sessions": 2,
+          "sessionTime": 50,
+          "importance": 4,
+          "topics": ["Tópico 1", "Tópico 2"],
+          "questions": 15,
+          "notes": "Focar em exercícios práticos"
+        }
+      ]
+    }
+  }
+}
+
+Regras obrigatórias:
+- As datas devem ser no formato YYYY-MM-DD
+- "hours" = total de horas para aquela matéria no dia
+- "sessions" = quantas sessões de estudo (use técnica Pomodoro adaptada)
+- "sessionTime" = duração de cada sessão em minutos
+- "importance" = de 1 a 5 (baseado na importância/peso da matéria)
+- "topics" = array com os tópicos/conteúdos específicos para estudar naquele dia
+- "questions" = número de questões sugeridas para resolver naquele dia sobre aquela matéria
+- "notes" = dicas ou observações (ex: "revisão espaçada", "fazer resumo", "resolver provas anteriores")
+- Distribua as matérias usando métodos comprovados de estudo: revisão espaçada (spaced repetition), intercalação de matérias (interleaving), técnica Pomodoro, ciclo de estudos, e revisão ativa
+- Inclua dias de revisão geral a cada 7 dias
+- Matérias mais importantes devem aparecer mais vezes por semana
+- Sugira uma quantidade de questões proporcional à importância e à fase do estudo (mais questões nas revisões)
+- Alterne entre matérias pesadas e leves no mesmo dia`;
 
     if(aiMode==='subjects'){
         hoursPerDay=parseFloat(document.getElementById('aiHoursPerDay').value)||4;
         days=parseInt(document.getElementById('aiDays').value)||30;
         if(!studySubjects.length){alert('Cadastre ao menos uma matéria primeiro.');btn.disabled=false;document.getElementById('aiLoading').style.display='none';return;}
-        const subList=studySubjects.sort((a,b)=>b.importance-a.importance).map(s=>`- ${s.name} (importância: ${stars(s.importance)})`).join('\n');
-        prompt=`Você é especialista em planejamento de estudos. Crie um cronograma detalhado:\n\nMATÉRIAS:\n${subList}\n\nParâmetros: ${days} dias, ${hoursPerDay}h/dia disponíveis, início hoje (${new Date().toLocaleDateString('pt-br')}).\n\nInstruções:\n1. Distribua as matérias proporcionalmente à importância (5 estrelas = maior prioridade)\n2. Intercale matérias ao longo da semana\n3. Reserve tempo para revisões\n4. Apresente semana a semana (Semana 1, Semana 2...)\n5. Para cada semana: quais matérias estudar em cada dia e por quantas horas\n6. Resumo final: total de horas por matéria\nResponda em português de forma clara e estruturada.`;
+        const subList=studySubjects.sort((a,b)=>b.importance-a.importance).map(s=>`- ${s.name} (importância: ${stars(s.importance)}, peso: ${s.importance}/5)`).join('\n');
+        prompt=`Você é especialista em planejamento de estudos para concursos e vestibulares. Crie um cronograma detalhado de estudos.
+
+MATÉRIAS DO ALUNO:
+${subList}
+
+PARÂMETROS:
+- Início: ${startStr}
+- Duração: ${days} dias
+- Horas disponíveis por dia: ${hoursPerDay}h
+- Usar métodos de estudo baseados em evidências científicas (revisão espaçada, intercalação, prática de recuperação, técnica Pomodoro)
+
+BUSQUE e aplique os melhores métodos de divisão de estudos conhecidos, como:
+- Ciclo de Estudos de Robert Bjork
+- Revisão Espaçada (Spaced Repetition) com intervalos crescentes
+- Intercalação de matérias (Interleaving)
+- Prática de Recuperação (Retrieval Practice)
+- Técnica Feynman para consolidação
+${jsonInstructions}`;
     } else {
         hoursPerDay=parseFloat(document.getElementById('aiHoursPerDay2').value)||4;
         days=parseInt(document.getElementById('aiDays2').value)||30;
-        const text=document.getElementById('aiTextarea').value.trim();
-        if(!text){alert('Cole o texto do edital ou das matérias.');btn.disabled=false;document.getElementById('aiLoading').style.display='none';return;}
-        prompt=`Você é especialista em planejamento de estudos para concursos. Analise o texto e crie um cronograma:\n\nTEXTO:\n${text.substring(0,4000)}\n\nParâmetros: ${days} dias, ${hoursPerDay}h/dia, início hoje (${new Date().toLocaleDateString('pt-br')}).\n\nInstruções:\n1. Identifique todas as matérias/tópicos\n2. Priorize os de maior peso ou frequência\n3. Apresente semana a semana\n4. Para cada semana: matérias por dia e horas\n5. Inclua dias de revisão\n6. Resumo: total de horas por matéria\nResponda em português de forma clara.`;
+        let text = document.getElementById('aiTextarea').value.trim();
+        if (aiPdfText) text = aiPdfText + '\n\n' + text;
+        if(!text){alert('Envie um PDF ou cole o texto do edital.');btn.disabled=false;document.getElementById('aiLoading').style.display='none';return;}
+        prompt=`Você é especialista em planejamento de estudos para concursos públicos. Analise o conteúdo do edital/ementa abaixo e crie um cronograma completo.
+
+CONTEÚDO DO EDITAL:
+${text.substring(0,6000)}
+
+PARÂMETROS:
+- Início: ${startStr}
+- Duração: ${days} dias
+- Horas disponíveis por dia: ${hoursPerDay}h
+- Usar métodos de estudo baseados em evidências científicas
+
+INSTRUÇÕES:
+1. Identifique TODAS as matérias e tópicos cobrados no edital
+2. Estime o peso/importância de cada matéria (1-5) com base na frequência em concursos
+3. Distribua os tópicos ao longo dos dias de forma inteligente
+4. BUSQUE e aplique os melhores métodos de divisão de estudos conhecidos: revisão espaçada, intercalação, prática ativa, ciclo de estudos
+5. Sugira quantidade de questões para cada tópico
+${jsonInstructions}`;
     }
 
     try {
-        const response=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5-20250929',max_tokens:1500,messages:[{role:'user',content:prompt}]})});
+        const response=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5-20250929',max_tokens:4000,messages:[{role:'user',content:prompt}]})});
         const data=await response.json();
-        const text2=data.content?.map(c=>c.text||'').join('\n')||'Erro ao gerar cronograma.';
-        const html=text2.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/^### (.+)$/gm,'<h3>$1</h3>').replace(/^## (.+)$/gm,'<h3>$1</h3>').replace(/^# (.+)$/gm,'<h3>$1</h3>').replace(/\n/g,'<br>');
-        document.getElementById('aiResult').innerHTML=html;
-        document.getElementById('aiResult').style.display='block';
+        const rawText=data.content?.map(c=>c.text||'').join('')||'';
+
+        // Try to parse JSON from response
+        let parsed = null;
+        try {
+            // Try direct parse first
+            parsed = JSON.parse(rawText);
+        } catch(e1) {
+            // Try extracting JSON from markdown code block
+            const jsonMatch = rawText.match(/```(?:json)?\s*([\s\S]*?)```/);
+            if (jsonMatch) {
+                try { parsed = JSON.parse(jsonMatch[1].trim()); } catch(e2) {}
+            }
+            // Try finding JSON object in text
+            if (!parsed) {
+                const braceMatch = rawText.match(/\{[\s\S]*\}/);
+                if (braceMatch) {
+                    try { parsed = JSON.parse(braceMatch[0]); } catch(e3) {}
+                }
+            }
+        }
+
+        if (parsed && parsed.schedule) {
+            // Apply to scheduleData
+            Object.entries(parsed.schedule).forEach(([date, dayInfo]) => {
+                if (dayInfo.subjects && Array.isArray(dayInfo.subjects)) {
+                    scheduleData[date] = dayInfo;
+                }
+            });
+            saveScheduleData();
+            renderCronoCalendar();
+
+            const totalDays = Object.keys(parsed.schedule).length;
+            const totalSubjects = new Set();
+            Object.values(parsed.schedule).forEach(d => d.subjects?.forEach(s => totalSubjects.add(s.name)));
+            document.getElementById('aiResult').innerHTML = `<div style="color:#2ecc71;font-weight:600">✓ Cronograma gerado com sucesso!</div><div style="margin-top:6px;font-size:0.82rem;color:rgba(255,255,255,0.6)">${totalDays} dias programados · ${totalSubjects.size} matérias · Feche este modal para ver o calendário</div>`;
+            document.getElementById('aiResult').style.display='block';
+
+            // Switch to cronograma view
+            setTimeout(() => { setStudyView('cronograma'); }, 500);
+        } else {
+            // Fallback: show raw text
+            const html=rawText.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/^### (.+)$/gm,'<h3>$1</h3>').replace(/^## (.+)$/gm,'<h3>$1</h3>').replace(/^# (.+)$/gm,'<h3>$1</h3>').replace(/\n/g,'<br>');
+            document.getElementById('aiResult').innerHTML='<div style="color:#f39c12;font-size:0.78rem;margin-bottom:8px">⚠ Não foi possível converter para calendário automaticamente. Resultado em texto:</div>'+html;
+            document.getElementById('aiResult').style.display='block';
+            document.getElementById('aiBtnOpenClaude').style.display='';
+        }
     } catch(err) {
-        document.getElementById('aiResult').innerHTML=`<span style="color:#ff7675">Erro ao conectar com a IA. Verifique sua conexão e se a chave de API está configurada.</span>`;
+        document.getElementById('aiResult').innerHTML=`<span style="color:#ff7675">Erro ao conectar com a IA. Verifique sua conexão.</span>`;
         document.getElementById('aiResult').style.display='block';
+        document.getElementById('aiBtnOpenClaude').style.display='';
     }
     document.getElementById('aiLoading').style.display='none';
     btn.disabled=false;
@@ -1053,6 +1332,9 @@ function setStudyView(view) {
     if (view === 'erros') {
         populateErrosSelects();
         renderErrosList();
+    }
+    if (view === 'cronograma') {
+        renderCronoCalendar();
     }
 }
 

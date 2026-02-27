@@ -37,6 +37,12 @@
                 </svg>
                 caderno de erros
             </button>
+            <button class="drawer-item" id="sdItemCronograma" onclick="setStudyView('cronograma')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                cronograma
+            </button>
         </nav>
         <div class="drawer-footer" style="padding:12px 10px;border-top:1px solid rgba(255,255,255,0.06)">
             <button class="btn-topbar-action" onclick="exportStudyData()" style="width:100%;justify-content:center;gap:8px;border-radius:12px">
@@ -90,12 +96,6 @@
                     <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
                 </svg>
                 matérias
-            </button>
-            <button class="btn-topbar-action btn-topbar-action--text" onclick="openAIModal()">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-                </svg>
-                cronograma IA
             </button>
         </div>
         <button class="theme-toggle" onclick="toggleTheme()" id="themeToggleBtn">☀ claro</button>
@@ -317,45 +317,6 @@
         </div>
     </div>
 
-    <!-- MODAL IA -->
-    <div class="edit-modal-overlay" id="aiModalOverlay" onclick="closeAIModal(event)">
-        <div class="edit-modal ai-modal">
-            <div class="edit-modal-title">cronograma com ia</div>
-            <div class="ai-note">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                O cronograma é gerado via <strong>API do Claude</strong>. Se não funcionar, use o botão "abrir no Claude" para gerar manualmente.
-            </div>
-            <div class="ai-mode-toggle">
-                <button class="type-btn type-btn--active" id="aiModeSubjects" onclick="setAIMode('subjects')">minhas matérias</button>
-                <button class="type-btn" id="aiModeText" onclick="setAIMode('text')">colar edital / texto</button>
-            </div>
-            <div id="aiPanelSubjects">
-                <p class="ai-hint">O cronograma será gerado com base nas suas matérias cadastradas e seus graus de importância.</p>
-                <div class="ai-extra-row">
-                    <input type="number" id="aiHoursPerDay"  class="f-input" placeholder="horas disponíveis/dia" min="1" max="16" style="width:200px">
-                    <input type="number" id="aiDays"         class="f-input" placeholder="quantos dias" min="1" max="365" style="width:160px">
-                </div>
-            </div>
-            <div id="aiPanelText" style="display:none">
-                <p class="ai-hint">Cole o texto do edital, ementa ou lista de matérias abaixo.</p>
-                <textarea id="aiTextarea" class="ai-textarea" placeholder="cole aqui o edital ou as matérias que deseja estudar…"></textarea>
-                <div class="ai-extra-row">
-                    <input type="number" id="aiHoursPerDay2" class="f-input" placeholder="horas disponíveis/dia" min="1" max="16" style="width:200px">
-                    <input type="number" id="aiDays2"        class="f-input" placeholder="quantos dias" min="1" max="365" style="width:160px">
-                </div>
-            </div>
-            <div class="ai-loading" id="aiLoading" style="display:none">
-                <div class="ai-spinner"></div><span>gerando cronograma…</span>
-            </div>
-            <div class="ai-result" id="aiResult" style="display:none"></div>
-            <div class="edit-modal-actions">
-                <button class="btn-note-cancel" id="aiBtnOpenClaude" onclick="openInClaude()" style="display:none">abrir no Claude ↗</button>
-                <button class="btn-note-cancel" onclick="closeAIModal()">fechar</button>
-                <button class="btn-note-save"   id="aiBtnGenerate" onclick="generateSchedule()">gerar cronograma</button>
-            </div>
-        </div>
-    </div>
-
     </div> <!-- end viewSessoes -->
 
     <!-- VIEW: CADERNO DE ERROS -->
@@ -398,9 +359,106 @@
         </div>
     </div> <!-- end viewErros -->
 
+    <!-- VIEW: CRONOGRAMA -->
+    <div class="study-view hidden" id="viewCronograma">
+        <div class="crono-top-row">
+            <div class="crono-month-nav">
+                <button class="nav-btn" onclick="changeCronoMonth(-1)">‹</button>
+                <span class="crono-month-label" id="cronoMonthLabel">—</span>
+                <button class="nav-btn" onclick="changeCronoMonth(1)">›</button>
+            </div>
+            <div class="crono-actions">
+                <button class="btn-topbar-action btn-topbar-action--text" onclick="openAIModal()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    gerar cronograma com IA
+                </button>
+                <button class="btn-topbar-action btn-topbar-action--text" onclick="clearScheduleData()" title="Limpar cronograma">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                    </svg>
+                    limpar
+                </button>
+            </div>
+        </div>
+        <div class="crono-weekday-header">
+            <div class="crono-wday">DOM</div>
+            <div class="crono-wday">SEG</div>
+            <div class="crono-wday">TER</div>
+            <div class="crono-wday">QUA</div>
+            <div class="crono-wday">QUI</div>
+            <div class="crono-wday">SEX</div>
+            <div class="crono-wday">SÁB</div>
+        </div>
+        <div class="crono-calendar-grid" id="cronoCalendarGrid"></div>
+        <div class="crono-legend" id="cronoLegend"></div>
+    </div> <!-- end viewCronograma -->
+
     </div> <!-- end study-container -->
     </div> <!-- end estudos-main -->
 </div> <!-- end estudos-page-layout -->
+
+    <!-- MODAL IA (global, fora das views) -->
+    <div class="edit-modal-overlay" id="aiModalOverlay" onclick="closeAIModal(event)">
+        <div class="edit-modal ai-modal">
+            <div class="edit-modal-title">gerar cronograma com IA</div>
+            <div class="ai-note">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                O cronograma é gerado via <strong>API do Claude</strong> e preenchido automaticamente no calendário. Se não funcionar, use o botão "abrir no Claude" para gerar manualmente.
+            </div>
+            <div class="ai-mode-toggle">
+                <button class="type-btn type-btn--active" id="aiModeSubjects" onclick="setAIMode('subjects')">minhas matérias</button>
+                <button class="type-btn" id="aiModeText" onclick="setAIMode('text')">analisar edital / PDF</button>
+            </div>
+            <div id="aiPanelSubjects">
+                <p class="ai-hint">O cronograma será gerado com base nas suas matérias cadastradas e seus graus de importância.</p>
+                <div class="ai-extra-row">
+                    <input type="number" id="aiHoursPerDay"  class="f-input" placeholder="horas disponíveis/dia" min="1" max="16" style="width:200px">
+                    <input type="number" id="aiDays"         class="f-input" placeholder="quantos dias" min="1" max="365" style="width:160px">
+                </div>
+            </div>
+            <div id="aiPanelText" style="display:none">
+                <p class="ai-hint">Envie o PDF do edital ou cole o texto com as matérias/tópicos do concurso.</p>
+                <div class="ai-pdf-row">
+                    <label class="ai-pdf-label" id="aiPdfLabel">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        <span id="aiPdfName">selecionar PDF do edital</span>
+                        <input type="file" id="aiPdfInput" accept=".pdf,.txt" style="display:none" onchange="handlePdfSelect(this)">
+                    </label>
+                    <span class="ai-pdf-or">ou cole o texto abaixo:</span>
+                </div>
+                <textarea id="aiTextarea" class="ai-textarea" placeholder="cole aqui o edital, ementa ou lista de matérias/tópicos que serão cobrados…"></textarea>
+                <div class="ai-extra-row">
+                    <input type="number" id="aiHoursPerDay2" class="f-input" placeholder="horas disponíveis/dia" min="1" max="16" style="width:200px">
+                    <input type="number" id="aiDays2"        class="f-input" placeholder="quantos dias" min="1" max="365" style="width:160px">
+                </div>
+            </div>
+            <div class="ai-loading" id="aiLoading" style="display:none">
+                <div class="ai-spinner"></div><span>gerando cronograma… isso pode levar até 1 minuto</span>
+            </div>
+            <div class="ai-result" id="aiResult" style="display:none"></div>
+            <div class="edit-modal-actions">
+                <button class="btn-note-cancel" id="aiBtnOpenClaude" onclick="openInClaude()" style="display:none">abrir no Claude ↗</button>
+                <button class="btn-note-cancel" onclick="closeAIModal()">fechar</button>
+                <button class="btn-note-save"   id="aiBtnGenerate" onclick="generateSchedule()">gerar cronograma</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DIA DO CRONOGRAMA -->
+    <div class="edit-modal-overlay" id="cronoDayModalOverlay" onclick="closeCronoDayModal(event)">
+        <div class="edit-modal crono-day-modal">
+            <div class="crono-day-modal-header">
+                <div class="crono-day-modal-date" id="cronoDayModalDate">—</div>
+                <div class="crono-day-modal-total" id="cronoDayModalTotal">—</div>
+            </div>
+            <div class="crono-day-modal-body" id="cronoDayModalBody"></div>
+            <div class="edit-modal-actions">
+                <button class="btn-note-cancel" onclick="closeCronoDayModal()">fechar</button>
+            </div>
+        </div>
+    </div>
 
     <div class="review-tooltip" id="reviewTooltip"></div>
 
