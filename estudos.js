@@ -1852,26 +1852,33 @@ function setStudyView(view) {
     currentStudyView = view;
     document.querySelectorAll('.study-view').forEach(v => v.classList.add('hidden'));
     document.getElementById('view' + view.charAt(0).toUpperCase() + view.slice(1)).classList.remove('hidden');
-    // Update active drawer item
     document.querySelectorAll('.study-drawer .drawer-item').forEach(item => {
         item.classList.remove('drawer-item--active');
     });
     document.getElementById('sdItem' + view.charAt(0).toUpperCase() + view.slice(1)).classList.add('drawer-item--active');
 
-    // Toggle topbar elements based on view
+    // Toggle topbar elements and container based on view
+    const topbar = document.querySelector('.study-topbar');
+    const container = document.querySelector('.study-container');
     const dayNav = document.getElementById('studyDateNav');
     const cronoNav = document.getElementById('cronoMonthNavTopbar');
     const goalBox = document.querySelector('.daily-goal-box');
     const reviewBadge = document.getElementById('reviewBadgeWrap');
     const topActions = document.querySelector('.topbar-actions');
+    const themeBtn = document.getElementById('themeToggleBtn');
 
     if (view === 'cronograma') {
+        // Show topbar but only with month nav and theme toggle
+        if (topbar) { topbar.style.display = ''; topbar.style.marginBottom = '8px'; }
+        if (container) container.style.display = 'none';
         if (dayNav) dayNav.classList.add('hidden');
         if (cronoNav) cronoNav.classList.remove('hidden');
         if (goalBox) goalBox.style.display = 'none';
         if (reviewBadge) reviewBadge.style.display = 'none';
         if (topActions) topActions.style.display = 'none';
     } else {
+        if (topbar) { topbar.style.display = ''; topbar.style.marginBottom = ''; }
+        if (container) container.style.display = '';
         if (dayNav) dayNav.classList.remove('hidden');
         if (cronoNav) cronoNav.classList.add('hidden');
         if (goalBox) goalBox.style.display = '';
