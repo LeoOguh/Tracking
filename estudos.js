@@ -54,7 +54,8 @@ function toggleTheme() {
     isLight = !isLight;
     document.body.classList.toggle('light', isLight);
     localStorage.setItem('clarity_theme', isLight ? 'light' : 'dark');
-    { const _tb = document.getElementById('themeToggleBtn'); if (_tb) _tb.textContent = isLight ? '☾ escuro' : '☀ claro'; }
+    const label = isLight ? '☾ escuro' : '☀ claro';
+    document.querySelectorAll('#themeToggleBtn, #themeToggleCrono').forEach(b => { if (b) b.textContent = label; });
     renderCharts();
 }
 
@@ -1217,7 +1218,7 @@ function changeCronoMonth(delta) {
 
 function renderCronoCalendar() {
     const grid = document.getElementById('cronoCalendarGrid');
-    const label = document.getElementById('cronoMonthLabelTopbar');
+    const label = document.getElementById('cronoMonthLabelInline');
     if (!grid) return;
 
     const y = cronoMonth.getFullYear(), m = cronoMonth.getMonth();
@@ -1866,44 +1867,22 @@ function setStudyView(view) {
     });
     document.getElementById('sdItem' + view.charAt(0).toUpperCase() + view.slice(1)).classList.add('drawer-item--active');
 
-    // Toggle topbar elements based on view
+    const topbar = document.querySelector('.study-topbar');
     const container = document.querySelector('.study-container');
-    const dayNav = document.getElementById('studyDateNav');
-    const cronoNav = document.getElementById('cronoMonthNavTopbar');
-    const goalBox = document.querySelector('.daily-goal-box');
-    const reviewBadge = document.getElementById('reviewBadgeWrap');
-    const actionsSessoes = document.getElementById('topbarActionsSessoes');
-    const actionsCrono = document.getElementById('topbarActionsCrono');
 
     if (view === 'cronograma') {
+        // Cronograma has its own header bar inside viewCronograma
+        if (topbar) topbar.style.display = 'none';
         if (container) container.style.display = 'none';
-        if (dayNav) dayNav.classList.add('hidden');
-        if (cronoNav) cronoNav.classList.remove('hidden');
-        if (goalBox) goalBox.style.display = 'none';
-        if (reviewBadge) reviewBadge.style.display = 'none';
-        if (actionsSessoes) actionsSessoes.classList.add('hidden');
-        if (actionsCrono) actionsCrono.classList.remove('hidden');
-        // Ensure topbar is visible with reduced margin
-        const topbar = document.querySelector('.study-topbar');
-        if (topbar) { topbar.style.display = 'flex'; topbar.style.marginBottom = '8px'; }
+        renderCronoCalendar();
     } else {
+        if (topbar) topbar.style.display = '';
         if (container) container.style.display = '';
-        if (dayNav) dayNav.classList.remove('hidden');
-        if (cronoNav) cronoNav.classList.add('hidden');
-        if (goalBox) goalBox.style.display = '';
-        if (reviewBadge) reviewBadge.style.display = '';
-        if (actionsSessoes) actionsSessoes.classList.remove('hidden');
-        if (actionsCrono) actionsCrono.classList.add('hidden');
-        const topbar = document.querySelector('.study-topbar');
-        if (topbar) { topbar.style.display = ''; topbar.style.marginBottom = ''; }
     }
 
     if (view === 'erros') {
         populateErrosSelects();
         renderErrosList();
-    }
-    if (view === 'cronograma') {
-        renderCronoCalendar();
     }
 }
 
