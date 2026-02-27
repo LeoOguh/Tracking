@@ -962,155 +962,101 @@ function clearScheduleData() {
 }
 
 // ─── PDF HANDLING ────────────────────────────────────────────────────────────
+let aiPdfBase64 = null; // Variável global para guardar o arquivo
+
 function handlePdfSelect(input) {
     const file = input.files[0];
     const label = document.getElementById('aiPdfLabel');
     const nameEl = document.getElementById('aiPdfName');
     if (!file) return;
+    
     nameEl.textContent = file.name;
     label.classList.add('has-file');
 
     const reader = new FileReader();
     reader.onload = function(e) {
-        // For txt files, read directly
         if (file.name.endsWith('.txt')) {
             aiPdfText = e.target.result;
-            return;
+            aiPdfBase64 = null;
+        } else {
+            // Guarda o arquivo limpo para enviar para a Vercel
+            aiPdfBase64 = e.target.result.split(',')[1];
+            aiPdfText = ''; 
         }
-        // For PDFs, extract text using pdf.js-like basic extraction
-        aiPdfText = atob(e.target.result.split(',')[1]).replace(/[^\x20-\x7E\xC0-\xFF\n]/g, ' ').replace(/ {3,}/g, '\n').substring(0, 8000);
     };
+    
     if (file.name.endsWith('.txt')) reader.readAsText(file);
-    else reader.readAsDataURL(file);
+    else reader.readAsDataURL(file); // Lê como DataURL para pegar o Base64
 }
 
 // ─── AI SCHEDULE GENERATION ──────────────────────────────────────────────────
-async function generateSchedule(){
-    const btn=document.getElementById('aiBtnGenerate');
-    btn.disabled=true;
-    document.getElementById('aiLoading').style.display='flex';
-    document.getElementById('aiResult').style.display='none';
+async function generateSchedule() {
+    const btn = document.getElementById('aiBtnGenerate');
+    btn.disabled = true;
+    document.getElementById('aiLoading').style.display = 'flex';
+    document.getElementById('aiResult').style.display = 'none';
 
-    let hoursPerDay,days,prompt;
-    const impLabel=['','baixa','média','alta','muito alta','máxima'];
-    const stars=n=>'★'.repeat(n)+'☆'.repeat(5-n);
+    let hoursPerDay, days;
     const startDate = new Date();
-    const startStr = startDate.toLocaleDateString('pt-br');
+    // Força o fuso horário para garantir que começa "hoje"
+    const startStr = `${startDate.getFullYear()}-${String(startDate.getMonth()+1).padStart(2,'0')}-${String(startDate.getDate()).padStart(2,'0')}`;
+    const stars = n => '★'.repeat(n) + '☆'.repeat(5-n);
 
-    const jsonInstructions = `
+    // Prepara os dados que vão para a Vercel
+    let payload = {
+        tipoGeracao: aiMode,
+        dataInicio: startStr
+    };
 
-IMPORTANTE: Responda EXCLUSIVAMENTE com um JSON válido, sem nenhum texto antes ou depois, sem backticks, sem markdown.
-O JSON deve seguir EXATAMENTE esta estrutura:
-{
-  "schedule": {
-    "YYYY-MM-DD": {
-      "subjects": [
-        {
-          "name": "Nome da Matéria",
-          "hours": 2,
-          "sessions": 2,
-          "sessionTime": 50,
-          "importance": 4,
-          "topics": ["Tópico 1", "Tópico 2"],
-          "questions": 15,
-          "notes": "Focar em exercícios práticos"
+    if (aiMode === 'subjects') {
+        hoursPerDay = parseFloat(document.getElementById('aiHoursPerDay').value) || 4;
+        days = parseInt(document.getElementById('aiDays').value) || 30;
+        
+        if (!studySubjects.length) {
+            alert('Cadastre ao menos uma matéria na aba Sessões primeiro.');
+            btn.disabled = false; document.getElementById('aiLoading').style.display = 'none'; return;
         }
-      ]
-    }
-  }
-}
-
-Regras obrigatórias:
-- As datas devem ser no formato YYYY-MM-DD
-- "hours" = total de horas para aquela matéria no dia
-- "sessions" = quantas sessões de estudo (use técnica Pomodoro adaptada)
-- "sessionTime" = duração de cada sessão em minutos
-- "importance" = de 1 a 5 (baseado na importância/peso da matéria)
-- "topics" = array com os tópicos/conteúdos específicos para estudar naquele dia
-- "questions" = número de questões sugeridas para resolver naquele dia sobre aquela matéria
-- "notes" = dicas ou observações (ex: "revisão espaçada", "fazer resumo", "resolver provas anteriores")
-- Distribua as matérias usando métodos comprovados de estudo: revisão espaçada (spaced repetition), intercalação de matérias (interleaving), técnica Pomodoro, ciclo de estudos, e revisão ativa
-- Inclua dias de revisão geral a cada 7 dias
-- Matérias mais importantes devem aparecer mais vezes por semana
-- Sugira uma quantidade de questões proporcional à importância e à fase do estudo (mais questões nas revisões)
-- Alterne entre matérias pesadas e leves no mesmo dia`;
-
-    if(aiMode==='subjects'){
-        hoursPerDay=parseFloat(document.getElementById('aiHoursPerDay').value)||4;
-        days=parseInt(document.getElementById('aiDays').value)||30;
-        if(!studySubjects.length){alert('Cadastre ao menos uma matéria primeiro.');btn.disabled=false;document.getElementById('aiLoading').style.display='none';return;}
-        const subList=studySubjects.sort((a,b)=>b.importance-a.importance).map(s=>`- ${s.name} (importância: ${stars(s.importance)}, peso: ${s.importance}/5)`).join('\n');
-        prompt=`Você é especialista em planejamento de estudos para concursos e vestibulares. Crie um cronograma detalhado de estudos.
-
-MATÉRIAS DO ALUNO:
-${subList}
-
-PARÂMETROS:
-- Início: ${startStr}
-- Duração: ${days} dias
-- Horas disponíveis por dia: ${hoursPerDay}h
-- Usar métodos de estudo baseados em evidências científicas (revisão espaçada, intercalação, prática de recuperação, técnica Pomodoro)
-
-BUSQUE e aplique os melhores métodos de divisão de estudos conhecidos, como:
-- Ciclo de Estudos de Robert Bjork
-- Revisão Espaçada (Spaced Repetition) com intervalos crescentes
-- Intercalação de matérias (Interleaving)
-- Prática de Recuperação (Retrieval Practice)
-- Técnica Feynman para consolidação
-${jsonInstructions}`;
+        
+        payload.materias = studySubjects.sort((a,b)=>b.importance-a.importance)
+                           .map(s=>`- ${s.name} (importância: ${s.importance}/5)`).join('\n');
     } else {
-        hoursPerDay=parseFloat(document.getElementById('aiHoursPerDay2').value)||4;
-        days=parseInt(document.getElementById('aiDays2').value)||30;
+        hoursPerDay = parseFloat(document.getElementById('aiHoursPerDay2').value) || 4;
+        days = parseInt(document.getElementById('aiDays2').value) || 30;
         let text = document.getElementById('aiTextarea').value.trim();
         if (aiPdfText) text = aiPdfText + '\n\n' + text;
-        if(!text){alert('Envie um PDF ou cole o texto do edital.');btn.disabled=false;document.getElementById('aiLoading').style.display='none';return;}
-        prompt=`Você é especialista em planejamento de estudos para concursos públicos. Analise o conteúdo do edital/ementa abaixo e crie um cronograma completo.
 
-CONTEÚDO DO EDITAL:
-${text.substring(0,6000)}
-
-PARÂMETROS:
-- Início: ${startStr}
-- Duração: ${days} dias
-- Horas disponíveis por dia: ${hoursPerDay}h
-- Usar métodos de estudo baseados em evidências científicas
-
-INSTRUÇÕES:
-1. Identifique TODAS as matérias e tópicos cobrados no edital
-2. Estime o peso/importância de cada matéria (1-5) com base na frequência em concursos
-3. Distribua os tópicos ao longo dos dias de forma inteligente
-4. BUSQUE e aplique os melhores métodos de divisão de estudos conhecidos: revisão espaçada, intercalação, prática ativa, ciclo de estudos
-5. Sugira quantidade de questões para cada tópico
-${jsonInstructions}`;
+        if (!text && !aiPdfBase64) {
+            alert('Envie um PDF do edital ou cole o texto.');
+            btn.disabled = false; document.getElementById('aiLoading').style.display = 'none'; return;
+        }
+        payload.texto = text;
+        payload.pdfBase64 = aiPdfBase64; // Envia o PDF limpo
     }
 
-    try {
-        const response=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5-20250929',max_tokens:4000,messages:[{role:'user',content:prompt}]})});
-        const data=await response.json();
-        const rawText=data.content?.map(c=>c.text||'').join('')||'';
+    payload.horasDia = hoursPerDay;
+    payload.dias = days;
 
-        // Try to parse JSON from response
-        let parsed = null;
-        try {
-            // Try direct parse first
-            parsed = JSON.parse(rawText);
-        } catch(e1) {
-            // Try extracting JSON from markdown code block
-            const jsonMatch = rawText.match(/```(?:json)?\s*([\s\S]*?)```/);
-            if (jsonMatch) {
-                try { parsed = JSON.parse(jsonMatch[1].trim()); } catch(e2) {}
-            }
-            // Try finding JSON object in text
-            if (!parsed) {
-                const braceMatch = rawText.match(/\{[\s\S]*\}/);
-                if (braceMatch) {
-                    try { parsed = JSON.parse(braceMatch[0]); } catch(e3) {}
-                }
-            }
-        }
+    try {
+        // Chama a nossa API na Vercel
+        const response = await fetch('/api/gerar-cronograma', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (data.error) throw new Error(data.error.message || data.error || "Erro na API.");
+        if (!data.candidates || !data.candidates[0]) throw new Error("A IA não retornou dados.");
+
+        const rawText = data.candidates[0].content.parts[0].text;
+        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) throw new Error("Formato inválido retornado pela IA.");
+
+        const parsed = JSON.parse(jsonMatch[0]);
 
         if (parsed && parsed.schedule) {
-            // Apply to scheduleData
+            // Salva os dados no seu calendário
             Object.entries(parsed.schedule).forEach(([date, dayInfo]) => {
                 if (dayInfo.subjects && Array.isArray(dayInfo.subjects)) {
                     scheduleData[date] = dayInfo;
@@ -1122,25 +1068,20 @@ ${jsonInstructions}`;
             const totalDays = Object.keys(parsed.schedule).length;
             const totalSubjects = new Set();
             Object.values(parsed.schedule).forEach(d => d.subjects?.forEach(s => totalSubjects.add(s.name)));
-            document.getElementById('aiResult').innerHTML = `<div style="color:#2ecc71;font-weight:600">✓ Cronograma gerado com sucesso!</div><div style="margin-top:6px;font-size:0.82rem;color:rgba(255,255,255,0.6)">${totalDays} dias programados · ${totalSubjects.size} matérias · Feche este modal para ver o calendário</div>`;
-            document.getElementById('aiResult').style.display='block';
+            
+            document.getElementById('aiResult').innerHTML = `<div style="color:#2ecc71;font-weight:600">✓ Cronograma gerado com sucesso!</div><div style="margin-top:6px;font-size:0.82rem;color:rgba(255,255,255,0.6)">${totalDays} dias programados · ${totalSubjects.size} matérias · Feche este modal para ver o calendário.</div>`;
+            document.getElementById('aiResult').style.display = 'block';
 
-            // Switch to cronograma view
             setTimeout(() => { setStudyView('cronograma'); }, 500);
-        } else {
-            // Fallback: show raw text
-            const html=rawText.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/^### (.+)$/gm,'<h3>$1</h3>').replace(/^## (.+)$/gm,'<h3>$1</h3>').replace(/^# (.+)$/gm,'<h3>$1</h3>').replace(/\n/g,'<br>');
-            document.getElementById('aiResult').innerHTML='<div style="color:#f39c12;font-size:0.78rem;margin-bottom:8px">⚠ Não foi possível converter para calendário automaticamente. Resultado em texto:</div>'+html;
-            document.getElementById('aiResult').style.display='block';
-            document.getElementById('aiBtnOpenClaude').style.display='';
         }
     } catch(err) {
-        document.getElementById('aiResult').innerHTML=`<span style="color:#ff7675">Erro ao conectar com a IA. Verifique sua conexão.</span>`;
-        document.getElementById('aiResult').style.display='block';
-        document.getElementById('aiBtnOpenClaude').style.display='';
+        console.error(err);
+        document.getElementById('aiResult').innerHTML = `<span style="color:#ff7675">Erro: ${err.message}</span>`;
+        document.getElementById('aiResult').style.display = 'block';
+    } finally {
+        document.getElementById('aiLoading').style.display = 'none';
+        btn.disabled = false;
     }
-    document.getElementById('aiLoading').style.display='none';
-    btn.disabled=false;
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
