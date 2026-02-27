@@ -369,11 +369,24 @@
     <div class="study-view hidden" id="viewCronograma">
         <div class="crono-top-row">
             <div class="crono-actions">
+                <button class="btn-topbar-action btn-topbar-action--text" onclick="openCronoSubjectsPanel('manual')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+                        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+                    </svg>
+                    matérias
+                </button>
+                <button class="btn-topbar-action btn-topbar-action--text" onclick="openCronoSubjectsPanel('edital')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                    edital
+                </button>
                 <button class="btn-topbar-action btn-topbar-action--text" onclick="openAIModal()">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
                     </svg>
-                    gerar cronograma com IA
+                    gerar com IA
                 </button>
                 <button class="btn-topbar-action btn-topbar-action--text" onclick="clearScheduleData()" title="Limpar cronograma">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -400,47 +413,53 @@
     </div> <!-- end estudos-main -->
 </div> <!-- end estudos-page-layout -->
 
-    <!-- MODAL IA (global, fora das views) -->
+    <!-- MODAL IA: GERAR CRONOGRAMA -->
     <div class="edit-modal-overlay" id="aiModalOverlay" onclick="closeAIModal(event)">
         <div class="edit-modal ai-modal">
             <div class="edit-modal-title">gerar cronograma com IA</div>
             <div class="ai-note">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                O cronograma é gerado via <strong>Google Gemini AI</strong> e preenchido automaticamente no calendário. Se houver falha, tente gerar novamente em alguns segundos.
+                O cronograma é gerado via <strong>Google Gemini AI</strong> e preenchido automaticamente no calendário.
             </div>
-            <div class="ai-mode-toggle">
-                <button class="type-btn type-btn--active" id="aiModeSubjects" onclick="setAIMode('subjects')">minhas matérias</button>
-                <button class="type-btn" id="aiModeText" onclick="setAIMode('text')">analisar edital / PDF</button>
+            <div id="aiScheduleExistsWarning" class="ai-warning" style="display:none">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <span>Já existe um cronograma gerado. <strong>Limpe o cronograma atual</strong> antes de gerar um novo.</span>
             </div>
-            <div id="aiPanelSubjects">
-                <p class="ai-hint">O cronograma será gerado com base nas suas matérias cadastradas e seus graus de importância.</p>
-                <div class="ai-extra-row">
-                    <input type="number" id="aiHoursPerDay"  class="f-input" placeholder="horas disponíveis/dia" min="1" max="16" style="width:200px">
-                    <input type="number" id="aiTotalDays"    class="f-input" placeholder="duração (dias)" min="1" max="365" style="width:160px" title="Quantos dias de duração terá o cronograma">
+            <div id="aiModalContent">
+                <div class="ai-mode-toggle">
+                    <button class="type-btn type-btn--active" id="aiModeSubjects" onclick="setAIMode('subjects')">minhas matérias</button>
+                    <button class="type-btn" id="aiModeEdital" onclick="setAIMode('edital')">matérias do edital</button>
                 </div>
-                <div class="ai-weekdays-wrap">
-                    <span class="ai-weekdays-label">dias de estudo:</span>
-                    <div class="weekdays-toggle" id="aiWeekdaysToggle"></div>
+                <div id="aiPanelSubjects">
+                    <p class="ai-hint">O cronograma será gerado com base nas suas matérias cadastradas e seus graus de importância.</p>
+                    <div id="aiSubjectsPreview" class="ai-subjects-preview"></div>
+                    <div class="ai-extra-row">
+                        <input type="number" id="aiHoursPerDay" class="f-input" placeholder="horas disponíveis/dia" min="1" max="16" style="width:200px">
+                        <input type="number" id="aiTotalDays" class="f-input" placeholder="duração (dias)" min="1" max="365" style="width:160px">
+                    </div>
+                    <div class="ai-weekdays-wrap">
+                        <span class="ai-weekdays-label">dias de estudo:</span>
+                        <div class="weekdays-toggle" id="aiWeekdaysToggle"></div>
+                    </div>
                 </div>
-            </div>
-            <div id="aiPanelText" style="display:none">
-                <p class="ai-hint">Envie o PDF do edital ou cole o texto com as matérias/tópicos do concurso.</p>
-                <div class="ai-pdf-row">
-                    <label class="ai-pdf-label" id="aiPdfLabel">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                        <span id="aiPdfName">selecionar PDF do edital</span>
-                        <input type="file" id="aiPdfInput" accept=".pdf,.txt" style="display:none" onchange="handlePdfSelect(this)">
-                    </label>
-                    <span class="ai-pdf-or">ou cole o texto abaixo:</span>
-                </div>
-                <textarea id="aiTextarea" class="ai-textarea" placeholder="cole aqui o edital, ementa ou lista de matérias/tópicos que serão cobrados…"></textarea>
-                <div class="ai-extra-row">
-                    <input type="number" id="aiHoursPerDay2" class="f-input" placeholder="horas disponíveis/dia" min="1" max="16" style="width:200px">
-                    <input type="number" id="aiTotalDays2"   class="f-input" placeholder="duração (dias)" min="1" max="365" style="width:160px" title="Quantos dias de duração terá o cronograma">
-                </div>
-                <div class="ai-weekdays-wrap">
-                    <span class="ai-weekdays-label">dias de estudo:</span>
-                    <div class="weekdays-toggle" id="aiWeekdaysToggle2"></div>
+                <div id="aiPanelEdital" style="display:none">
+                    <p class="ai-hint">O cronograma será gerado com base nas matérias extraídas do edital analisado.</p>
+                    <div id="aiEditalPreview" class="ai-subjects-preview"></div>
+                    <div id="aiEditalEmpty" class="ai-edital-empty">
+                        <p>Nenhum edital analisado ainda.</p>
+                        <button class="btn-topbar-action btn-topbar-action--text" onclick="closeAIModal();openAnalyzeEditalModal()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                            analisar edital primeiro
+                        </button>
+                    </div>
+                    <div class="ai-extra-row">
+                        <input type="number" id="aiHoursPerDay2" class="f-input" placeholder="horas disponíveis/dia" min="1" max="16" style="width:200px">
+                        <input type="number" id="aiTotalDays2" class="f-input" placeholder="duração (dias)" min="1" max="365" style="width:160px">
+                    </div>
+                    <div class="ai-weekdays-wrap">
+                        <span class="ai-weekdays-label">dias de estudo:</span>
+                        <div class="weekdays-toggle" id="aiWeekdaysToggle2"></div>
+                    </div>
                 </div>
             </div>
             <div class="ai-loading" id="aiLoading" style="display:none">
@@ -448,9 +467,47 @@
             </div>
             <div class="ai-result" id="aiResult" style="display:none"></div>
             <div class="edit-modal-actions">
-                <button class="btn-note-cancel" id="aiBtnOpenClaude" onclick="openInClaude()" style="display:none">abrir no Claude ↗</button>
                 <button class="btn-note-cancel" onclick="closeAIModal()">fechar</button>
-                <button class="btn-note-save"   id="aiBtnGenerate" onclick="generateSchedule()">gerar cronograma</button>
+                <button class="btn-note-save" id="aiBtnGenerate" onclick="generateSchedule()">gerar cronograma</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: ANALISAR EDITAL (PDF) -->
+    <div class="edit-modal-overlay" id="analyzeEditalOverlay" onclick="closeAnalyzeEditalModal(event)">
+        <div class="edit-modal ai-modal">
+            <div class="edit-modal-title">analisar edital</div>
+            <div class="ai-note">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Envie o PDF ou texto do edital. A IA extrairá as matérias e tópicos automaticamente.
+            </div>
+            <div class="ai-pdf-row">
+                <label class="ai-pdf-label" id="aiPdfLabel">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    <span id="aiPdfName">selecionar PDF do edital</span>
+                    <input type="file" id="aiPdfInput" accept=".pdf,.txt" style="display:none" onchange="handlePdfSelect(this)">
+                </label>
+                <span class="ai-pdf-or">ou cole o texto abaixo:</span>
+            </div>
+            <textarea id="aiTextarea" class="ai-textarea" placeholder="cole aqui o edital, ementa ou lista de matérias/tópicos que serão cobrados…"></textarea>
+            <div class="ai-loading" id="aiAnalyzeLoading" style="display:none">
+                <div class="ai-spinner"></div><span>analisando edital… isso pode levar até 1 minuto</span>
+            </div>
+            <div class="ai-result" id="aiAnalyzeResult" style="display:none"></div>
+            <div class="edit-modal-actions">
+                <button class="btn-note-cancel" onclick="closeAnalyzeEditalModal()">fechar</button>
+                <button class="btn-note-save" id="aiBtnAnalyze" onclick="analyzeEdital()">analisar edital</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: VISUALIZAR MATÉRIAS DO CRONOGRAMA -->
+    <div class="edit-modal-overlay" id="cronoSubjectsPanelOverlay" onclick="closeCronoSubjectsPanel(event)">
+        <div class="edit-modal" style="max-width:600px;width:92vw">
+            <div class="edit-modal-title" id="cronoSubjectsPanelTitle">matérias</div>
+            <div class="crono-subjects-panel-body" id="cronoSubjectsPanelBody"></div>
+            <div class="edit-modal-actions">
+                <button class="btn-note-cancel" onclick="closeCronoSubjectsPanel()">fechar</button>
             </div>
         </div>
     </div>
@@ -465,7 +522,6 @@
             <div class="crono-day-modal-body" id="cronoDayModalBody"></div>
             <div class="edit-modal-actions">
                 <button class="btn-note-cancel" onclick="closeCronoDayModal()">fechar</button>
-                <button class="btn-note-save" id="cronoDayEditBtn" onclick="toggleCronoDayEdit()" style="display:none">editar</button>
             </div>
         </div>
     </div>

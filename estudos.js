@@ -94,7 +94,7 @@ function formatHHMMSS(seconds) {
 
 // ─── EXPORTAR ─────────────────────────────────────────────────────────────────
 function exportStudyData() {
-    const data = { studySessions, studyGoals, studySubjects, scheduleData, exportedAt: new Date().toISOString() };
+    const data = { studySessions, studyGoals, studySubjects, scheduleData, editalSubjects, exportedAt: new Date().toISOString() };
     const blob = new Blob([JSON.stringify(data,null,2)], { type:'application/json' });
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a'); a.href=url; a.download=`clarity-estudos-${todayKey()}.json`; a.click();
@@ -114,6 +114,7 @@ function importStudyData() {
                 if (data.studyGoals) { studyGoals = data.studyGoals; localStorage.setItem('study_daily_goals', JSON.stringify(studyGoals)); }
                 if (data.studySubjects) { studySubjects = data.studySubjects; localStorage.setItem('study_subjects', JSON.stringify(studySubjects)); }
                 if (data.scheduleData) { scheduleData = data.scheduleData; localStorage.setItem('study_schedule_data', JSON.stringify(scheduleData)); }
+                if (data.editalSubjects) { editalSubjects = data.editalSubjects; localStorage.setItem('study_edital_subjects', JSON.stringify(editalSubjects)); }
                 alert('Dados importados com sucesso!');
                 location.reload();
             } catch (err) { alert('Erro ao ler o arquivo: ' + err.message); }
@@ -816,17 +817,36 @@ function showReviewTip(e,dateStr,tooltip){
 function hideReviewTip(){document.getElementById('reviewTooltip').classList.remove('visible');}
 
 // ─── CRONOGRAMA IA ────────────────────────────────────────────────────────────
-function openAIModal()  {
+function openAIModal() {
+    const hasSchedule = Object.keys(scheduleData).length > 0;
+    const warning = document.getElementById('aiScheduleExistsWarning');
+    const content = document.getElementById('aiModalContent');
+    const genBtn = document.getElementById('aiBtnGenerate');
+
+    if (hasSchedule) {
+        warning.style.display = 'flex';
+        content.style.display = 'none';
+        genBtn.disabled = true;
+        genBtn.style.opacity = '0.4';
+    } else {
+        warning.style.display = 'none';
+        content.style.display = '';
+        genBtn.disabled = false;
+        genBtn.style.opacity = '';
+    }
+
     document.getElementById('aiModalOverlay').classList.add('open');
-    document.getElementById('aiResult').style.display='none';
+    document.getElementById('aiResult').style.display = 'none';
     buildAIWeekdaysToggle();
     buildAIWeekdaysToggle2();
+    renderAISubjectsPreview();
+    renderAIEditalPreview();
 }
-function closeAIModal(e){ if(e) return; document.getElementById('aiModalOverlay').classList.remove('open'); }
+function closeAIModal(e) { if (e) return; document.getElementById('aiModalOverlay').classList.remove('open'); }
 
 // ─── WEEKDAY SELECTOR FOR AI MODAL ──────────────────────────────────────────
 const AI_DAY_LABELS = ['D','S','T','Q','Q','S','S'];
-let aiSelectedDays = [1,2,3,4,5]; // seg a sex por padrão
+let aiSelectedDays = [1,2,3,4,5];
 let aiSelectedDays2 = [1,2,3,4,5];
 
 function buildAIWeekdaysToggle() {
@@ -855,12 +875,228 @@ function toggleAIDay2(i) {
     } else { aiSelectedDays2.push(i); }
     buildAIWeekdaysToggle2();
 }
-function setAIMode(mode){
-    aiMode=mode;
-    document.getElementById('aiModeSubjects').classList.toggle('type-btn--active',mode==='subjects');
-    document.getElementById('aiModeText').classList.toggle('type-btn--active',mode==='text');
-    document.getElementById('aiPanelSubjects').style.display=mode==='subjects'?'':'none';
-    document.getElementById('aiPanelText').style.display=mode==='text'?'':'none';
+
+function renderAISubjectsPreview() {
+    const el = document.getElementById('aiSubjectsPreview');
+    if (!el) return;
+    if (!studySubjects.length) {
+        el.innerHTML = '<span style="font-size:0.75rem;color:rgba(255,255,255,0.3)">nenhuma matéria cadastrada</span>';
+        return;
+    }
+    el.innerHTML = studySubjects.map(s => {
+        const stars = '★'.repeat(s.importance || 3) + '☆'.repeat(5 - (s.importance || 3));
+        return `<span class="ai-subj-tag"><span style="color:${s.color || '#7f8c8d'}">●</span> ${s.name} <span class="ai-subj-stars">${stars}</span></span>`;
+    }).join('');
+}
+
+function renderAIEditalPreview() {
+    const el = document.getElementById('aiEditalPreview');
+    const emptyEl = document.getElementById('aiEditalEmpty');
+    if (!el) return;
+    if (!editalSubjects.length) {
+        el.innerHTML = '';
+        if (emptyEl) emptyEl.style.display = '';
+        return;
+    }
+    if (emptyEl) emptyEl.style.display = 'none';
+    el.innerHTML = editalSubjects.map(s => {
+        const stars = '★'.repeat(s.importance || 3) + '☆'.repeat(5 - (s.importance || 3));
+        return `<span class="ai-subj-tag">${s.name} <span class="ai-subj-stars">${stars}</span></span>`;
+    }).join('');
+}
+
+function setAIMode(mode) {
+    aiMode = mode;
+    document.getElementById('aiModeSubjects').classList.toggle('type-btn--active', mode === 'subjects');
+    document.getElementById('aiModeEdital').classList.toggle('type-btn--active', mode === 'edital');
+    document.getElementById('aiPanelSubjects').style.display = mode === 'subjects' ? '' : 'none';
+    document.getElementById('aiPanelEdital').style.display = mode === 'edital' ? '' : 'none';
+}
+
+// ─── EDITAL SUBJECTS (from PDF analysis) ────────────────────────────────────
+let editalSubjects = JSON.parse(localStorage.getItem('study_edital_subjects')) || [];
+
+function saveEditalSubjects() {
+    localStorage.setItem('study_edital_subjects', JSON.stringify(editalSubjects));
+}
+
+// ─── ANALYZE EDITAL MODAL ───────────────────────────────────────────────────
+function openAnalyzeEditalModal() {
+    document.getElementById('analyzeEditalOverlay').classList.add('open');
+    document.getElementById('aiAnalyzeResult').style.display = 'none';
+    document.getElementById('aiAnalyzeLoading').style.display = 'none';
+}
+function closeAnalyzeEditalModal(e) {
+    if (e) return;
+    document.getElementById('analyzeEditalOverlay').classList.remove('open');
+}
+
+async function analyzeEdital() {
+    const btn = document.getElementById('aiBtnAnalyze');
+    btn.disabled = true;
+    document.getElementById('aiAnalyzeLoading').style.display = 'flex';
+    document.getElementById('aiAnalyzeResult').style.display = 'none';
+
+    let text = document.getElementById('aiTextarea').value.trim();
+    if (aiPdfText) text = aiPdfText + '\n\n' + text;
+
+    if (!text && !aiPdfBase64) {
+        alert('Envie um PDF do edital ou cole o texto.');
+        btn.disabled = false;
+        document.getElementById('aiAnalyzeLoading').style.display = 'none';
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/analisar-edital', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ texto: text, pdfBase64: aiPdfBase64 })
+        });
+
+        const data = await response.json();
+        if (data.error) throw new Error(data.error.message || data.error || "Erro na API.");
+        if (!data.candidates || !data.candidates[0]) throw new Error("A IA não retornou dados.");
+
+        const rawText = data.candidates[0].content.parts[0].text;
+        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) throw new Error("Formato inválido retornado pela IA.");
+
+        const parsed = JSON.parse(jsonMatch[0]);
+
+        if (parsed && parsed.subjects && parsed.subjects.length) {
+            editalSubjects = parsed.subjects.map(s => ({
+                name: s.name,
+                importance: s.importance || 3,
+                topics: (s.topics || []).map(t => ({
+                    name: t.name || t,
+                    subtopics: t.subtopics || []
+                }))
+            }));
+            saveEditalSubjects();
+
+            document.getElementById('aiAnalyzeResult').innerHTML = `<div style="color:#2ecc71;font-weight:600">✓ Edital analisado com sucesso!</div><div style="margin-top:6px;font-size:0.82rem;color:rgba(255,255,255,0.6)">${editalSubjects.length} matérias extraídas.</div>`;
+            document.getElementById('aiAnalyzeResult').style.display = 'block';
+
+            setTimeout(() => {
+                closeAnalyzeEditalModal();
+                openCronoSubjectsPanel('edital');
+            }, 1200);
+        } else {
+            throw new Error("Nenhuma matéria encontrada no edital.");
+        }
+    } catch (err) {
+        console.error(err);
+        document.getElementById('aiAnalyzeResult').innerHTML = `<span style="color:#ff7675">Erro: ${err.message}</span>`;
+        document.getElementById('aiAnalyzeResult').style.display = 'block';
+    } finally {
+        document.getElementById('aiAnalyzeLoading').style.display = 'none';
+        btn.disabled = false;
+    }
+}
+
+// ─── SUBJECTS PANEL (view/edit) ─────────────────────────────────────────────
+function openCronoSubjectsPanel(type) {
+    const overlay = document.getElementById('cronoSubjectsPanelOverlay');
+    const title = document.getElementById('cronoSubjectsPanelTitle');
+    const body = document.getElementById('cronoSubjectsPanelBody');
+
+    if (type === 'manual') {
+        title.textContent = 'matérias cadastradas';
+        if (!studySubjects.length) {
+            body.innerHTML = '<div class="crono-subj-panel-empty">Nenhuma matéria cadastrada.<br>Cadastre matérias na aba Sessões.</div>';
+        } else {
+            body.innerHTML = studySubjects.map((s, i) => {
+                const impClass = s.importance >= 4 ? 'imp-high' : s.importance >= 3 ? 'imp-medium' : 'imp-low';
+                return `<div class="crono-subj-item">
+                    <div class="crono-subj-header" style="cursor:default">
+                        <div class="crono-subj-dot" style="background:${s.color || '#7f8c8d'}"></div>
+                        <span class="crono-subj-name">${s.name}</span>
+                        <span class="crono-subj-imp ${impClass}">${'★'.repeat(s.importance || 3)}</span>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+    } else {
+        title.textContent = 'matérias do edital';
+        let actionsHtml = `<div class="crono-subj-panel-actions">
+            <button class="btn-topbar-action btn-topbar-action--text" onclick="closeCronoSubjectsPanel();openAnalyzeEditalModal()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                ${editalSubjects.length ? 'reanalisar edital' : 'analisar edital'}
+            </button>
+            ${editalSubjects.length ? `<button class="btn-topbar-action btn-topbar-action--text" onclick="clearEditalSubjects()" style="color:#ff7675">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                limpar
+            </button>` : ''}
+        </div>`;
+
+        if (!editalSubjects.length) {
+            body.innerHTML = actionsHtml + '<div class="crono-subj-panel-empty">Nenhum edital analisado ainda.</div>';
+        } else {
+            body.innerHTML = actionsHtml + editalSubjects.map((s, i) => {
+                const impClass = s.importance >= 4 ? 'imp-high' : s.importance >= 3 ? 'imp-medium' : 'imp-low';
+                const hasTopics = s.topics && s.topics.length > 0;
+                let topicsHtml = '';
+                if (hasTopics) {
+                    topicsHtml = '<div class="crono-subj-topics">' + s.topics.map((t, ti) => {
+                        let html = `<div class="crono-topic-item"><strong>${ti + 1}. ${typeof t === 'string' ? t : t.name}</strong></div>`;
+                        if (t.subtopics && t.subtopics.length) {
+                            html += t.subtopics.map((st, si) => `<div class="crono-subtopic">${ti + 1}.${si + 1} ${st}</div>`).join('');
+                        }
+                        return html;
+                    }).join('') + '</div>';
+                }
+                return `<div class="crono-subj-item" id="editalSubj${i}">
+                    <div class="crono-subj-header" onclick="${hasTopics ? `toggleEditalSubject(${i})` : ''}">
+                        <span class="crono-subj-name">${s.name}</span>
+                        <div class="crono-subj-imp-wrap">
+                            <span class="crono-subj-imp ${impClass}">${'★'.repeat(s.importance || 3)}</span>
+                            <button class="crono-subj-imp-btn" onclick="event.stopPropagation();openEditalImportanceEditor(${i})">editar</button>
+                        </div>
+                        ${hasTopics ? '<span class="crono-subj-chevron">▾</span>' : ''}
+                    </div>
+                    ${topicsHtml}
+                </div>`;
+            }).join('');
+        }
+    }
+
+    overlay.classList.add('open');
+}
+
+function closeCronoSubjectsPanel(e) {
+    if (e) return;
+    document.getElementById('cronoSubjectsPanelOverlay').classList.remove('open');
+}
+
+function toggleEditalSubject(idx) {
+    const el = document.getElementById('editalSubj' + idx);
+    if (el) el.classList.toggle('open');
+}
+
+function openEditalImportanceEditor(idx) {
+    const s = editalSubjects[idx];
+    if (!s) return;
+    const current = s.importance || 3;
+    // Create inline star editor
+    const impEl = document.querySelector(`#editalSubj${idx} .crono-subj-imp-wrap`);
+    if (!impEl) return;
+    impEl.innerHTML = `<div class="crono-star-editor">${[1,2,3,4,5].map(n =>
+        `<button class="star-btn ${n <= current ? 'active' : ''}" onclick="setEditalImportance(${idx},${n})">★</button>`
+    ).join('')}</div>`;
+}
+
+function setEditalImportance(idx, val) {
+    editalSubjects[idx].importance = val;
+    saveEditalSubjects();
+    openCronoSubjectsPanel('edital');
+}
+
+function clearEditalSubjects() {
+    if (!confirm('Remover todas as matérias do edital?')) return;
+    editalSubjects = [];
+    saveEditalSubjects();
+    openCronoSubjectsPanel('edital');
 }
 
 // ─── CRONOGRAMA STATE ────────────────────────────────────────────────────────
@@ -937,7 +1173,8 @@ function renderCronoLegend() {
     const legend = document.getElementById('cronoLegend');
     if (!legend) return;
     const subjects = new Set();
-    Object.values(scheduleData).forEach(day => {
+    Object.entries(scheduleData).forEach(([key, day]) => {
+        if (key === '_source') return;
         if (day.subjects) day.subjects.forEach(s => subjects.add(s.name));
     });
     if (subjects.size === 0) { legend.innerHTML = ''; return; }
@@ -955,7 +1192,6 @@ function openCronoDayModal(dateStr) {
     const dateEl = document.getElementById('cronoDayModalDate');
     const totalEl = document.getElementById('cronoDayModalTotal');
     const body = document.getElementById('cronoDayModalBody');
-    const editBtn = document.getElementById('cronoDayEditBtn');
 
     const parts = dateStr.split('-');
     const dt = new Date(+parts[0], +parts[1]-1, +parts[2]);
@@ -966,8 +1202,6 @@ function openCronoDayModal(dateStr) {
     if (!dayData || !dayData.subjects || dayData.subjects.length === 0) {
         totalEl.textContent = '';
         body.innerHTML = '<div class="crono-modal-empty">nenhum estudo programado para este dia</div>';
-        // Show edit btn to allow adding subjects even on empty days
-        if (editBtn) editBtn.style.display = 'inline-flex';
     } else {
         const totalH = dayData.subjects.reduce((acc, s) => acc + (s.hours || 0), 0);
         const totalSessions = dayData.subjects.reduce((acc, s) => acc + (s.sessions || 0), 0);
@@ -994,7 +1228,6 @@ function openCronoDayModal(dateStr) {
                 <div class="crono-modal-detail">${details}</div>
             </div>`;
         }).join('');
-        if (editBtn) editBtn.style.display = 'inline-flex';
     }
 
     // Add "add subject" button at the bottom
@@ -1042,6 +1275,13 @@ function handlePdfSelect(input) {
 
 // ─── AI SCHEDULE GENERATION ──────────────────────────────────────────────────
 async function generateSchedule() {
+    // Block if schedule exists
+    const scheduleKeys = Object.keys(scheduleData).filter(k => k !== '_source');
+    if (scheduleKeys.length > 0) {
+        alert('Já existe um cronograma. Limpe o cronograma atual antes de gerar um novo.');
+        return;
+    }
+
     const btn = document.getElementById('aiBtnGenerate');
     btn.disabled = true;
     document.getElementById('aiLoading').style.display = 'flex';
@@ -1053,41 +1293,45 @@ async function generateSchedule() {
     const dayNames = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
 
     let payload = {
-        tipoGeracao: aiMode,
+        tipoGeracao: 'subjects',
         dataInicio: startStr
     };
+
+    let sourceSubjects;
 
     if (aiMode === 'subjects') {
         hoursPerDay = parseFloat(document.getElementById('aiHoursPerDay').value) || 4;
         totalDays = parseInt(document.getElementById('aiTotalDays').value) || 30;
         activeDays = [...aiSelectedDays].sort();
-        
-        if (!studySubjects.length) {
+        sourceSubjects = studySubjects;
+
+        if (!sourceSubjects.length) {
             alert('Cadastre ao menos uma matéria na aba Sessões primeiro.');
             btn.disabled = false; document.getElementById('aiLoading').style.display = 'none'; return;
         }
-        
-        // Calcula peso proporcional baseado na importância
-        const totalImportance = studySubjects.reduce((acc, s) => acc + (s.importance || 3), 0);
-        payload.materias = studySubjects.sort((a,b)=>b.importance-a.importance)
-                           .map(s => {
-                               const pct = Math.round(((s.importance || 3) / totalImportance) * 100);
-                               return `- ${s.name} (importância: ${s.importance}/5, peso: ${pct}% do tempo)`;
-                           }).join('\n');
     } else {
         hoursPerDay = parseFloat(document.getElementById('aiHoursPerDay2').value) || 4;
         totalDays = parseInt(document.getElementById('aiTotalDays2').value) || 30;
         activeDays = [...aiSelectedDays2].sort();
-        let text = document.getElementById('aiTextarea').value.trim();
-        if (aiPdfText) text = aiPdfText + '\n\n' + text;
+        sourceSubjects = editalSubjects;
 
-        if (!text && !aiPdfBase64) {
-            alert('Envie um PDF do edital ou cole o texto.');
+        if (!sourceSubjects.length) {
+            alert('Analise um edital primeiro para extrair as matérias.');
             btn.disabled = false; document.getElementById('aiLoading').style.display = 'none'; return;
         }
-        payload.texto = text;
-        payload.pdfBase64 = aiPdfBase64;
     }
+
+    const totalImportance = sourceSubjects.reduce((acc, s) => acc + (s.importance || 3), 0);
+    payload.materias = [...sourceSubjects].sort((a, b) => (b.importance || 3) - (a.importance || 3))
+        .map(s => {
+            const pct = Math.round(((s.importance || 3) / totalImportance) * 100);
+            let line = `- ${s.name} (importância: ${s.importance || 3}/5, peso: ${pct}% do tempo)`;
+            if (s.topics && s.topics.length) {
+                const topicNames = s.topics.map(t => typeof t === 'string' ? t : t.name).join(', ');
+                line += ` [tópicos: ${topicNames}]`;
+            }
+            return line;
+        }).join('\n');
 
     payload.horasDia = hoursPerDay;
     payload.dias = totalDays;
@@ -1113,6 +1357,7 @@ async function generateSchedule() {
         const parsed = JSON.parse(jsonMatch[0]);
 
         if (parsed && parsed.schedule) {
+            scheduleData = { _source: aiMode };
             Object.entries(parsed.schedule).forEach(([date, dayInfo]) => {
                 if (dayInfo.subjects && Array.isArray(dayInfo.subjects)) {
                     scheduleData[date] = dayInfo;
@@ -1122,19 +1367,18 @@ async function generateSchedule() {
             renderCronoCalendar();
 
             const totalGeneratedDays = Object.keys(parsed.schedule).length;
-            const totalSubjects = new Set();
-            Object.values(parsed.schedule).forEach(d => d.subjects?.forEach(s => totalSubjects.add(s.name)));
-            
-            document.getElementById('aiResult').innerHTML = `<div style="color:#2ecc71;font-weight:600">✓ Cronograma gerado com sucesso!</div><div style="margin-top:6px;font-size:0.82rem;color:rgba(255,255,255,0.6)">${totalGeneratedDays} dias programados · ${totalSubjects.size} matérias</div>`;
+            const totalSubjectsSet = new Set();
+            Object.values(parsed.schedule).forEach(d => d.subjects?.forEach(s => totalSubjectsSet.add(s.name)));
+
+            document.getElementById('aiResult').innerHTML = `<div style="color:#2ecc71;font-weight:600">✓ Cronograma gerado com sucesso!</div><div style="margin-top:6px;font-size:0.82rem;color:rgba(255,255,255,0.6)">${totalGeneratedDays} dias programados · ${totalSubjectsSet.size} matérias</div>`;
             document.getElementById('aiResult').style.display = 'block';
 
-            // 3) Fechar modal automaticamente após geração
             setTimeout(() => {
                 closeAIModal();
                 setStudyView('cronograma');
             }, 1200);
         }
-    } catch(err) {
+    } catch (err) {
         console.error(err);
         document.getElementById('aiResult').innerHTML = `<span style="color:#ff7675">Erro: ${err.message}</span>`;
         document.getElementById('aiResult').style.display = 'block';
@@ -1161,9 +1405,22 @@ function openCronoEditSubject(dateStr, idx) {
 
     // Populate subject select
     select.innerHTML = '<option value="">— selecione —</option>';
-    studySubjects.forEach(s => {
-        select.innerHTML += `<option value="${s.name}">${s.name}</option>`;
-    });
+    // Add manual subjects
+    if (studySubjects.length) {
+        select.innerHTML += '<optgroup label="Minhas matérias">';
+        studySubjects.forEach(s => {
+            select.innerHTML += `<option value="${s.name}">${s.name}</option>`;
+        });
+        select.innerHTML += '</optgroup>';
+    }
+    // Add edital subjects
+    if (editalSubjects.length) {
+        select.innerHTML += '<optgroup label="Matérias do edital">';
+        editalSubjects.forEach(s => {
+            select.innerHTML += `<option value="${s.name}">${s.name}</option>`;
+        });
+        select.innerHTML += '</optgroup>';
+    }
     select.innerHTML += '<option value="__custom__">digitar manualmente…</option>';
     select.onchange = function() {
         customInput.classList.toggle('hidden', select.value !== '__custom__');
@@ -1234,7 +1491,7 @@ function saveCronoSubjectEdit() {
         hours,
         sessions: Math.ceil(hours * 2), // ~30min sessions
         sessionTime: 30,
-        importance: (studySubjects.find(s => s.name.toLowerCase() === name.toLowerCase()) || {}).importance || 3,
+        importance: (studySubjects.find(s => s.name.toLowerCase() === name.toLowerCase()) || editalSubjects.find(s => s.name.toLowerCase() === name.toLowerCase()) || {}).importance || 3,
         topics,
         notes
     };
